@@ -1,277 +1,251 @@
-:root {
-    --primary: #2563eb;           /* Bright blue */
-    --primary-hover: #1d4ed8;     /* Darker blue */
-    --success: #22c55e;           /* Green */
-    --danger: #ef4444;            /* Red */
-    --background: #f9fafb;        /* Light gray background */
-    --card-bg: #ffffff;           /* White */
-    --text: #1f2937;              /* Dark gray text */
-    --text-secondary: #6b7280;    /* Medium gray text */
-    --border: #e5e7eb;           /* Light gray border */
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+// Global state
+let items = [];
+let selectedLocation = '';
+
+// Data persistence functions
+function saveToLocalStorage() {
+    localStorage.setItem('qcChecklist', JSON.stringify(items));
+    localStorage.setItem('selectedLocation', selectedLocation);
 }
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 24px;
-    background: var(--background);
-    color: var(--text);
-    line-height: 1.5;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-}
-
-/* Location Selector */
-.location-selector {
-    margin: 32px 0;
-    text-align: center;
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-}
-
-.location-button {
-    padding: 12px 24px;
-    border: 1px solid var(--primary);
-    border-radius: 8px;
-    background: var(--card-bg);
-    cursor: pointer;
-    color: var(--primary);
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.location-button:hover {
-    background: var(--primary);
-    color: white;
-}
-
-.location-button.selected {
-    background: var(--primary);
-    color: white;
-}
-
-/* Checklist Items */
-.checklist-item {
-    background: var(--card-bg);
-    padding: 24px;
-    margin: 16px 0;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    transition: all 0.2s ease;
-}
-
-.checklist-item:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-}
-
-.checklist-item.incomplete {
-    border-left: 4px solid var(--danger);
-}
-
-.checklist-item.complete {
-    border-left: 4px solid var(--success);
-}
-
-/* Form Elements */
-select, textarea {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-select {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
-    padding-right: 40px;
-}
-
-textarea {
-    min-height: 80px;
-    resize: vertical;
-    line-height: 1.6;
-}
-
-select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-/* Buttons */
-.button {
-    background: var(--primary);
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-.button:hover {
-    background: var(--primary-hover);
-}
-
-/* Progress Bar */
-.progress-bar {
-    background: var(--background);
-    height: 8px;
-    border-radius: 4px;
-    margin: 24px 0;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--primary);
-    width: 0%;
-    transition: width 0.3s ease;
-}
-
-/* Score Info */
-.score-info {
-    margin: 16px 0;
-    padding: 16px;
-    background: var(--card-bg);
-    border-radius: 12px;
-    text-align: center;
-    font-weight: 500;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-}
-
-/* Image Preview */
-.preview-container {
-    margin-top: 16px;
-}
-
-.image-preview {
-    position: relative;
-    display: inline-block;
-    margin-top: 8px;
-}
-
-.photo-preview {
-    max-width: 300px;
-    max-height: 300px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-}
-
-.delete-image {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: var(--danger);
-    padding: 8px 16px;
-    font-size: 12px;
-}
-
-.delete-image:hover {
-    background: #dc2626;
-}
-
-/* Requirements List */
-.requirement-list {
-    list-style: none;
-    padding: 0;
-    margin: 16px 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.requirement-list li {
-    margin: 0;
-    padding: 8px 16px;
-    background: var(--background);
-    border-radius: 20px;
-    font-size: 14px;
-    color: var(--text-secondary);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.requirement-list li::before {
-    content: "×";
-    color: var(--danger);
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.requirement-list li.complete::before {
-    content: "✓";
-    color: var(--success);
-}
-
-/* Container for buttons */
-.buttons-container {
-    display: flex;
-    gap: 16px;
-    margin-top: 32px;
-    justify-content: center;
-}
-
-/* Section visibility */
-#checklist-section {
-    display: none;
-    animation: fadeIn 0.3s ease;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(10px); 
+function loadFromLocalStorage() {
+    const savedItems = localStorage.getItem('qcChecklist');
+    const savedLocation = localStorage.getItem('selectedLocation');
+    
+    if (savedItems) {
+        const parsed = JSON.parse(savedItems);
+        items = items.map(item => ({
+            ...item,
+            score: (parsed.find(p => p.id === item.id) || {}).score || 0,
+            notes: (parsed.find(p => p.id === item.id) || {}).notes || '',
+            image: (parsed.find(p => p.id === item.id) || {}).image || null,
+        }));
     }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
+    if (savedLocation) {
+        selectLocation(savedLocation);
     }
 }
 
-/* Mobile Optimizations */
-@media (max-width: 768px) {
-    body {
-        padding: 16px;
-    }
+// Item Management Functions
+function checkItemCompletion(item) {
+    const hasScore = item.score > 0;
+    const hasNotes = item.notes && item.notes.trim().length >= 10;
+    const hasImage = item.image !== null;
+    item.isComplete = hasScore && hasNotes && hasImage;
+    return item.isComplete;
+}
 
-    .location-selector {
-        flex-direction: column;
-        gap: 8px;
-    }
+function createRequirementsList(item) {
+    const hasScore = item.score > 0;
+    const hasNotes = item.notes && item.notes.trim().length >= 10;
+    const hasImage = item.image !== null;
+    
+    return `
+        <ul class="requirement-list">
+            <li class="${hasScore ? 'complete' : ''}">Select a score</li>
+            <li class="${hasNotes ? 'complete' : ''}">Add detailed notes (minimum 10 characters)</li>
+            <li class="${hasImage ? 'complete' : ''}">Upload a photo</li>
+        </ul>
+    `;
+}
 
-    .checklist-item {
-        padding: 16px;
-    }
+// Image handling functions - UPDATED
+function handleImageUpload(id) {
+    return function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    .photo-preview {
-        max-width: 100%;
-        height: auto;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.image = e.target.result;
+                saveToLocalStorage();
+                renderChecklist();
+                updateProgress();
+            }
+        };
+        reader.readAsDataURL(file);
+        // Remove this specific input after use
+        event.target.remove();
+    };
+}
+
+function triggerImageUpload(id) {
+    // Create new input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    // Don't set capture on iOS
+    if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        input.capture = 'environment';
+    }
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    
+    // Set up the change handler
+    input.onchange = handleImageUpload(id);
+    
+    // Trigger click with slight delay
+    setTimeout(() => {
+        input.click();
+    }, 50);
+}
+
+function deleteImage(id) {
+    const item = items.find(i => i.id === id);
+    if (item) {
+        item.image = null;
+        saveToLocalStorage();
+        renderChecklist();
+        updateProgress();
     }
 }
+
+function createChecklistItem(item) {
+    checkItemCompletion(item);
+    
+    return `
+        <div class="checklist-item ${item.isComplete ? 'complete' : 'incomplete'}">
+            <h3>${item.name} (Weight: ${item.weight})</h3>
+            <select onchange="updateScore(${item.id}, this.value)">
+                <option value="0" ${item.score === 0 ? 'selected' : ''}>Select Score</option>
+                <option value="1" ${item.score === 1 ? 'selected' : ''}>1 - Poor</option>
+                <option value="2" ${item.score === 2 ? 'selected' : ''}>2 - Fair</option>
+                <option value="3" ${item.score === 3 ? 'selected' : ''}>3 - Good</option>
+                <option value="4" ${item.score === 4 ? 'selected' : ''}>4 - Very Good</option>
+                <option value="5" ${item.score === 5 ? 'selected' : ''}>5 - Excellent</option>
+            </select>
+            <textarea 
+                id="notes-${item.id}"
+                placeholder="Add detailed notes here (minimum 10 characters)..."
+                oninput="handleNotesInput(${item.id}, this.value)"
+                onblur="handleNotesBlur(${item.id}, this.value)"
+            >${item.notes || ''}</textarea>
+            <button class="button" onclick="triggerImageUpload(${item.id})">
+                Upload Photo
+            </button>
+            <div id="preview-${item.id}">
+                ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
+            </div>
+            ${createRequirementsList(item)}
+        </div>
+    `;
+}
+
+// Event handlers
+function handleNotesInput(id, value) {
+    const item = items.find(i => i.id === id);
+    if (item) {
+        item.notes = value;
+    }
+}
+
+function handleNotesBlur(id, value) {
+    const item = items.find(i => i.id === id);
+    if (item) {
+        item.notes = value;
+        saveToLocalStorage();
+        renderChecklist();
+        updateProgress();
+    }
+}
+
+// UI updates
+function updateScore(id, score) {
+    const item = items.find(i => i.id === id);
+    if (item) {
+        item.score = parseInt(score);
+        saveToLocalStorage();
+        renderChecklist();
+        updateProgress();
+    }
+}
+
+function selectLocation(location) {
+    selectedLocation = location;
+    document.querySelectorAll('.location-button').forEach(button => {
+        button.classList.remove('selected');
+        if (button.textContent === location) {
+            button.classList.add('selected');
+        }
+    });
+    document.getElementById('checklist-section').style.display = 'block';
+    renderChecklist();
+}
+
+function updateProgress() {
+    const completedItems = items.filter(item => item.isComplete).length;
+    const totalItems = items.length;
+    const percentage = (completedItems / totalItems) * 100;
+    
+    document.getElementById('progress-fill').style.width = `${percentage}%`;
+    document.getElementById('progress-text').textContent = 
+        `${completedItems} of ${totalItems} items complete (${percentage.toFixed(1)}%)`;
+    
+    document.getElementById('pdf-button').style.display = 
+        completedItems === totalItems ? 'block' : 'none';
+    
+    calculateTotalScore();
+}
+
+function calculateTotalScore() {
+    if (items.length === 0) return 0;
+    let totalWeight = 0;
+    let weightedScore = 0;
+    
+    items.forEach(item => {
+        totalWeight += item.weight;
+        weightedScore += (item.score / 5) * item.weight;
+    });
+    
+    const percentage = (weightedScore / totalWeight) * 100;
+    document.getElementById('total-score').textContent = 
+        `Total Score: ${percentage.toFixed(1)}% of Perfect Operation`;
+    return percentage;
+}
+
+// Rendering
+function renderChecklist() {
+    const container = document.getElementById('checklist');
+    container.innerHTML = items.map(item => createChecklistItem(item)).join('');
+}
+
+// Initialization
+function startNewQC() {
+    if (confirm('Start new QC? This will clear all current data.')) {
+        localStorage.clear();
+        selectedLocation = '';
+        document.querySelectorAll('.location-button').forEach(button => {
+            button.classList.remove('selected');
+        });
+        loadChecklist();
+    }
+}
+
+async function loadChecklist() {
+    try {
+        const response = await fetch('checklist-items.json');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        items = data.items.map(item => ({
+            ...item,
+            score: 0,
+            notes: '',
+            image: null,
+            isComplete: false
+        }));
+        
+        loadFromLocalStorage();
+        renderChecklist();
+        updateProgress();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error loading checklist: ' + error.message);
+    }
+}
+
+// Initialize when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadChecklist();
+});
