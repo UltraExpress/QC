@@ -282,45 +282,117 @@
             calculateTotalScore();
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
         function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Set up initial formatting
+    doc.setFontSize(20);
+    doc.text('Quality Control Report', 20, 20);
+    doc.setFontSize(12);
+    let yPos = 40;
 
-            doc.setFontSize(20);
-            doc.text('Quality Control Report', 20, 20);
-            doc.setFontSize(12);
-            let yPos = 40;
+    // Add total score at the top of the PDF
+    const scores = calculateTotalScore();
+    doc.text(`Total Quality Score: ${scores.score} of ${scores.maxScore} (${scores.percentage}%)`, 20, 30);
 
-            // Add total score at the top of the PDF
-            const scores = calculateTotalScore();
-            doc.text(`Total Quality Score: ${scores.score} of ${scores.maxScore} (${scores.percentage}%)`, 20, 30);
+    // Helper function to add text with potential red highlighting
+    function addTextWithHighlight(text, x, y, score) {
+        if (score >= 1 && score <= 3) {
+            // Save current text color
+            const currentTextColor = doc.getTextColor();
+            
+            // Set text to red for low scores
+            doc.setTextColor(255, 0, 0);
+            
+            // Add a light red background highlight
+            doc.setFillColor(255, 200, 200);
+            const textWidth = doc.getTextWidth(text);
+            doc.rect(x - 2, y - 6, textWidth + 4, 8, 'F');
+            
+            // Add the text
+            doc.text(text, x, y);
+            
+            // Restore original text color
+            doc.setTextColor(currentTextColor);
+        } else {
+            doc.text(text, x, y);
+        }
+    }
 
-            items.forEach(item => {
-                if (yPos > 270) {
-                    doc.addPage();
-                    yPos = 20;
-                }
-                doc.text(`${item.name}`, 20, yPos);
-                yPos += 10;
-
-                if (item.notes) {
-                    doc.text(`Notes: ${item.notes}`, 20, yPos);
-                    yPos += 10;
-                }
-
-                if (item.image) {
-                    try {
-                        doc.addImage(item.image, 'JPEG', 20, yPos, 60, 45);
-                        yPos += 50;
-                    } catch (error) {
-                        console.error("Error adding image to PDF:", error);
-                    }
-                }
-            });
-
-            doc.save(`QC_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    items.forEach(item => {
+        if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
         }
 
+        // Add item name with score
+        const itemText = `${item.name} - Score: ${item.score}/5`;
+        addTextWithHighlight(itemText, 20, yPos, item.score);
+        yPos += 10;
+
+        if (item.notes) {
+            // If the score is low, also highlight the notes
+            if (item.score >= 1 && item.score <= 3) {
+                doc.setTextColor(255, 0, 0);
+                doc.text(`Notes: ${item.notes}`, 20, yPos);
+                doc.setTextColor(0, 0, 0); // Reset to black
+            } else {
+                doc.text(`Notes: ${item.notes}`, 20, yPos);
+            }
+            yPos += 10;
+        }
+
+        if (item.image) {
+            try {
+                doc.addImage(item.image, 'JPEG', 20, yPos, 60, 45);
+                yPos += 50;
+            } catch (error) {
+                console.error("Error adding image to PDF:", error);
+            }
+        }
+
+        // Add some spacing between items
+        yPos += 5;
+    });
+
+    doc.save(`QC_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
         window.onload = function () {
             loadChecklist();
         };
