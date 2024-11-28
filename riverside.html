@@ -9,6 +9,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    
+    <!-- Include jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <!-- Include Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,8 +60,7 @@
         const checklistData = {
             items: [
                 {"id": 1, "name": "Roller Up", "weight": 0.6},
-                {"id": 2, "name": "PRE SOAK #1 Wash Service", "weight": 0.8},
-                // Add all items here
+                {"id": 2, "name": "PRE SOAK #1 Wash Service", "weight": 0.8}
             ]
         };
 
@@ -73,6 +75,9 @@
                     isCompleted: false
                 }))
             );
+
+            const [inspectorName, setInspectorName] = React.useState('');
+            const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
 
             const handleImageUpload = (id, e) => {
                 const file = e.target.files[0];
@@ -126,10 +131,87 @@
                 return ((totalWeightedScore / totalPossibleScore) * 100).toFixed(1);
             };
 
+            const generatePDF = async () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                let yPos = 20;
+
+                // Add header
+                doc.setFontSize(20);
+                doc.text('Quality Control Inspection Report', 105, yPos, { align: 'center' });
+                
+                // Add inspector and date
+                yPos += 20;
+                doc.setFontSize(12);
+                doc.text(`Inspector: ${inspectorName}`, 20, yPos);
+                doc.text(`Date: ${date}`, 120, yPos);
+
+                // Add total score
+                yPos += 20;
+                doc.setFontSize(16);
+                doc.text(`Overall Score: ${calculateWeightedScore()}%`, 20, yPos);
+                
+                // Add items
+                yPos += 10;
+                doc.setFontSize(12);
+                items.filter(item => item.isCompleted).forEach((item) => {
+                    yPos += 20;
+                    if (yPos > 250) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    doc.text(`${item.name}`, 20, yPos);
+                    doc.text(`Score: ${item.score}/5 (Weight: ${item.weight})`, 120, yPos);
+                    
+                    if (item.notes) {
+                        yPos += 10;
+                        doc.setFontSize(10);
+                        doc.text(`Notes: ${item.notes}`, 30, yPos);
+                        doc.setFontSize(12);
+                    }
+
+                    if (item.imagePreview) {
+                        try {
+                            yPos += 10;
+                            doc.addImage(item.imagePreview, 'JPEG', 20, yPos, 50, 50);
+                            yPos += 50;
+                        } catch (e) {
+                            console.error('Failed to add image to PDF', e);
+                        }
+                    }
+                });
+
+                // Save the PDF
+                doc.save('quality-control-report.pdf');
+            };
+
             return (
                 <div className="max-w-4xl mx-auto">
                     <div className="card mb-6">
                         <h1 className="text-2xl font-bold mb-4">Riverside Car Wash Quality Control Checklist</h1>
+                        
+                        {/* Inspector and Date inputs */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label className="block mb-2">Inspector Name</label>
+                                <input
+                                    type="text"
+                                    value={inspectorName}
+                                    onChange={(e) => setInspectorName(e.target.value)}
+                                    className="w-full p-2 border rounded"
+                                    placeholder="Enter inspector name"
+                                />
+                            </div>
+                            <div>
+                                <label className="block mb-2">Date</label>
+                                <input
+                                    type="date"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                    className="w-full p-2 border rounded"
+                                />
+                            </div>
+                        </div>
                         
                         {items.map((item) => (
                             <div key={item.id} className="card">
@@ -204,8 +286,9 @@
                                 </p>
                             </div>
                             <button
-                                onClick={() => alert('Generating PDF with score: ' + calculateWeightedScore() + '%')}
+                                onClick={generatePDF}
                                 className="button button-primary"
+                                disabled={!inspectorName}
                             >
                                 Export to PDF
                             </button>
