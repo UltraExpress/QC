@@ -329,8 +329,23 @@
 
                 if (item.image) {
                     try {
-                        doc.addImage(item.image, 'JPEG', 30, yPos, 100, 60);
-                        yPos += 70;
+                        // Create a temporary image to get dimensions
+                        const tempImg = new Image();
+                        tempImg.src = item.image;
+                        
+                        // Calculate aspect ratio
+                        const imgWidth = 100; // Maximum width in the PDF
+                        const aspectRatio = tempImg.height / tempImg.width;
+                        const imgHeight = imgWidth * aspectRatio;
+                        
+                        // Check if we need a new page
+                        if (yPos + imgHeight > 280) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        
+                        doc.addImage(item.image, 'JPEG', 30, yPos, imgWidth, imgHeight);
+                        yPos += imgHeight + 10;
                     } catch (e) {
                         console.error('Error adding image to PDF:', e);
                     }
