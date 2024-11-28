@@ -49,64 +49,45 @@ function createRequirementsList(item) {
     `;
 }
 
-// Image handling functions
-function handleImageUpload(id) {
-    return function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
+// Image handling
+function handleImageUpload(id, input) {
+    const file = input.files[0];
+    if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.image = e.target.result;
-                saveToLocalStorage();
-                renderChecklist();
-                updateProgress();
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
                 
-                // Remove the input after successful upload
-                event.target.remove();
-            }
+                // Maintain aspect ratio while correcting orientation
+                if (4 < height/width) {
+                    canvas.width = height;
+                    canvas.height = width;
+                } else {
+                    canvas.width = width;
+                    canvas.height = height;
+                }
+
+                const ctx = canvas.getContext('2d');
+                ctx.translate(canvas.width/2, canvas.height/2);
+                ctx.rotate(0);
+                ctx.drawImage(img, -width/2, -height/2, width, height);
+
+                const correctedImage = canvas.toDataURL('image/jpeg', 0.7);
+                
+                const item = items.find(i => i.id === id);
+                if (item) {
+                    item.image = correctedImage;
+                    const preview = document.getElementById(`preview-${id}`);
+                    preview.innerHTML = `<img src="${correctedImage}" class="photo-preview">`;
+                    saveToLocalStorage();
+                }
+            };
+            img.src = e.target.result;
         };
-
-        reader.onerror = function() {
-            alert('Error reading file. Please try again.');
-        };
-
-        try {
-            reader.readAsDataURL(file);
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error processing image. Please try again.');
-        }
-    };
-}
-
-function triggerImageUpload(id) {
-    // Create a new input element each time
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment';
-    input.style.display = 'none';
-    
-    // Add the input to the DOM
-    document.body.appendChild(input);
-    
-    // Set up the change handler
-    input.onchange = handleImageUpload(id);
-    
-    // Trigger the file selection
-    input.click();
-}
-
-function deleteImage(id) {
-    const item = items.find(i => i.id === id);
-    if (item) {
-        item.image = null;
-        saveToLocalStorage();
-        renderChecklist();
-        updateProgress();
+        reader.readAsDataURL(file);
     }
 }
 
@@ -130,16 +111,16 @@ function createChecklistItem(item) {
                 oninput="handleNotesInput(${item.id}, this.value)"
                 onblur="handleNotesBlur(${item.id}, this.value)"
             >${item.notes || ''}</textarea>
-            <button class="button" onclick="triggerImageUpload(${item.id})">
+            <input type="file" 
+                   id="image-${item.id}" 
+                   accept="image/*" 
+                   style="display: none"
+                   onchange="handleImageUpload(${item.id}, this)">
+            <button class="button" onclick="document.getElementById('image-${item.id}').click()">
                 Upload Photo
             </button>
-            <div id="preview-${item.id}" class="preview-container">
-                ${item.image ? `
-                    <div class="image-preview">
-                        <img src="${item.image}" class="photo-preview">
-                        <button class="button delete-image" onclick="deleteImage(${item.id})">Remove Photo</button>
-                    </div>
-                ` : ''}
+            <div id="preview-${id}">
+                ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
             </div>
             ${createRequirementsList(item)}
         </div>
@@ -248,9 +229,6 @@ async function loadChecklist() {
             image: null,
             isComplete: false
         }));
-        
-        // Clean up any existing file inputs
-        document.querySelectorAll('input[type="file"]').forEach(input => input.remove());
         
         loadFromLocalStorage();
         renderChecklist();
