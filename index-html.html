@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Wash Quality Control Checklist</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>Car Wash Quality Control Checklist</h1>
+        <button class="button" onclick="startNewQC()">New QC</button>
+    </div>
+
+    <div class="location-selector">
+        <button class="location-button" onclick="selectLocation('RIVERSIDE')">RIVERSIDE</button>
+        <button class="location-button" onclick="selectLocation('SANTA ANA')">SANTA ANA</button>
+    </div>
+
+    <div id="checklist-section">
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div id="progress-text" class="score-info">0% Complete</div>
+        <div id="checklist"></div>
+        <div id="total-score" class="score-info"></div>
+        <div class="buttons-container">
+            <button class="button" onclick="generatePDF()" id="pdf-button" style="display: none;">
+                Generate PDF Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+    <script src="pdf-generator.js"></script>
+    <script>
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', loadChecklist);
+    </script>
+</body>
+</html>
