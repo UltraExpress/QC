@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quality Control Checklist</title>
+    <title>Car Wash Quality Control Checklist</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
@@ -11,106 +11,55 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: #f0f0f0;
         }
-        .header-controls {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
         }
-        .checklist-item {
-            background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-            gap: 10px;
-        }
-        .item-controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        select, textarea {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        textarea {
-            width: 100%;
-            min-height: 80px;
-            margin-top: 10px;
-            resize: vertical;
-        }
-        .photo-preview {
-            max-width: 200px;
-            max-height: 200px;
-            margin-top: 10px;
-            border-radius: 4px;
-        }
-        .total-score {
-            background: white;
-            padding: 15px;
+        .location-section {
+            text-align: right;
             margin: 20px 0;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
         }
-        .button {
-            background: #007bff;
-            color: white;
-            padding: 8px 15px;
-            border: none;
+        .location-button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            background: white;
+            border: 2px solid #007bff;
             border-radius: 4px;
             cursor: pointer;
         }
-        .button:hover {
-            background: #0056b3;
+        .location-button.active {
+            background: #007bff;
+            color: white;
         }
-        .button.new-qc {
-            background: #28a745;
-        }
-        .button.new-qc:hover {
-            background: #218838;
-        }
-        .actions {
-            background: white;
+        .checklist-item {
+            background: #f8f9fa;
             padding: 15px;
-            margin: 20px 0;
-            border-radius: 8px;
-            text-align: center;
+            margin: 10px 0;
+            border-radius: 4px;
         }
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .item-header {
-                flex-direction: column;
-            }
-            .item-controls {
-                width: 100%;
-            }
+        #checklist-content {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="header-controls">
-        <h1>Quality Control Checklist</h1>
-        <button class="button new-qc" onclick="startNewQC()">New QC</button>
+    <div class="header">
+        <h1>Car Wash Quality Control Checklist</h1>
+        <button onclick="startNewQC()">New QC</button>
     </div>
-    <div id="checklist"></div>
-    <div id="total-score" class="total-score"></div>
-    
-    <div class="actions">
-        <button class="button" onclick="generatePDF()">Generate PDF Report</button>
+
+    <div class="location-section">
+        <span>Select Location:</span>
+        <button class="location-button" onclick="selectLocation('RIVERSIDE')">RIVERSIDE</button>
+        <button class="location-button" onclick="selectLocation('SANTA ANA')">SANTA ANA</button>
+    </div>
+
+    <div id="checklist-content">
+        <div id="checklist"></div>
+        <div id="total-score"></div>
+        <button onclick="generatePDF()">Generate PDF Report</button>
     </div>
 
     <script>
@@ -120,51 +69,50 @@
             { id: 3, name: 'Functionality Test', score: 0, notes: '', image: null }
         ];
 
-        function startNewQC() {
-            if (confirm('Are you sure you want to start a new QC? This will clear all current data.')) {
-                items.forEach(item => {
-                    item.score = 0;
-                    item.notes = '';
-                    item.image = null;
-                });
-                localStorage.removeItem('qcChecklist');
-                renderChecklist();
-            }
+        let selectedLocation = '';
+
+        function selectLocation(location) {
+            selectedLocation = location;
+            
+            // Update button styles
+            document.querySelectorAll('.location-button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === location) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Show checklist content
+            document.getElementById('checklist-content').style.display = 'block';
+            
+            // Render checklist items
+            renderChecklist();
         }
 
-        function createChecklistItem(item) {
-            const div = document.createElement('div');
-            div.className = 'checklist-item';
-            div.innerHTML = `
-                <div class="item-header">
+        function renderChecklist() {
+            const container = document.getElementById('checklist');
+            container.innerHTML = '';
+            
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'checklist-item';
+                div.innerHTML = `
                     <h3>${item.name}</h3>
-                    <div class="item-controls">
-                        <select onchange="updateScore(${item.id}, this.value)">
-                            <option value="0" ${item.score === 0 ? 'selected' : ''}>0 - Failed</option>
-                            <option value="1" ${item.score === 1 ? 'selected' : ''}>1 - Poor</option>
-                            <option value="2" ${item.score === 2 ? 'selected' : ''}>2 - Fair</option>
-                            <option value="3" ${item.score === 3 ? 'selected' : ''}>3 - Good</option>
-                            <option value="4" ${item.score === 4 ? 'selected' : ''}>4 - Excellent</option>
-                        </select>
-                        <input type="file" 
-                               id="image-${item.id}" 
-                               accept="image/*" 
-                               style="display: none"
-                               onchange="handleImageUpload(${item.id}, this)">
-                        <button class="button" onclick="document.getElementById('image-${item.id}').click()">
-                            📷 Photo
-                        </button>
-                    </div>
-                </div>
-                <textarea
-                    placeholder="Add notes here..."
-                    onchange="updateNotes(${item.id}, this.value)"
-                >${item.notes}</textarea>
-                <div id="preview-${item.id}">
-                    ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
-                </div>
-            `;
-            return div;
+                    <select onchange="updateScore(${item.id}, this.value)">
+                        <option value="0">0 - Failed</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Excellent</option>
+                    </select>
+                    <textarea onchange="updateNotes(${item.id}, this.value)" 
+                              placeholder="Add notes here...">${item.notes}</textarea>
+                    <input type="file" accept="image/*" 
+                           onchange="handleImageUpload(${item.id}, this)">
+                `;
+                container.appendChild(div);
+            });
+            updateTotalScore();
         }
 
         function updateScore(id, score) {
@@ -172,7 +120,6 @@
             if (item) {
                 item.score = parseInt(score);
                 updateTotalScore();
-                saveToLocalStorage();
             }
         }
 
@@ -180,7 +127,6 @@
             const item = items.find(i => i.id === id);
             if (item) {
                 item.notes = notes;
-                saveToLocalStorage();
             }
         }
 
@@ -192,109 +138,58 @@
                     const item = items.find(i => i.id === id);
                     if (item) {
                         item.image = e.target.result;
-                        const preview = document.getElementById(`preview-${id}`);
-                        preview.innerHTML = `<img src="${e.target.result}" class="photo-preview">`;
-                        saveToLocalStorage();
                     }
                 };
                 reader.readAsDataURL(file);
             }
         }
 
+        function updateTotalScore() {
+            const total = items.reduce((sum, item) => sum + item.score, 0);
+            document.getElementById('total-score').textContent = 
+                `Total Score: ${total} / ${items.length * 4}`;
+        }
+
         function generatePDF() {
+            if (!selectedLocation) {
+                alert('Please select a location first');
+                return;
+            }
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Add title
-            doc.setFontSize(20);
-            doc.text('Quality Control Report', 20, 20);
-            doc.setFontSize(12);
+            doc.text(`Car Wash QC Report - ${selectedLocation}`, 20, 20);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30);
             
-            let yPos = 40;
-            const totalScore = items.reduce((sum, item) => sum + item.score, 0);
-            const maxScore = items.length * 4;
-            
-            // Add date
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, yPos);
-            yPos += 10;
-            
-            // Add total score
-            doc.text(`Total Score: ${totalScore}/${maxScore}`, 20, yPos);
-            yPos += 20;
-
-            // Add items
-            items.forEach((item, index) => {
-                // Check if we need a new page
-                if (yPos > 250) {
-                    doc.addPage();
-                    yPos = 20;
-                }
-
-                doc.setFontSize(14);
-                doc.text(`${item.name}`, 20, yPos);
-                yPos += 10;
-                
-                doc.setFontSize(12);
-                doc.text(`Score: ${item.score}/4`, 30, yPos);
-                yPos += 10;
-                
+            let y = 50;
+            items.forEach(item => {
+                doc.text(`${item.name}: ${item.score}/4`, 20, y);
+                y += 10;
                 if (item.notes) {
-                    doc.text('Notes:', 30, yPos);
-                    yPos += 10;
-                    const splitNotes = doc.splitTextToSize(item.notes, 150);
-                    doc.text(splitNotes, 40, yPos);
-                    yPos += splitNotes.length * 7;
+                    doc.text(`Notes: ${item.notes}`, 30, y);
+                    y += 10;
                 }
-
-                if (item.image) {
-                    try {
-                        doc.addImage(item.image, 'JPEG', 30, yPos, 100, 60);
-                        yPos += 70;
-                    } catch (e) {
-                        console.error('Error adding image to PDF:', e);
-                    }
-                }
-
-                yPos += 10;
             });
-
-            // Save the PDF
-            doc.save('QC_Report.pdf');
+            
+            doc.save(`QC_Report_${selectedLocation}_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
-        function updateTotalScore() {
-            const totalScore = items.reduce((sum, item) => sum + item.score, 0);
-            const maxScore = items.length * 4;
-            document.getElementById('total-score').textContent = 
-                `Total Score: ${totalScore} / ${maxScore}`;
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('qcChecklist', JSON.stringify(items));
-        }
-
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('qcChecklist');
-            if (saved) {
-                const savedItems = JSON.parse(saved);
-                items.forEach((item, index) => {
-                    Object.assign(item, savedItems[index]);
+        function startNewQC() {
+            if (confirm('Start new QC? This will clear all current data.')) {
+                selectedLocation = '';
+                items.forEach(item => {
+                    item.score = 0;
+                    item.notes = '';
+                    item.image = null;
                 });
+                document.querySelectorAll('.location-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.getElementById('checklist-content').style.display = 'none';
+                renderChecklist();
             }
         }
-
-        function renderChecklist() {
-            const container = document.getElementById('checklist');
-            container.innerHTML = '';
-            items.forEach(item => {
-                container.appendChild(createChecklistItem(item));
-            });
-            updateTotalScore();
-        }
-
-        // Initialize the page
-        loadFromLocalStorage();
-        renderChecklist();
     </script>
 </body>
 </html>
