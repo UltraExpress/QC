@@ -121,208 +121,191 @@
         <button class="button" onclick="generatePDF()">Generate PDF Report</button>
     </div>
 
-    <script>
-        let items = [];
+   <script>
+    let items = [];
 
-        async function loadChecklist() {
-            try {
-                const response = await fetch('https://ultraexpress.github.io/QC/riverside_checklist.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                items = data.items.map(item => ({
-                    ...item,
-                    score: 0,
-                    notes: '',
-                    image: null
-                }));
-                renderChecklist();
-                updateProgress();
-            } catch (error) {
-                console.error('Error loading checklist:', error);
-                alert('Error loading checklist items. Please try again.');
+    async function loadChecklist() {
+        try {
+            const response = await fetch('https://ultraexpress.github.io/QC/riverside_checklist.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            const data = await response.json();
+            items = data.items.map(item => ({
+                ...item,
+                score: 0,
+                notes: '',
+                image: null
+            }));
+            renderChecklist();
+            updateProgress();
+        } catch (error) {
+            console.error('Error loading checklist:', error);
+            alert('Error loading checklist items. Please try again.');
         }
+    }
 
-        function isItemComplete(item) {
-            return item.score > 0 && item.notes.trim() !== '' && item.image !== null;
-        }
+    function isItemComplete(item) {
+        return item.score > 0 && item.notes.trim() !== '' && item.image !== null;
+    }
 
-        function calculateItemPercentage(item) {
-            const maxPossible = item.weight * 5;
-            const actual = item.weight * item.score;
-            return (actual / maxPossible) * 100;
-        }
+    function calculateItemPercentage(item) {
+        const maxPossible = item.weight * 5;
+        const actual = item.weight * item.score;
+        return (actual / maxPossible) * 100;
+    }
 
-        function calculateTotalScore() {
-            let totalPercentage = 0;
-            items.forEach(item => {
-                totalPercentage += calculateItemPercentage(item);
-            });
-            return totalPercentage / items.length;
-        }
+    function calculateTotalScore() {
+        let totalPercentage = 0;
+        items.forEach(item => {
+            totalPercentage += calculateItemPercentage(item);
+        });
+        return totalPercentage / items.length;
+    }
 
-        function updateProgress() {
-            const scoredItems = items.filter(isItemComplete).length;
-            const totalItems = items.length;
-            const percentage = (scoredItems / totalItems) * 100;
+    function updateProgress() {
+        const scoredItems = items.filter(isItemComplete).length;
+        const totalItems = items.length;
+        const percentage = (scoredItems / totalItems) * 100;
 
-            document.getElementById('progress-fill').style.width = percentage + '%';
-            document.getElementById('progress-text').textContent = 
-                `${scoredItems} of ${totalItems} items completed (${percentage.toFixed(1)}%)`;
-        }
+        document.getElementById('progress-fill').style.width = percentage + '%';
+        document.getElementById('progress-text').textContent = 
+            `${scoredItems} of ${totalItems} items completed (${percentage.toFixed(1)}%)`;
+    }
 
-        function createChecklistItem(item, index) {
-            const div = document.createElement('div');
-            div.className = 'checklist-item';
-            const isDisabled = index > 0 && !isItemComplete(items[index - 1]);
+    function createChecklistItem(item, index) {
+        const div = document.createElement('div');
+        div.className = 'checklist-item';
+        const isDisabled = index > 0 && !isItemComplete(items[index - 1]);
 
-            div.innerHTML = `
-                <div class="item-header">
-                    <h3>${item.name} (Weight: ${item.weight})</h3>
-                    <div class="item-controls">
-                        <select onchange="updateScore(${item.id}, this.value)" ${isDisabled ? 'disabled' : ''}>
-                            <option value="0" ${item.score === 0 ? 'selected' : ''}>Select Score</option>
-                            <option value="1" ${item.score === 1 ? 'selected' : ''}>1 - Poor</option>
-                            <option value="2" ${item.score === 2 ? 'selected' : ''}>2 - Fair</option>
-                            <option value="3" ${item.score === 3 ? 'selected' : ''}>3 - Good</option>
-                            <option value="4" ${item.score === 4 ? 'selected' : ''}>4 - Very Good</option>
-                            <option value="5" ${item.score === 5 ? 'selected' : ''}>5 - Excellent</option>
-                        </select>
-                        <input type="file" 
-                               id="image-${item.id}" 
-                               accept="image/*" 
-                               style="display: none"
-                               ${isDisabled ? 'disabled' : ''}
-                               onchange="handleImageUpload(${item.id}, this)">
-                        <button class="button" ${isDisabled ? 'disabled' : ''} onclick="document.getElementById('image-${item.id}').click()">
-                            📷 Upload Photo
-                        </button>
-                    </div>
+        div.innerHTML = `
+            <div class="item-header">
+                <h3>${item.name} (Weight: ${item.weight})</h3>
+                <div class="item-controls">
+                    <select onchange="updateScore(${item.id}, this.value)" ${isDisabled ? 'disabled' : ''}>
+                        <option value="0" ${item.score === 0 ? 'selected' : ''}>Select Score</option>
+                        <option value="1" ${item.score === 1 ? 'selected' : ''}>1 - Poor</option>
+                        <option value="2" ${item.score === 2 ? 'selected' : ''}>2 - Fair</option>
+                        <option value="3" ${item.score === 3 ? 'selected' : ''}>3 - Good</option>
+                        <option value="4" ${item.score === 4 ? 'selected' : ''}>4 - Very Good</option>
+                        <option value="5" ${item.score === 5 ? 'selected' : ''}>5 - Excellent</option>
+                    </select>
+                    <input type="file" 
+                           id="image-${item.id}" 
+                           accept="image/*" 
+                           style="display: none"
+                           ${isDisabled ? 'disabled' : ''}
+                           onchange="handleImageUpload(${item.id}, this)">
+                    <button class="button" ${isDisabled ? 'disabled' : ''} onclick="document.getElementById('image-${item.id}').click()">
+                        📷 Upload Photo
+                    </button>
                 </div>
-                <textarea
-                    placeholder="Add notes here..."
-                    onchange="updateNotes(${item.id}, this.value)"
-                    ${isDisabled ? 'disabled' : ''}
-                >${item.notes}</textarea>
-                <div id="preview-${item.id}">
-                    ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
-                </div>
-            `;
-            return div;
-        }
+            </div>
+            <textarea
+                placeholder="Add notes here..."
+                onchange="updateNotes(${item.id}, this.value)"
+                ${isDisabled ? 'disabled' : ''}
+            >${item.notes}</textarea>
+            <div id="preview-${item.id}">
+                ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
+            </div>
+        `;
+        return div;
+    }
 
-        function renderChecklist() {
-            const container = document.getElementById('checklist');
-            container.innerHTML = '';
-            items.forEach((item, index) => {
-                container.appendChild(createChecklistItem(item, index));
-            });
+    function renderChecklist() {
+        const container = document.getElementById('checklist');
+        container.innerHTML = '';
+        items.forEach((item, index) => {
+            container.appendChild(createChecklistItem(item, index));
+        });
+        updateProgress();
+    }
+
+    function updateScore(id, score) {
+        const item = items.find(i => i.id === id);
+        if (item) {
+            item.score = parseInt(score);
+            checkCompletionAndRender();
+        }
+    }
+
+    function updateNotes(id, notes) {
+        const item = items.find(i => i.id === id);
+        if (item) {
+            item.notes = notes;
+            checkCompletionAndRender();
+        }
+    }
+
+    function handleImageUpload(id, input) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const item = items.find(i => i.id === id);
+                if (item) {
+                    item.image = e.target.result;
+
+                    // Update preview dynamically
+                    const preview = document.getElementById(`preview-${id}`);
+                    if (preview) {
+                        preview.innerHTML = `<img src="${item.image}" class="photo-preview">`;
+                    }
+
+                    checkCompletionAndRender();
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function checkCompletionAndRender() {
+        saveToLocalStorage();
+        renderChecklist();
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem('qcChecklist', JSON.stringify(items));
+    }
+
+    function loadFromLocalStorage() {
+        const savedData = localStorage.getItem('qcChecklist');
+        if (savedData) {
+            items = JSON.parse(savedData);
+            renderChecklist();
             updateProgress();
         }
+    }
 
-        function updateScore(id, score) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.score = parseInt(score);
-                if (isItemComplete(item)) {
-                    saveToLocalStorage();
-                    renderChecklist();
-                }
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(20);
+        doc.text('Quality Control Report', 20, 20);
+        doc.setFontSize(12);
+        let yPos = 40;
+
+        items.forEach(item => {
+            if (yPos > 270) {
+                doc.addPage();
+                yPos = 20;
             }
-        }
+            doc.text(`${item.name}`, 20, yPos);
+            yPos += 10;
+        });
 
-        function updateNotes(id, notes) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.notes = notes;
-                if (isItemComplete(item)) {
-                    saveToLocalStorage();
-                    renderChecklist();
-                }
-            }
-        }
+        doc.save(`QC_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    }
 
-        function handleImageUpload(id, input) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const item = items.find(i => i.id === id);
-                    if (item) {
-                        item.image = e.target.result;
+    // Initialize the checklist on load
+    window.onload = function () {
+        loadChecklist();
+        loadFromLocalStorage();
+    };
+</script>
 
-                        // Update only the preview for this item
-                        const preview = document.getElementById(`preview-${id}`);
-                        if (preview) {
-                            preview.innerHTML = `<img src="${item.image}" class="photo-preview">`;
-                        }
-
-                        // Check if the item is complete and update storage
-                        if (isItemComplete(item)) {
-                            saveToLocalStorage();
-                        }
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.setFontSize(20);
-            doc.text('Quality Control Report', 20, 20);
-            doc.setFontSize(12);
-            let yPos = 40;
-
-            items.forEach(item => {
-                if (yPos > 270) {
-                    doc.addPage();
-                    yPos = 20;
-                }
-                doc.text(`${item.name}`, 20, yPos);
-                yPos += 10;
-
-                if (item.notes) {
-                    doc.text(`Notes: ${item.notes}`, 20, yPos);
-                    yPos += 10;
-                }
-
-                if (item.image) {
-                    try {
-                        doc.addImage(item.image, 'JPEG', 20, yPos, 60, 45);
-                        yPos += 50;
-                    } catch (e) {
-                        console.error("Error adding image to PDF:", e);
-                    }
-                }
-            });
-
-            doc.save(`QC_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('qcChecklist', JSON.stringify(items));
-        }
-
-        function loadFromLocalStorage() {
-            const savedData = localStorage.getItem('qcChecklist');
-            if (savedData) {
-                items = JSON.parse(savedData);
-                renderChecklist();
-                updateProgress();
-            }
-        }
-
-        // Initialize the checklist on load
-        window.onload = function () {
-            loadChecklist();
-            loadFromLocalStorage();
-        };
-    </script>
 </body>
 </html>
 
