@@ -3,525 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Wash Quality Control Checklist</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>Quality Control Checklist</title>
+    
+    <!-- Include React -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Styles -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f0f0f0;
-        }
-        .header-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .checklist-item {
+        .card {
             background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-            gap: 10px;
-        }
-        .item-controls {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        select, textarea {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        textarea {
-            width: 100%;
-            min-height: 80px;
-            margin-top: 10px;
-            resize: vertical;
-        }
-        .photo-preview {
-            max-width: 200px;
-            max-height: 200px;
-            margin-top: 10px;
-            border-radius: 4px;
-        }
-        .total-score {
-            background: white;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            margin-bottom: 1rem;
+            padding: 1rem;
         }
         .button {
-            background: #007bff;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
             cursor: pointer;
+            transition: all 0.2s;
         }
-        .button:hover {
-            background: #0056b3;
-        }
-        .button.new-qc {
-            background: #28a745;
-        }
-        .button.new-qc:hover {
-            background: #218838;
-        }
-        .location-selector {
-            text-align: right;
-            margin: 20px 0;
-        }
-        .location-button {
-            padding: 10px 20px;
-            margin: 0 5px;
-            border: 2px solid #007bff;
-            border-radius: 4px;
-            background: white;
-            color: #007bff;
-            cursor: pointer;
-        }
-        .location-button.selected {
-            background: #007bff;
+        .button-primary {
+            background: #3b82f6;
             color: white;
         }
-        #checklist-section {
-            display: none;
+        .button-primary:hover {
+            background: #2563eb;
         }
-        .score-details {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 5px;
+        .rating-button {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-right: 0.5rem;
+            border-radius: 0.25rem;
         }
-        .percentage {
-            font-weight: bold;
-            color: #007bff;
+        .rating-selected {
+            background: #3b82f6;
+            color: white;
         }
-        .progress-section {
-            background: white;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .progress-fill {
-            height: 100%;
-            background-color: #28a745;
-            transition: width 0.3s ease;
-        }
-        .progress-text {
-            text-align: center;
-            font-size: 1.1em;
-            margin: 5px 0;
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .item-header {
-                flex-direction: column;
-            }
-            .item-controls {
-                width: 100%;
-            }
+        .rating-unselected {
+            background: #e5e7eb;
         }
     </style>
 </head>
-<body>
-    <div id="loading-overlay" class="loading-overlay">
-        <div class="loading-spinner"></div>
-    </div>
+<body class="bg-gray-100 min-h-screen p-4">
+    <div id="root"></div>
 
-    <div class="header-controls">
-        <h1>Car Wash Quality Control Checklist</h1>
-        <button class="button new-qc" onclick="startNewQC()">New QC</button>
-    </div>
-
-    <div class="location-selector">
-        <span>Select Location:</span>
-        <button class="location-button" onclick="selectLocation('RIVERSIDE')">RIVERSIDE</button>
-        <button class="location-button" onclick="selectLocation('SANTA ANA')">SANTA ANA</button>
-    </div>
-
-    <div id="checklist-section">
-        <div class="progress-section">
-            <div class="progress-text">Inspection Progress</div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-            </div>
-            <div class="progress-text" id="progress-text">0 of 0 items scored</div>
-        </div>
-
-        <div id="checklist"></div>
-        <div id="total-score" class="total-score"></div>
-        <div class="actions">
-            <button class="button" onclick="generatePDF()">Generate PDF Report</button>
-        </div>
-    </div>
-
-    <script>
-        let selectedLocation = '';
-        let items = [];
-
-        async function loadChecklist() {
-            try {
-                // Replace with your GitHub raw content URL
-                const response = await fetch('https://ultraexpress.github.io/QC/checklist-items.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                items = data.items;
-                
-                // Initialize additional properties
-                items.forEach(item => {
-                    item.score = 0;
-                    item.notes = '';
-                    item.image = null;
-                });
-
-                loadFromLocalStorage();
-                renderChecklist();
-                updateProgress();
-                document.getElementById('loading-overlay').style.display = 'none';
-            } catch (error) {
-                console.error('Error loading checklist:', error);
-                alert('Error loading checklist items. Please check your internet connection and try again.');
-                document.getElementById('loading-overlay').style.display = 'none';
-            }
-        }
-
-        function calculateItemPercentage(item) {
-            const maxPossible = item.weight * 5;
-            const actual = item.weight * item.score;
-            return (actual / maxPossible) * 100;
-        }
-
-        function calculateTotalScore() {
-            let totalPercentage = 0;
-            items.forEach(item => {
-                totalPercentage += calculateItemPercentage(item);
-            });
-            return totalPercentage / items.length;
-        }
-
-        function selectLocation(location) {
-            selectedLocation = location;
-            document.querySelectorAll('.location-button').forEach(button => {
-                button.classList.remove('selected');
-                if (button.textContent === location) {
-                    button.classList.add('selected');
-                }
-            });
-            document.getElementById('checklist-section').style.display = 'block';
-            renderChecklist();
-            localStorage.setItem('selectedLocation', location);
-        }
-
-        function createChecklistItem(item) {
-            const div = document.createElement('div');
-            div.className = 'checklist-item';
-            const percentage = calculateItemPercentage(item);
-            
-            div.innerHTML = `
-                <div class="item-header">
-                    <h3>${item.name} (Weight: ${item.weight})</h3>
-                    <div class="item-controls">
-                        <select onchange="updateScore(${item.id}, this.value)">
-                            <option value="0" ${item.score === 0 ? 'selected' : ''}>Select Score</option>
-                            <option value="1" ${item.score === 1 ? 'selected' : ''}>1 - Poor</option>
-                            <option value="2" ${item.score === 2 ? 'selected' : ''}>2 - Fair</option>
-                            <option value="3" ${item.score === 3 ? 'selected' : ''}>3 - Good</option>
-                            <option value="4" ${item.score === 4 ? 'selected' : ''}>4 - Very Good</option>
-                            <option value="5" ${item.score === 5 ? 'selected' : ''}>5 - Excellent</option>
-                        </select>
-                        <input type="file" 
-                               id="image-${item.id}" 
-                               accept="image/*" 
-                               style="display: none"
-                               onchange="handleImageUpload(${item.id}, this)">
-                        <button class="button" onclick="document.getElementById('image-${item.id}').click()">
-                            📷 Upload Photo
-                        </button>
-                    </div>
-                </div>
-                <div class="score-details">
-                    Raw Score: ${item.score}/5 | Weight: ${item.weight} | 
-                    <span class="percentage">Running at ${percentage.toFixed(1)}% of perfect</span>
-                </div>
-                <textarea
-                    placeholder="Add notes here..."
-                    onchange="updateNotes(${item.id}, this.value)"
-                >${item.notes}</textarea>
-                <div id="preview-${item.id}">
-                    ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
-                </div>
-            `;
-            return div;
-        }
-
-        function updateScore(id, score) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.score = parseInt(score);
-                updateTotalScore();
-                updateProgress();
-                saveToLocalStorage();
-                renderChecklist();
-            }
-        }
-
-        function updateNotes(id, notes) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.notes = notes;
-                saveToLocalStorage();
-            }
-        }
-
-        function handleImageUpload(id, input) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        if (4 < height/width) {
-                            canvas.width = height;
-                            canvas.height = width;
-                        } else {
-                            canvas.width = width;
-                            canvas.height = height;
-                        }
-
-                        const ctx = canvas.getContext('2d');
-                        ctx.translate(canvas.width/2, canvas.height/2);
-                        ctx.rotate(0);
-                        ctx.drawImage(img, -width/2, -height/2, width, height);
-
-                        const correctedImage = canvas.toDataURL('image/jpeg', 0.7);
-                        
-                        const item = items.find(i => i.id === id);
-                        if (item) {
-                            item.image = correctedImage;
-                            const preview = document.getElementById(`preview-${id}`);
-                            preview.innerHTML = `<img src="${correctedImage}" class="photo-preview">`;
-                            saveToLocalStorage();
-                        }
-                    };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function generatePDF() {
-            if (!selectedLocation) {
-                alert('Please select a location first');
-                return;
-            }
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFontSize(20);
-            doc.text('Quality Control Report', 20, 20);
-            doc.setFontSize(16);
-            doc.text(`Location: ${selectedLocation}`, 20, 30);
-            doc.setFontSize(12);
-            
-            let yPos = 45;
-            const totalScore = calculateTotalScore();
-            
-            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, yPos);
-            yPos += 10;
-            doc.text(`Overall Performance: ${totalScore.toFixed(1)}% of Perfect Operation`, 20, yPos);
-            yPos += 20;
-
-            items.forEach((item, index) => {
-                if (yPos > 250) {
-                    doc.addPage();
-                    yPos = 20;
-                }
-
-                const percentage = calculateItemPercentage(item);
-
-                doc.setFontSize(14);
-                doc.text(`${item.name}`, 20, yPos);
-                yPos += 10;
-                
-                doc.setFontSize(12);
-                doc.text(`Score: ${item.score}/5 | Weight: ${item.weight}`, 30, yPos);
-                yPos += 10;
-                doc.text(`Running at ${percentage.toFixed(1)}% of perfect`, 30, yPos);
-                yPos += 10;
-                
-                if (item.notes) {
-                    doc.text('Notes:', 30, yPos);
-                    yPos += 10;
-                    const splitNotes = doc.splitTextToSize(item.notes, 150);
-                    doc.text(splitNotes, 40, yPos);
-                    yPos += splitNotes.length * 7;
-                }
-
-                if (item.image) {
-                    try {
-                        const imgWidth = 100;
-                        const aspectRatio = 0.75; // Assuming a 4:3 aspect ratio
-                        const imgHeight = imgWidth * aspectRatio;
-                        
-                        if (yPos + imgHeight > 280) {
-                            doc.addPage();
-                            yPos = 20;
-                        }
-                        
-                
-
-
-
-
-
-
-
-                                     doc.addImage(item.image, 'JPEG', 30, yPos, imgWidth, imgHeight);
-                        yPos += imgHeight + 10;
-                    } catch (e) {
-                        console.error('Error adding image to PDF:', e);
-                    }
-                }
-
-                yPos += 10;
-            });
-
-            doc.save(`QC_Report_${selectedLocation}_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-
-        function updateProgress() {
-            const scoredItems = items.filter(item => item.score > 0).length;
-            const totalItems = items.length;
-            const percentage = (scoredItems / totalItems) * 100;
-            
-            document.getElementById('progress-fill').style.width = percentage + '%';
-            document.getElementById('progress-text').textContent = 
-                `${scoredItems} of ${totalItems} items scored (${percentage.toFixed(1)}%)`;
-            
-            const progressFill = document.getElementById('progress-fill');
-            if (percentage < 33) {
-                progressFill.style.backgroundColor = '#dc3545';
-            } else if (percentage < 66) {
-                progressFill.style.backgroundColor = '#ffc107';
-            } else {
-                progressFill.style.backgroundColor = '#28a745';
-            }
-        }
-
-        function updateTotalScore() {
-            const totalScore = calculateTotalScore();
-            document.getElementById('total-score').innerHTML = 
-                `Total Score: ${totalScore.toFixed(1)}% of Perfect Operation`;
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('qcChecklist', JSON.stringify(items));
-        }
-
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('qcChecklist');
-            if (saved) {
-                const savedItems = JSON.parse(saved);
-                items.forEach((item, index) => {
-                    if (savedItems[index]) {
-                        Object.assign(item, savedItems[index]);
-                    }
-                });
-            }
-        }
-
-        function startNewQC() {
-            if (confirm('Are you sure you want to start a new QC? This will clear all current data.')) {
-                selectedLocation = '';
-                items.forEach(item => {
-                    item.score = 0;
-                    item.notes = '';
-                    item.image = null;
-                });
-                localStorage.removeItem('qcChecklist');
-                localStorage.removeItem('selectedLocation');
-                document.querySelectorAll('.location-button').forEach(button => {
-                    button.classList.remove('selected');
-                });
-                document.getElementById('checklist-section').style.display = 'none';
-                renderChecklist();
-                updateProgress();
-            }
-        }
-
-        function renderChecklist() {
-            const container = document.getElementById('checklist');
-            container.innerHTML = '';
-            items.forEach(item => {
-                container.appendChild(createChecklistItem(item));
-            });
-            updateTotalScore();
-        }
-
-        // Initialize the application
-        window.onload = function() {
-            const savedLocation = localStorage.getItem('selectedLocation');
-            if (savedLocation) {
-                selectLocation(savedLocation);
-            }
-            loadChecklist();
+    <script type="text/babel">
+        const checklistData = {
+            items: [
+                {"id": 1, "name": "Roller Up", "weight": 0.6},
+                {"id": 2, "name": "PRE SOAK #1 Wash Service", "weight": 0.8},
+                // Add all items here
+            ]
         };
+
+        function QualityChecklist() {
+            const [items, setItems] = React.useState(
+                checklistData.items.map(item => ({
+                    ...item,
+                    score: 0,
+                    notes: '',
+                    image: null,
+                    imagePreview: null,
+                    isCompleted: false
+                }))
+            );
+
+            const handleImageUpload = (id, e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setItems(prevItems => 
+                            prevItems.map(item => 
+                                item.id === id 
+                                    ? {...item, image: file, imagePreview: reader.result}
+                                    : item
+                            )
+                        );
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleRating = (id, rating) => {
+                setItems(prevItems =>
+                    prevItems.map(item =>
+                        item.id === id
+                            ? {...item, score: rating, isCompleted: true}
+                            : item
+                    )
+                );
+            };
+
+            const handleNotes = (id, notes) => {
+                setItems(prevItems =>
+                    prevItems.map(item =>
+                        item.id === id
+                            ? {...item, notes}
+                            : item
+                    )
+                );
+            };
+
+            const calculateWeightedScore = () => {
+                const completedItems = items.filter(item => item.isCompleted);
+                if (completedItems.length === 0) return 0;
+
+                const totalWeightedScore = completedItems.reduce((sum, item) => {
+                    return sum + (item.score * item.weight);
+                }, 0);
+
+                const totalPossibleScore = completedItems.reduce((sum, item) => {
+                    return sum + (5 * item.weight);
+                }, 0);
+
+                return ((totalWeightedScore / totalPossibleScore) * 100).toFixed(1);
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="card mb-6">
+                        <h1 className="text-2xl font-bold mb-4">Riverside Car Wash Quality Control Checklist</h1>
+                        
+                        {items.map((item) => (
+                            <div key={item.id} className="card">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h3 className="font-bold mb-2">{item.name}</h3>
+                                        <p className="text-sm text-gray-500 mb-2">Weight: {item.weight}</p>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block mb-2">Rating (1-5)</label>
+                                            <div className="flex">
+                                                {[1, 2, 3, 4, 5].map((num) => (
+                                                    <button
+                                                        key={num}
+                                                        onClick={() => handleRating(item.id, num)}
+                                                        className={`rating-button ${
+                                                            item.score === num
+                                                                ? 'rating-selected'
+                                                                : 'rating-unselected'
+                                                        }`}
+                                                    >
+                                                        {num}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-4">
+                                            <label className="block mb-2">Notes</label>
+                                            <textarea
+                                                value={item.notes}
+                                                onChange={(e) => handleNotes(item.id, e.target.value)}
+                                                className="w-full p-2 border rounded"
+                                                rows="2"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="mb-4">
+                                            <label className="button button-primary inline-block cursor-pointer">
+                                                <span>Upload Photo</span>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={(e) => handleImageUpload(item.id, e)}
+                                                />
+                                            </label>
+                                            {item.imagePreview && (
+                                                <img
+                                                    src={item.imagePreview}
+                                                    alt={item.name}
+                                                    className="mt-4 max-w-full h-48 object-cover rounded"
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {items.some(item => item.isCompleted) && (
+                        <div className="card">
+                            <div className="bg-blue-50 p-4 rounded mb-4">
+                                <h2 className="font-bold mb-2">Weighted Score</h2>
+                                <p>
+                                    {calculateWeightedScore()}%
+                                    <br />
+                                    {items.filter(item => item.isCompleted).length} of {items.length} items completed
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => alert('Generating PDF with score: ' + calculateWeightedScore() + '%')}
+                                className="button button-primary"
+                            >
+                                Export to PDF
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<QualityChecklist />, document.getElementById('root'));
     </script>
 </body>
 </html>
