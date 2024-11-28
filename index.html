@@ -248,12 +248,39 @@
             }
         }
 
+        function calculateTotalScore() {
+            let totalScore = 0;
+            let maxPossibleScore = 0;
+
+            items.forEach(item => {
+                // Current score: weight * actual score
+                const itemScore = item.score * item.weight;
+                totalScore += itemScore;
+                
+                // Maximum possible score: weight * 5 (since 5 is the max rating)
+                const maxItemScore = item.weight * 5;
+                maxPossibleScore += maxItemScore;
+            });
+            
+            // Calculate percentage
+            const percentage = (totalScore / maxPossibleScore * 100).toFixed(1);
+            
+            // Update the total score display
+            const totalScoreElement = document.getElementById('total-score');
+            totalScoreElement.textContent = `Total Quality Score: ${totalScore.toFixed(1)} of ${maxPossibleScore.toFixed(1)} (${percentage}%)`;
+            
+            return {
+                score: totalScore.toFixed(1),
+                maxScore: maxPossibleScore.toFixed(1),
+                percentage: percentage
+            };
+        }
+
         function checkCompletionAndRender() {
             renderChecklist();
             updateProgress();
+            calculateTotalScore();
         }
-
-
 
         function generatePDF() {
             const { jsPDF } = window.jspdf;
@@ -263,6 +290,10 @@
             doc.text('Quality Control Report', 20, 20);
             doc.setFontSize(12);
             let yPos = 40;
+
+            // Add total score at the top of the PDF
+            const scores = calculateTotalScore();
+            doc.text(`Total Quality Score: ${scores.score} of ${scores.maxScore} (${scores.percentage}%)`, 20, 30);
 
             items.forEach(item => {
                 if (yPos > 270) {
