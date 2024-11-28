@@ -107,6 +107,7 @@
             const data = await response.json();
 
             let completionStatus = []; // Tracks completion of each item
+            const perfectScore = data.items.reduce((sum, item) => sum + item.weight * 5, 0); // Max score (rating of 5 for all items)
 
             // Build form dynamically
             data.items.forEach((item, index) => {
@@ -208,31 +209,34 @@
                     });
                 }
 
-                generatePDF(pdfData, totalScore);
+                generatePDF(pdfData, totalScore, perfectScore);
             });
 
-            const generatePDF = async (pdfData, totalScore) => {
+            const generatePDF = async (pdfData, totalScore, perfectScore) => {
                 const pdfDoc = await PDFLib.PDFDocument.create();
-                pdfData.forEach(async (item, index) => {
+                const percentageScore = ((totalScore / perfectScore) * 100).toFixed(2);
+
+                const firstPage = pdfDoc.addPage([600, 900]);
+                firstPage.drawText(`RIVERSIDE Quality Control Report`, { x: 50, y: 850, size: 18 });
+                firstPage.drawText(`Total Score: ${totalScore.toFixed(2)} / ${perfectScore.toFixed(2)}`, { x: 50, y: 820 });
+                firstPage.drawText(`Site Score: ${percentageScore}%`, { x: 50, y: 800 });
+
+                for (const [index, item] of pdfData.entries()) {
                     const page = pdfDoc.addPage([600, 900]);
                     page.drawText(`Item: ${item.name}`, { x: 50, y: 850 });
-                    page.drawText(`Notes: ${item.notes}`, { x: 50, y: 800 });
-                    page.drawText(`Rating: ${item.rating}`, { x: 50, y: 750 });
-                    page.drawText(`Weighted Score: ${item.weightedScore}`, { x: 50, y: 700 });
-
-                    if (item.rating < 4) {
-                        page.drawText(`⚠️ Rating below acceptable threshold`, { x: 50, y: 650, color: [1, 0, 0] });
-                    }
+                    page.drawText(`Notes: ${item.notes}`, { x: 50, y: 820 });
+                    page.drawText(`Rating: ${item.rating}`, { x: 50, y: 800 });
+                    page.drawText(`Weighted Score: ${item.weightedScore.toFixed(2)}`, { x: 50, y: 780 });
 
                     const imageBytes = await item.image.arrayBuffer();
                     const imageEmbed = await pdfDoc.embedPng(imageBytes);
                     page.drawImage(imageEmbed, {
                         x: 50,
-                        y: 400,
+                        y: 600,
                         width: 200,
                         height: 200,
                     });
-                });
+                }
 
                 const pdfBytes = await pdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
