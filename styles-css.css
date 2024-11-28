@@ -30,7 +30,7 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
-/* Location Selector Styles */
+/* Location Selector */
 .location-selector {
     margin: 32px 0;
     text-align: center;
@@ -60,7 +60,7 @@ body {
     color: white;
 }
 
-/* Checklist Item Styles */
+/* Checklist Items */
 .checklist-item {
     background: var(--card-bg);
     padding: 24px;
@@ -111,7 +111,6 @@ textarea {
     min-height: 80px;
     resize: vertical;
     line-height: 1.6;
-    font-family: inherit;
 }
 
 select:focus, textarea:focus {
@@ -120,7 +119,7 @@ select:focus, textarea:focus {
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* Button Styles */
+/* Buttons */
 .button {
     background: var(--primary);
     color: white;
@@ -166,12 +165,34 @@ select:focus, textarea:focus {
 }
 
 /* Image Preview */
+.preview-container {
+    margin-top: 16px;
+}
+
+.image-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 8px;
+}
+
 .photo-preview {
     max-width: 300px;
     max-height: 300px;
-    margin-top: 16px;
     border-radius: 8px;
     box-shadow: var(--shadow);
+}
+
+.delete-image {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--danger);
+    padding: 8px 16px;
+    font-size: 12px;
+}
+
+.delete-image:hover {
+    background: #dc2626;
 }
 
 /* Requirements List */
@@ -231,5 +252,26 @@ select:focus, textarea:focus {
     to { 
         opacity: 1; 
         transform: translateY(0); 
+    }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    body {
+        padding: 16px;
+    }
+
+    .location-selector {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .checklist-item {
+        padding: 16px;
+    }
+
+    .photo-preview {
+        max-width: 100%;
+        height: auto;
     }
 }
