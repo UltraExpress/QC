@@ -260,22 +260,69 @@
         }
     }
 
-    function checkCompletionAndRender() {
-        saveToLocalStorage();
+
+
+
+
+        function checkCompletionAndRender() {
+    saveToLocalStorage();
+    setTimeout(() => {
         renderChecklist();
-    }
+    }, 0); // Small delay for DOM update
+}
 
-    function saveToLocalStorage() {
-        localStorage.setItem('qcChecklist', JSON.stringify(items));
-    }
+function handleImageUpload(id, input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.image = e.target.result;
 
-    function loadFromLocalStorage() {
-        const savedData = localStorage.getItem('qcChecklist');
-        if (savedData) {
-            items = JSON.parse(savedData);
-            renderChecklist();
-            updateProgress();
-        }
+                // Update preview dynamically
+                const preview = document.getElementById(`preview-${id}`);
+                if (preview) {
+                    preview.innerHTML = `<img src="${item.image}" class="photo-preview">`;
+                }
+
+                checkCompletionAndRender();
+
+                // Reset file input for iOS compatibility
+                input.value = '';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function renderChecklist() {
+    const container = document.getElementById('checklist');
+    container.innerHTML = '';
+    items.forEach((item, index) => {
+        container.appendChild(createChecklistItem(item, index));
+    });
+
+    // Force DOM refresh for iOS
+    container.style.display = 'none';
+    container.offsetHeight; // Trigger reflow
+    container.style.display = 'block';
+
+    updateProgress();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+        
     }
 
     function generatePDF() {
