@@ -81,18 +81,12 @@
         .button.new-qc:hover {
             background: #218838;
         }
-        .email-form {
+        .actions {
             background: white;
             padding: 15px;
             margin: 20px 0;
             border-radius: 8px;
-        }
-        .email-form input {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            text-align: center;
         }
         @media (max-width: 600px) {
             body {
@@ -115,11 +109,8 @@
     <div id="checklist"></div>
     <div id="total-score" class="total-score"></div>
     
-    <div class="email-form">
-        <h3>Send Report</h3>
-        <input type="email" id="email-to" placeholder="To: (email addresses, comma separated)" />
-        <input type="text" id="email-subject" placeholder="Subject" value="Quality Control Report" />
-        <button class="button" onclick="generateAndSendReport()">Generate & Send Report</button>
+    <div class="actions">
+        <button class="button" onclick="generatePDF()">Generate PDF Report</button>
     </div>
 
     <script>
@@ -138,8 +129,6 @@
                 });
                 localStorage.removeItem('qcChecklist');
                 renderChecklist();
-                document.getElementById('email-to').value = '';
-                document.getElementById('email-subject').value = 'Quality Control Report';
             }
         }
 
@@ -212,15 +201,7 @@
             }
         }
 
-        function generateAndSendReport() {
-            const emailTo = document.getElementById('email-to').value;
-            const emailSubject = document.getElementById('email-subject').value;
-            
-            if (!emailTo) {
-                alert('Please enter recipient email address(es)');
-                return;
-            }
-
+        function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
@@ -277,24 +258,8 @@
                 yPos += 10;
             });
 
-            // Generate PDF blob and create email
-            const pdfBlob = doc.output('blob');
-            const formData = new FormData();
-            formData.append('report.pdf', pdfBlob);
-
-            // Create mailto link with subject
-            const emailBody = `Please find attached the Quality Control Report.\n\nTotal Score: ${totalScore}/${maxScore}`;
-            const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-            
-            // Open email client
-            window.location.href = mailtoLink;
-
-            // Also offer PDF download
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-            const downloadLink = document.createElement('a');
-            downloadLink.href = pdfUrl;
-            downloadLink.download = 'QC_Report.pdf';
-            downloadLink.click();
+            // Save the PDF
+            doc.save('QC_Report.pdf');
         }
 
         function updateTotalScore() {
