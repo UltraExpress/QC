@@ -24,7 +24,6 @@ function loadFromLocalStorage() {
     if (savedLocation) {
         selectLocation(savedLocation);
     }
-    updateProgress();
 }
 
 // Item Management Functions
