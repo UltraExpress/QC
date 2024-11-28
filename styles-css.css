@@ -26,7 +26,6 @@ function loadFromLocalStorage() {
     }
 }
 
-// Item Management Functions
 function checkItemCompletion(item) {
     const hasScore = item.score > 0;
     const hasNotes = item.notes && item.notes.trim().length >= 10;
@@ -49,56 +48,44 @@ function createRequirementsList(item) {
     `;
 }
 
-// Image handling functions - UPDATED
-function handleImageUpload(id) {
-    return function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
+function handleImageUpload(id, input) {
+    const file = input.files[0];
+    if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.image = e.target.result;
-                saveToLocalStorage();
-                renderChecklist();
-                updateProgress();
-            }
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Maintain aspect ratio while correcting orientation
+                if (4 < height/width) {
+                    canvas.width = height;
+                    canvas.height = width;
+                } else {
+                    canvas.width = width;
+                    canvas.height = height;
+                }
+
+                const ctx = canvas.getContext('2d');
+                ctx.translate(canvas.width/2, canvas.height/2);
+                ctx.rotate(0);
+                ctx.drawImage(img, -width/2, -height/2, width, height);
+
+                const correctedImage = canvas.toDataURL('image/jpeg', 0.7);
+                
+                const item = items.find(i => i.id === id);
+                if (item) {
+                    item.image = correctedImage;
+                    saveToLocalStorage();
+                    renderChecklist();
+                    updateProgress();
+                }
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
-        // Remove this specific input after use
-        event.target.remove();
-    };
-}
-
-function triggerImageUpload(id) {
-    // Create new input element
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    // Don't set capture on iOS
-    if (!/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-        input.capture = 'environment';
-    }
-    input.style.display = 'none';
-    document.body.appendChild(input);
-    
-    // Set up the change handler
-    input.onchange = handleImageUpload(id);
-    
-    // Trigger click with slight delay
-    setTimeout(() => {
-        input.click();
-    }, 50);
-}
-
-function deleteImage(id) {
-    const item = items.find(i => i.id === id);
-    if (item) {
-        item.image = null;
-        saveToLocalStorage();
-        renderChecklist();
-        updateProgress();
     }
 }
 
@@ -122,8 +109,13 @@ function createChecklistItem(item) {
                 oninput="handleNotesInput(${item.id}, this.value)"
                 onblur="handleNotesBlur(${item.id}, this.value)"
             >${item.notes || ''}</textarea>
-            <button class="button" onclick="triggerImageUpload(${item.id})">
-                Upload Photo
+            <input type="file" 
+                   id="image-${item.id}" 
+                   accept="image/*" 
+                   style="display: none"
+                   onchange="handleImageUpload(${item.id}, this)">
+            <button class="button" onclick="document.getElementById('image-${item.id}').click()">
+                📷 Upload Photo
             </button>
             <div id="preview-${item.id}">
                 ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
@@ -151,7 +143,6 @@ function handleNotesBlur(id, value) {
     }
 }
 
-// UI updates
 function updateScore(id, score) {
     const item = items.find(i => i.id === id);
     if (item) {
@@ -205,13 +196,11 @@ function calculateTotalScore() {
     return percentage;
 }
 
-// Rendering
 function renderChecklist() {
     const container = document.getElementById('checklist');
     container.innerHTML = items.map(item => createChecklistItem(item)).join('');
 }
 
-// Initialization
 function startNewQC() {
     if (confirm('Start new QC? This will clear all current data.')) {
         localStorage.clear();
