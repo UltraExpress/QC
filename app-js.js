@@ -85,8 +85,8 @@ function handleImageUpload(id, input) {
                     if (preview) {
                         preview.innerHTML = `<img src="${correctedImage}" class="photo-preview">`;
                         saveToLocalStorage();
-                        updateProgress();  // Added to update completion status
-                        checkItemCompletion(item);  // Update item completion status
+                        updateProgress();
+                        checkItemCompletion(item);
                     }
                 }
             };
@@ -207,7 +207,9 @@ function calculateTotalScore() {
 // Rendering
 function renderChecklist() {
     const container = document.getElementById('checklist');
-    container.innerHTML = items.map(item => createChecklistItem(item)).join('');
+    if (container) {
+        container.innerHTML = items.map(item => createChecklistItem(item)).join('');
+    }
 }
 
 // Initialization
@@ -224,7 +226,7 @@ function startNewQC() {
 
 async function loadChecklist() {
     try {
-        const response = await fetch('checklist-items.json');
+        const response = await fetch('https://ultraexpress.github.io/QC/checklist-items.json');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         items = data.items.map(item => ({
