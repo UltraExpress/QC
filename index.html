@@ -3,100 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra Express QC Checklist</title>
+    <title>Car Wash QC - Riverside</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
         }
-
-        .container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 90%;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 2rem;
-        }
-
-        .location-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .location-button {
-            padding: 1.5rem 3rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            color: white;
-        }
-
-        .riverside {
-            background: #007bff;
-        }
-
-        .speedie {
-            background: #28a745;
-        }
-
-        .location-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .location-button:active {
-            transform: translateY(0);
-        }
-
-        .logo {
-            max-width: 200px;
-            margin-bottom: 2rem;
-        }
-
-        @media (max-width: 480px) {
-            .location-buttons {
-                flex-direction: column;
-            }
-
-            .location-button {
-                width: 100%;
-            }
-        }
+        .print-only { display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <img src="logo.png" alt="Ultra Express Logo" class="logo">
-        <h1>Ultra Express QC Checklist</h1>
-        <p>Select your location to begin the inspection:</p>
-        <div class="location-buttons">
-            <a href="RIVERSIDE.html" class="location-button riverside">
-                RIVERSIDE
-            </a>
-            <a href="SPEEDIE.html" class="location-button speedie">
-                SPEEDIE
-            </a>
-        </div>
-    </div>
+    <div id="root"></div>
+    <script type="text/babel">
+        const App = () => {
+            const [items, setItems] = React.useState([]);
+            const [currentIndex, setCurrentIndex] = React.useState(0);
+            const [formData, setFormData] = React.useState({});
+            const [loading, setLoading] = React.useState(true);
+            const [showReport, setShowReport] = React.useState(false);
+
+            React.useEffect(() => {
+                fetch('https://ultraexpress.github.io/QC/riverside-checklist.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        setItems(data);
+                        const initialFormData = {};
+                        data.forEach(item => {
+                            initialFormData[item.id] = {
+                                score: '',
+                                notes: '',
+                                image: null,
+                            };
+                        });
+                        setFormData(initialFormData);
+                        setLoading(false);
+                    });
+            }, []);
+
+            const handleScoreChange = (itemId, value) => {
+                setFormData(prev => ({
+                    ...prev,
+                    [itemId]: {
+                        ...prev[itemId],
+                        score: Math.max(1, Math.min(5, parseInt(value) || 0))
+                    }
+                }));
+            };
+
+            const handleNotesChange = (itemId, value) => {
+                setFormData(prev => ({
+                    ...prev,
+                    [itemId]: {
+                        ...prev[itemId],
+                        notes: value
+                    }
+                }));
+            };
+
+            const handleImageUpload = (itemId, event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setFormData(prev => ({
+                            ...prev,
+                            [itemId]: {
+                                ...prev[itemId],
+                                image: reader.result
+                            }
+                        }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const isItemComplete = (itemId) => {
+                const item = formData[itemId];
+                return item.score && item.notes && item.image;
+            };
+
+            const calculateTotalScore = () => {
+                let total = 0;
+                let totalWeight = 0;
+                
+                items.forEach(item => {
+                    const data = formData[item.id];
+                    if (data.score) {
+                        total += data.score * item.weight;
+                        totalWeight += item.weight;
+                    }
+                });
+
+                return (total / totalWeight).toFixed(2);
+            };
+
+            const handlePrint = () => {
+                setShowReport(true);
+                setTimeout(() => {
+                    window.print();
+                }, 100);
+            };
+
+            if (loading) {
+                return (
+                    <div className="flex items-center justify-center h-screen">
+                        Loading...
+                    </div>
+                );
+            }
+
+            if (showReport) {
+                return (
+                    <div className="container mx-auto p-4 max-w-4xl">
+                        <div>
+                            <div className="space-y-6">
+                                <h1 className="text-2xl font-bold">Car Wash QC Report - Riverside</h1>
+                                <div className="text-xl">Total Score: {calculateTotalScore()}</div>
+                                
+                                <div className="space-y-8">
+                                    {items.map((item, index) => {
+                                        const data = formData[item.id];
+                                        const score = data.score;
+                                        
+                                        return (
+                                            <div key={item.id} className="border-b pb-6">
+                                                <h2 className={`text-lg font-semibold ${score < 4 ? 'text-red-600' : ''}`}>
+                                                    {index + 1}. {item.name}
+                                                </h2>
+                                                <div className="mt-2">
+                                                    <p><strong>Score:</strong> {score}</p>
+                                                    <p><strong>Notes:</strong> {data.notes}</p>
+                                                    {data.image && (
+                                                        <img
+                                                            src={data.image}
+                                                            alt={`QC image for ${item.name}`}
+                                                            className="mt-2 max-w-full h-40 object-contain"
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => setShowReport(false)}
+                            className="mt-6 px-4 py-2 bg-blue-500 text-white rounded no-print"
+                        >
+                            Back to Form
+                        </button>
+                    </div>
+                );
+            }
+
+            const currentItem = items[currentIndex];
+
+            return (
+                <div className="container mx-auto p-4 max-w-2xl">
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                        <div className="mb-6">
+                            <h1 className="text-2xl font-bold">Riverside Car Wash QC Form</h1>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="text-lg font-medium">
+                                Item {currentIndex + 1} of {items.length}
+                            </div>
+                            
+                            <div className="font-medium">{currentItem.name}</div>
+                            
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium">Score (1-5)</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="5"
+                                    value={formData[currentItem.id].score || ''}
+                                    onChange={(e) => handleScoreChange(currentItem.id, e.target.value)}
+                                    className="w-full p-2 border rounded"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium">Notes</label>
+                                <textarea
+                                    value={formData[currentItem.id].notes || ''}
+                                    onChange={(e) => handleNotesChange(currentItem.id, e.target.value)}
+                                    className="w-full p-2 border rounded h-32"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium">Image</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleImageUpload(currentItem.id, e)}
+                                    className="w-full p-2 border rounded"
+                                />
+                                {formData[currentItem.id].image && (
+                                    <img
+                                        src={formData[currentItem.id].image}
+                                        alt="Preview"
+                                        className="mt-2 max-w-full h-40 object-contain"
+                                    />
+                                )}
+                            </div>
+
+                            <div className="flex justify-between mt-6">
+                                <button
+                                    onClick={() => setCurrentIndex(prev => prev - 1)}
+                                    disabled={currentIndex === 0}
+                                    className="px-4 py-2 bg-gray-500 text-white rounded disabled:opacity-50"
+                                >
+                                    Previous
+                                </button>
+
+                                {currentIndex === items.length - 1 ? (
+                                    <button
+                                        onClick={handlePrint}
+                                        disabled={!isItemComplete(currentItem.id)}
+                                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                                    >
+                                        Generate Report
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setCurrentIndex(prev => prev + 1)}
+                                        disabled={!isItemComplete(currentItem.id)}
+                                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                                    >
+                                        Next
+                                    </button>
+                                )}
+                            </div>
+
+                            {currentIndex === items.length - 1 && (
+                                <div className="mt-4 text-center">
+                                    <div className="text-xl font-bold">
+                                        Total Score: {calculateTotalScore()}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
 </body>
 </html>
