@@ -1,0 +1,14 @@
+{
+  "items": [
+    { "id": 1, "name": "Roller Up", "weight": 0.6 },
+    { "id": 2, "name": "PRE SOAK #1 Wash Service", "weight": 0.8 },
+    { "id": 3, "name": "GRAND ENTRY FX Wash Service", "weight": 0.8 },
+    { "id": 4, "name": "PRE SOAK #2 Wash Service", "weight": 0.5 },
+    { "id": 5, "name": "CTA Wash Service", "weight": 0.5 },
+    { "id": 6, "name": "RS1000 #1 Wash Service", "weight": 0.9 },
+    { "id": 7, "name": "WheelBOSS MOTOR Wash Service", "weight": 0.9 },
+    { "id": 8, "name": "WheelBOSS RETRACT Wash Service", "weight": 0.6 },
+    { "id": 9, "name": "MID FOAM #1 Wash Service", "weight": 0.9 },
+    { "id": 10, "name": "TRI COLOR + LED Wash Service", "weight": 0.9 }
+  ]
+}
