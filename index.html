@@ -6,11 +6,18 @@
     <title>Car Wash Quality Control Checklist</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* Previous styles remain the same */
-        .validation-message {
-            color: #dc3545;
-            font-size: 0.9em;
-            margin-top: 5px;
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
         .checklist-item {
             background: white;
@@ -18,13 +25,84 @@
             margin: 10px 0;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: relative;
         }
         .checklist-item.incomplete {
             border: 2px solid #dc3545;
         }
         .checklist-item.complete {
             border: 2px solid #28a745;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        .item-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        select, textarea {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            margin-top: 10px;
+            resize: vertical;
+        }
+        .photo-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .total-score {
+            background: white;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button.new-qc {
+            background: #28a745;
+        }
+        .button.new-qc:hover {
+            background: #218838;
+        }
+        .location-selector {
+            text-align: right;
+            margin: 20px 0;
+        }
+        .location-button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            background: white;
+            color: #007bff;
+            cursor: pointer;
+        }
+        .location-button.selected {
+            background: #007bff;
+            color: white;
         }
         .requirement-list {
             list-style: none;
@@ -44,51 +122,99 @@
         .requirement-list li.complete::before {
             content: "✅";
         }
-        .disabled-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.1);
-            display: none;
-            z-index: 1;
+        .progress-section {
+            background: white;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        /* Rest of the previous styles */
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #28a745;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            text-align: center;
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
-    <!-- Previous HTML structure remains the same until the script tag -->
-    
+    <div class="header-controls">
+        <h1>Car Wash Quality Control Checklist</h1>
+        <button class="button new-qc" onclick="startNewQC()">New QC</button>
+    </div>
+
+    <div class="location-selector">
+        <span>Select Location:</span>
+        <button class="location-button" onclick="selectLocation('RIVERSIDE')">RIVERSIDE</button>
+        <button class="location-button" onclick="selectLocation('SANTA ANA')">SANTA ANA</button>
+    </div>
+
+    <div id="checklist-section">
+        <div class="progress-section">
+            <div class="progress-text">Inspection Progress</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0 of 0 items completed</div>
+        </div>
+
+        <div id="checklist"></div>
+        <div id="total-score" class="total-score"></div>
+        <button class="button" onclick="generatePDF()">Generate PDF Report</button>
+    </div>
+
     <script>
+        // Sample checklist items for testing (replace with your actual items)
+        const defaultItems = [
+            { id: 1, name: "Vacuum Quality", weight: 2 },
+            { id: 2, name: "Windows Cleaning", weight: 1.5 },
+            { id: 3, name: "Tire Shine", weight: 1 }
+        ];
+
         let selectedLocation = '';
         let items = [];
-        
-        // Add validation state to items
-        function initializeItem(item) {
-            return {
+
+        function initializeItems(sourceItems) {
+            return sourceItems.map(item => ({
                 ...item,
                 score: 0,
                 notes: '',
                 image: null,
                 isComplete: false
-            };
+            }));
         }
 
         function checkItemCompletion(item) {
             const hasScore = item.score > 0;
-            const hasNotes = item.notes.trim().length >= 10; // Minimum 10 characters for notes
+            const hasNotes = item.notes.trim().length >= 10;
             const hasImage = item.image !== null;
-            
             item.isComplete = hasScore && hasNotes && hasImage;
             return item.isComplete;
+        }
+
+        function calculateItemPercentage(item) {
+            const maxPossible = item.weight * 5;
+            const actual = item.weight * item.score;
+            return (actual / maxPossible) * 100;
         }
 
         function createRequirementsList(item) {
             const hasScore = item.score > 0;
             const hasNotes = item.notes.trim().length >= 10;
             const hasImage = item.image !== null;
-
+            
             return `
                 <ul class="requirement-list">
                     <li class="${hasScore ? 'complete' : ''}">Select a score</li>
@@ -142,12 +268,23 @@
             return div;
         }
 
+        function selectLocation(location) {
+            selectedLocation = location;
+            document.querySelectorAll('.location-button').forEach(button => {
+                button.classList.remove('selected');
+                if (button.textContent === location) {
+                    button.classList.add('selected');
+                }
+            });
+            document.getElementById('checklist-section').style.display = 'block';
+            renderChecklist();
+        }
+
         function updateScore(id, score) {
             const item = items.find(i => i.id === id);
             if (item) {
                 item.score = parseInt(score);
                 checkItemCompletion(item);
-                updateTotalScore();
                 updateProgress();
                 saveToLocalStorage();
                 renderChecklist();
@@ -168,59 +305,17 @@
             const file = input.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = async function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        if (4 < height/width) {
-                            canvas.width = height;
-                            canvas.height = width;
-                        } else {
-                            canvas.width = width;
-                            canvas.height = height;
-                        }
-
-                        const ctx = canvas.getContext('2d');
-                        ctx.translate(canvas.width/2, canvas.height/2);
-                        ctx.rotate(0);
-                        ctx.drawImage(img, -width/2, -height/2, width, height);
-
-                        const correctedImage = canvas.toDataURL('image/jpeg', 0.7);
-                        
-                        const item = items.find(i => i.id === id);
-                        if (item) {
-                            item.image = correctedImage;
-                            checkItemCompletion(item);
-                            const preview = document.getElementById(`preview-${id}`);
-                            preview.innerHTML = `<img src="${correctedImage}" class="photo-preview">`;
-                            saveToLocalStorage();
-                            renderChecklist();
-                        }
-                    };
-                    img.src = e.target.result;
+                reader.onload = function(e) {
+                    const item = items.find(i => i.id === id);
+                    if (item) {
+                        item.image = e.target.result;
+                        checkItemCompletion(item);
+                        saveToLocalStorage();
+                        renderChecklist();
+                    }
                 };
                 reader.readAsDataURL(file);
             }
-        }
-
-        function generatePDF() {
-            if (!selectedLocation) {
-                alert('Please select a location first');
-                return;
-            }
-
-            // Check if all items are complete
-            const incompleteItems = items.filter(item => !item.isComplete);
-            if (incompleteItems.length > 0) {
-                alert('Please complete all items before generating the PDF report.');
-                return;
-            }
-
-            // Rest of the PDF generation code remains the same
-            // ... (previous PDF generation code)
         }
 
         function updateProgress() {
@@ -231,45 +326,90 @@
             document.getElementById('progress-fill').style.width = percentage + '%';
             document.getElementById('progress-text').textContent = 
                 `${completedItems} of ${totalItems} items completed (${percentage.toFixed(1)}%)`;
+        }
+
+        function calculateTotalScore() {
+            if (items.length === 0) return 0;
+            const totalPercentage = items.reduce((sum, item) => sum + calculateItemPercentage(item), 0);
+            return totalPercentage / items.length;
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('checklist');
+            container.innerHTML = '';
+            items.forEach(item => {
+                container.appendChild(createChecklistItem(item));
+            });
             
-            const progressFill = document.getElementById('progress-fill');
-            if (percentage < 33) {
-                progressFill.style.backgroundColor = '#dc3545';
-            } else if (percentage < 66) {
-                progressFill.style.backgroundColor = '#ffc107';
+            const totalScore = calculateTotalScore();
+            document.getElementById('total-score').innerHTML = 
+                `Total Score: ${totalScore.toFixed(1)}% of Perfect Operation`;
+            updateProgress();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('qcChecklist', JSON.stringify(items));
+            localStorage.setItem('selectedLocation', selectedLocation);
+        }
+
+        function loadFromLocalStorage() {
+            const savedItems = localStorage.getItem('qcChecklist');
+            const savedLocation = localStorage.getItem('selectedLocation');
+            
+            if (savedItems) {
+                items = JSON.parse(savedItems);
+                items.forEach(item => checkItemCompletion(item));
             } else {
-                progressFill.style.backgroundColor = '#28a745';
+                items = initializeItems(defaultItems);
+            }
+            
+            if (savedLocation) {
+                selectLocation(savedLocation);
             }
         }
 
-        // Rest of the functions remain the same, just update the loadChecklist function to initialize items properly
-        async function loadChecklist() {
-            try {
-                const response = await fetch('https://ultraexpress.github.io/QC/checklist-items.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                items = data.items.map(initializeItem);
-                
-                loadFromLocalStorage();
+        function startNewQC() {
+            if (confirm('Are you sure you want to start a new QC? This will clear all current data.')) {
+                localStorage.removeItem('qcChecklist');
+                localStorage.removeItem('selectedLocation');
+                selectedLocation = '';
+                items = initializeItems(defaultItems);
+                document.querySelectorAll('.location-button').forEach(button => {
+                    button.classList.remove('selected');
+                });
+                document.getElementById('checklist-section').style.display = 'none';
                 renderChecklist();
-                updateProgress();
-                document.getElementById('loading-overlay').style.display = 'none';
-            } catch (error) {
-                console.error('Error loading checklist:', error);
-                alert('Error loading checklist items. Please check your internet connection and try again.');
-                document.getElementById('loading-overlay').style.display = 'none';
             }
+        }
+
+        function generatePDF() {
+            if (!selectedLocation) {
+                alert('Please select a location first');
+                return;
+            }
+
+            const incompleteItems = items.filter(item => !item.isComplete);
+            if (incompleteItems.length > 0) {
+                alert('Please complete all items before generating the PDF report.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Basic PDF generation for testing
+            doc.text('Quality Control Report', 20, 20);
+            doc.text(`Location: ${selectedLocation}`, 20, 30);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 40);
+            doc.text(`Total Score: ${calculateTotalScore().toFixed(1)}%`, 20, 50);
+            
+            doc.save(`QC_Report_${selectedLocation}_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
         // Initialize the application
         window.onload = function() {
-            const savedLocation = localStorage.getItem('selectedLocation');
-            if (savedLocation) {
-                selectLocation(savedLocation);
-            }
-            loadChecklist();
+            document.getElementById('checklist-section').style.display = 'none';
+            loadFromLocalStorage();
         };
     </script>
 </body>
