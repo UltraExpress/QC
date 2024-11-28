@@ -80,9 +80,14 @@ function handleImageUpload(id, input) {
                 const item = items.find(i => i.id === id);
                 if (item) {
                     item.image = correctedImage;
-                    const preview = document.getElementById(`preview-${id}`);
-                    preview.innerHTML = `<img src="${correctedImage}" class="photo-preview">`;
-                    saveToLocalStorage();
+                    const previewId = 'preview-' + id;
+                    const preview = document.getElementById(previewId);
+                    if (preview) {
+                        preview.innerHTML = `<img src="${correctedImage}" class="photo-preview">`;
+                        saveToLocalStorage();
+                        updateProgress();  // Added to update completion status
+                        checkItemCompletion(item);  // Update item completion status
+                    }
                 }
             };
             img.src = e.target.result;
@@ -119,7 +124,7 @@ function createChecklistItem(item) {
             <button class="button" onclick="document.getElementById('image-${item.id}').click()">
                 Upload Photo
             </button>
-            <div id="preview-${id}">
+            <div id="preview-${item.id}">
                 ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
             </div>
             ${createRequirementsList(item)}
