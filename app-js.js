@@ -49,43 +49,65 @@ function createRequirementsList(item) {
     `;
 }
 
-function handleImageUpload(id, input) {
-    const file = input.files[0];
-    if (!file) {
-        return;
-    }
+// Image handling functions
+function handleImageUpload(id) {
+    return function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const item = items.find(i => i.id === id);
-        if (item) {
-            item.image = e.target.result;
-            saveToLocalStorage();
-            renderChecklist();
-            updateProgress();
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.image = e.target.result;
+                saveToLocalStorage();
+                renderChecklist();
+                updateProgress();
+                
+                // Remove the input after successful upload
+                event.target.remove();
+            }
+        };
+
+        reader.onerror = function() {
+            alert('Error reading file. Please try again.');
+        };
+
+        try {
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error processing image. Please try again.');
         }
     };
-    reader.readAsDataURL(file);
 }
 
-function createFileInput(id) {
-    // Remove any existing file input with this ID
-    const existingInput = document.getElementById(`file-input-${id}`);
-    if (existingInput) {
-        existingInput.remove();
-    }
-
-    // Create a new file input
+function triggerImageUpload(id) {
+    // Create a new input element each time
     const input = document.createElement('input');
     input.type = 'file';
-    input.id = `file-input-${id}`;
     input.accept = 'image/*';
     input.capture = 'environment';
     input.style.display = 'none';
-    input.onchange = (e) => handleImageUpload(id, e.target);
     
+    // Add the input to the DOM
     document.body.appendChild(input);
-    return input;
+    
+    // Set up the change handler
+    input.onchange = handleImageUpload(id);
+    
+    // Trigger the file selection
+    input.click();
+}
+
+function deleteImage(id) {
+    const item = items.find(i => i.id === id);
+    if (item) {
+        item.image = null;
+        saveToLocalStorage();
+        renderChecklist();
+        updateProgress();
+    }
 }
 
 function createChecklistItem(item) {
@@ -111,8 +133,13 @@ function createChecklistItem(item) {
             <button class="button" onclick="triggerImageUpload(${item.id})">
                 Upload Photo
             </button>
-            <div id="preview-${item.id}">
-                ${item.image ? `<img src="${item.image}" class="photo-preview">` : ''}
+            <div id="preview-${item.id}" class="preview-container">
+                ${item.image ? `
+                    <div class="image-preview">
+                        <img src="${item.image}" class="photo-preview">
+                        <button class="button delete-image" onclick="deleteImage(${item.id})">Remove Photo</button>
+                    </div>
+                ` : ''}
             </div>
             ${createRequirementsList(item)}
         </div>
@@ -135,11 +162,6 @@ function handleNotesBlur(id, value) {
         renderChecklist();
         updateProgress();
     }
-}
-
-function triggerImageUpload(id) {
-    const input = createFileInput(id);
-    input.click();
 }
 
 // UI updates
