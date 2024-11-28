@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quality Control Checklist</title>
     
-    <!-- Include React -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -48,6 +47,9 @@
         .rating-unselected {
             background: white;
         }
+        .incomplete {
+            border: 2px solid #ef4444;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
@@ -74,6 +76,18 @@
 
             const [inspectorName, setInspectorName] = React.useState('');
             const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
+            const [showValidation, setShowValidation] = React.useState(false);
+
+            const isItemComplete = (item) => {
+                return item.score > 0 && 
+                       item.notes.trim() !== '' && 
+                       item.image !== null;
+            };
+
+            const areAllItemsComplete = () => {
+                return items.every(isItemComplete) && 
+                       inspectorName.trim() !== '';
+            };
 
             const handleImageUpload = (id, e) => {
                 const file = e.target.files[0];
@@ -118,9 +132,64 @@
                 return ((totalWeightedScore / totalPossibleScore) * 100).toFixed(1);
             };
 
+            const generatePDF = async () => {
+                if (!areAllItemsComplete()) {
+                    setShowValidation(true);
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                let yPos = 20;
+
+                // Add header
+                doc.setFontSize(20);
+                doc.text('Quality Control Inspection Report', 105, yPos, { align: 'center' });
+                
+                // Add inspector and date
+                yPos += 20;
+                doc.setFontSize(12);
+                doc.text(`Inspector: ${inspectorName}`, 20, yPos);
+                doc.text(`Date: ${date}`, 120, yPos);
+
+                // Add total score
+                yPos += 20;
+                doc.setFontSize(16);
+                doc.text(`Total Site Score: ${calculateTotalScore()}%`, 20, yPos);
+                
+                // Add items
+                items.forEach((item, index) => {
+                    yPos += 25;
+                    if (yPos > 250) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    
+                    doc.setFontSize(12);
+                    doc.text(`${index + 1}. ${item.name}`, 20, yPos);
+                    doc.text(`Score: ${item.score}/5 (Weight: ${item.weight})`, 120, yPos);
+                    
+                    yPos += 10;
+                    doc.setFontSize(10);
+                    doc.text(`Notes: ${item.notes}`, 30, yPos);
+                    
+                    if (item.imagePreview) {
+                        try {
+                            yPos += 10;
+                            doc.addImage(item.imagePreview, 'JPEG', 20, yPos, 50, 50);
+                            yPos += 50;
+                        } catch (e) {
+                            console.error('Failed to add image to PDF', e);
+                        }
+                    }
+                });
+
+                doc.save('quality-control-report.pdf');
+            };
+
             return (
                 <div className="max-w-4xl mx-auto">
-                    <div className="card">
+                    <div className={`card ${showValidation && !inspectorName.trim() ? 'incomplete' : ''}`}>
                         <h1 className="text-2xl font-bold mb-4">Riverside Car Wash Quality Control Checklist</h1>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -130,7 +199,7 @@
                                     type="text"
                                     value={inspectorName}
                                     onChange={(e) => setInspectorName(e.target.value)}
-                                    className="w-full p-2 border rounded"
+                                    className={`w-full p-2 border rounded ${showValidation && !inspectorName.trim() ? 'border-red-500' : ''}`}
                                     placeholder="Enter inspector name"
                                 />
                             </div>
@@ -145,13 +214,30 @@
                             </div>
                         </div>
 
+                        {showValidation && !areAllItemsComplete() && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                <p>Please complete all required fields:</p>
+                                <ul className="list-disc ml-5">
+                                    {!inspectorName.trim() && <li>Inspector name is required</li>}
+                                    {items.map((item, index) => !isItemComplete(item) && (
+                                        <li key={item.id}>
+                                            Item {index + 1} ({item.name}) needs:
+                                            {!item.score && ' rating,'}
+                                            {!item.notes.trim() && ' notes,'}
+                                            {!item.image && ' photo'}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
                         {items.map((item) => (
-                            <div key={item.id} className="card">
+                            <div key={item.id} className={`card ${showValidation && !isItemComplete(item) ? 'incomplete' : ''}`}>
                                 <h3 className="font-bold mb-2">{item.name}</h3>
                                 <p className="text-sm text-gray-500 mb-2">Weight: {item.weight}</p>
                                 
                                 <div className="mb-4">
-                                    <label className="block mb-2">Rating (1-5)</label>
+                                    <label className="block mb-2">Rating (1-5) *</label>
                                     <div className="flex">
                                         {[1, 2, 3, 4, 5].map((num) => (
                                             <button
@@ -170,18 +256,20 @@
                                 </div>
 
                                 <div className="mb-4">
-                                    <label className="block mb-2">Notes</label>
+                                    <label className="block mb-2">Notes *</label>
                                     <textarea
                                         value={item.notes}
                                         onChange={(e) => handleNotes(item.id, e.target.value)}
-                                        className="w-full p-2 border rounded"
+                                        className={`w-full p-2 border rounded ${
+                                            showValidation && !item.notes.trim() ? 'border-red-500' : ''
+                                        }`}
                                         rows="2"
                                     />
                                 </div>
 
                                 <div>
                                     <label className="button button-primary inline-block cursor-pointer">
-                                        <span>Upload Photo</span>
+                                        <span>Upload Photo *</span>
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -206,14 +294,15 @@
                             <h2 className="font-bold mb-2">Total Site Score</h2>
                             <p>{calculateTotalScore()}%</p>
                             <p className="text-sm text-gray-600 mt-2">
-                                {items.filter(item => item.score > 0).length} of {items.length} items completed
+                                {items.filter(isItemComplete).length} of {items.length} items completed
                             </p>
                         </div>
                         <button
+                            onClick={generatePDF}
                             className="button button-primary"
-                            disabled={true}
+                            disabled={!areAllItemsComplete()}
                         >
-                            Complete All Items to Export PDF
+                            {areAllItemsComplete() ? 'Export to PDF' : 'Complete All Items to Export PDF'}
                         </button>
                     </div>
                 </div>
