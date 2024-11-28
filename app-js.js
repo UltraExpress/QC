@@ -1,47 +1,44 @@
 function handleImageUpload(id, input) {
-    // Reset file input value first
     const file = input.files[0];
-    
     if (!file) {
-        alert('No file selected. Please try selecting the image again.');
         return;
     }
 
-    try {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.image = e.target.result;
-                saveToLocalStorage();
-                renderChecklist();
-                updateProgress();
-                
-                // Reset the file input after successful upload
-                input.value = '';
-            }
-        };
-
-        reader.onerror = function(error) {
-            console.error('Error reading file:', error);
-            alert('Error uploading image. Please try again.');
-            input.value = '';
-        };
-
-        reader.readAsDataURL(file);
-
-    } catch (error) {
-        console.error('Error handling file:', error);
-        alert('Error handling image. Please try again. If the problem persists, try taking a new photo.');
-        input.value = '';
-    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const item = items.find(i => i.id === id);
+        if (item) {
+            item.image = e.target.result;
+            saveToLocalStorage();
+            renderChecklist();
+            updateProgress();
+        }
+    };
+    reader.readAsDataURL(file);
 }
 
-// Modified createChecklistItem function to include better file input handling
+function createFileInput(id) {
+    // Remove any existing file input with this ID
+    const existingInput = document.getElementById(`file-input-${id}`);
+    if (existingInput) {
+        existingInput.remove();
+    }
+
+    // Create a new file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.id = `file-input-${id}`;
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.style.display = 'none';
+    input.onchange = (e) => handleImageUpload(id, e.target);
+    
+    document.body.appendChild(input);
+    return input;
+}
+
 function createChecklistItem(item) {
     checkItemCompletion(item);
-    const inputId = `image-${item.id}`;
     
     return `
         <div class="checklist-item ${item.isComplete ? 'complete' : 'incomplete'}">
@@ -60,13 +57,7 @@ function createChecklistItem(item) {
                 oninput="handleNotesInput(${item.id}, this.value)"
                 onblur="handleNotesBlur(${item.id}, this.value)"
             >${item.notes || ''}</textarea>
-            <input type="file" 
-                   id="${inputId}" 
-                   accept="image/*" 
-                   capture="environment"
-                   style="display: none"
-                   onchange="handleImageUpload(${item.id}, this)">
-            <button class="button" onclick="document.getElementById('${inputId}').value='';document.getElementById('${inputId}').click()">
+            <button class="button" onclick="triggerImageUpload(${item.id})">
                 Upload Photo
             </button>
             <div id="preview-${item.id}">
@@ -75,4 +66,41 @@ function createChecklistItem(item) {
             ${createRequirementsList(item)}
         </div>
     `;
+}
+
+// Add this new function
+function triggerImageUpload(id) {
+    const input = createFileInput(id);
+    input.click();
+}
+
+// Add these utility functions
+function isMobile() {
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
+
+// Modify the original loadChecklist function to clean up old file inputs
+async function loadChecklist() {
+    try {
+        const response = await fetch('checklist-items.json');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        items = data.items.map(item => ({
+            ...item,
+            score: 0,
+            notes: '',
+            image: null,
+            isComplete: false
+        }));
+        
+        // Clean up any existing file inputs
+        document.querySelectorAll('input[type="file"]').forEach(input => input.remove());
+        
+        loadFromLocalStorage();
+        renderChecklist();
+        updateProgress();
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error loading checklist: ' + error.message);
+    }
 }
