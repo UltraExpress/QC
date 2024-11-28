@@ -1,138 +1,235 @@
+:root {
+    --primary: #2563eb;           /* Bright blue */
+    --primary-hover: #1d4ed8;     /* Darker blue */
+    --success: #22c55e;           /* Green */
+    --danger: #ef4444;            /* Red */
+    --background: #f9fafb;        /* Light gray background */
+    --card-bg: #ffffff;           /* White */
+    --text: #1f2937;              /* Dark gray text */
+    --text-secondary: #6b7280;    /* Medium gray text */
+    --border: #e5e7eb;           /* Light gray border */
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
 body {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 20px;
-    background: #f0f0f0;
-}
-
-.checklist-item {
-    background: white;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: relative;
-}
-
-.checklist-item.incomplete {
-    border: 2px solid #dc3545;
-}
-
-.checklist-item.complete {
-    border: 2px solid #28a745;
+    padding: 24px;
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.5;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
 }
 
+/* Location Selector Styles */
 .location-selector {
-    margin: 20px 0;
+    margin: 32px 0;
     text-align: center;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
 }
 
 .location-button {
-    padding: 10px 20px;
-    margin: 0 5px;
-    border: 2px solid #007bff;
-    border-radius: 4px;
-    background: white;
+    padding: 12px 24px;
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    background: var(--card-bg);
     cursor: pointer;
-    color: #007bff;
+    color: var(--primary);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.location-button:hover {
+    background: var(--primary);
+    color: white;
 }
 
 .location-button.selected {
-    background: #007bff;
+    background: var(--primary);
     color: white;
 }
 
+/* Checklist Item Styles */
+.checklist-item {
+    background: var(--card-bg);
+    padding: 24px;
+    margin: 16px 0;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.checklist-item:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+}
+
+.checklist-item.incomplete {
+    border-left: 4px solid var(--danger);
+}
+
+.checklist-item.complete {
+    border-left: 4px solid var(--success);
+}
+
+/* Form Elements */
 select, textarea {
     width: 100%;
-    padding: 8px;
-    margin: 5px 0;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
 }
 
 textarea {
-    min-height: 60px;
+    min-height: 80px;
     resize: vertical;
+    line-height: 1.6;
+    font-family: inherit;
 }
 
+select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Button Styles */
 .button {
-    background: #007bff;
+    background: var(--primary);
     color: white;
-    padding: 8px 15px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
 }
 
-.photo-preview {
-    max-width: 200px;
-    max-height: 200px;
-    margin-top: 10px;
-    border-radius: 4px;
+.button:hover {
+    background: var(--primary-hover);
 }
 
-.requirement-list {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0;
-    font-size: 0.9em;
-}
-
-.requirement-list li {
-    margin: 5px 0;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: #666;
-}
-
-.requirement-list li::before {
-    content: "❌";
-}
-
-.requirement-list li.complete::before {
-    content: "✅";
-}
-
+/* Progress Bar */
 .progress-bar {
-    background: #eee;
-    height: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
+    background: var(--background);
+    height: 8px;
+    border-radius: 4px;
+    margin: 24px 0;
     overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
-    background: #28a745;
+    background: var(--primary);
     width: 0%;
     transition: width 0.3s ease;
 }
 
+/* Score Info */
 .score-info {
-    margin: 10px 0;
-    padding: 10px;
-    background: white;
-    border-radius: 4px;
+    margin: 16px 0;
+    padding: 16px;
+    background: var(--card-bg);
+    border-radius: 12px;
     text-align: center;
+    font-weight: 500;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+/* Image Preview */
+.photo-preview {
+    max-width: 300px;
+    max-height: 300px;
+    margin-top: 16px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+/* Requirements List */
+.requirement-list {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.requirement-list li {
+    margin: 0;
+    padding: 8px 16px;
+    background: var(--background);
+    border-radius: 20px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.requirement-list li::before {
+    content: "×";
+    color: var(--danger);
+    font-size: 18px;
     font-weight: bold;
 }
 
+.requirement-list li.complete::before {
+    content: "✓";
+    color: var(--success);
+}
+
+/* Container for buttons */
 .buttons-container {
     display: flex;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 16px;
+    margin-top: 32px;
     justify-content: center;
 }
 
+/* Section visibility */
 #checklist-section {
     display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
 }
