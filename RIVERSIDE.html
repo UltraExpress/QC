@@ -81,6 +81,9 @@
         .button.new-qc:hover {
             background: #218838;
         }
+        #checklist-section {
+            display: none;
+        }
         .score-details {
             font-size: 0.9em;
             color: #666;
@@ -179,6 +182,7 @@
     </div>
 
     <script>
+        let selectedLocation = 'RIVERSIDE';
         let items = [];
 
         async function loadChecklist() {
@@ -330,6 +334,8 @@
             
             doc.setFontSize(20);
             doc.text('Quality Control Report', 20, 20);
+            doc.setFontSize(16);
+            doc.text(`Location: ${selectedLocation}`, 20, 30);
             doc.setFontSize(12);
             
             let yPos = 45;
@@ -387,7 +393,7 @@
                 yPos += 10;
             });
 
-            doc.save(`QC_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+            doc.save(`QC_Report_${selectedLocation}_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
         function updateProgress() {
@@ -415,6 +421,16 @@
                 `Total Score: ${totalScore.toFixed(1)}% of Perfect Operation`;
         }
 
+      
+
+
+
+
+
+
+
+
+
 
 
 
@@ -430,6 +446,7 @@
 
         function saveToLocalStorage() {
             localStorage.setItem('qcChecklist', JSON.stringify(items));
+            localStorage.setItem('selectedLocation', selectedLocation);
         }
 
         function loadFromLocalStorage() {
@@ -442,6 +459,10 @@
                     }
                 });
             }
+            const savedLocation = localStorage.getItem('selectedLocation');
+            if (savedLocation) {
+                selectedLocation = savedLocation;
+            }
         }
 
         function startNewQC() {
@@ -452,6 +473,7 @@
                     item.image = null;
                 });
                 localStorage.removeItem('qcChecklist');
+                localStorage.removeItem('selectedLocation');
                 renderChecklist();
                 updateProgress();
             }
