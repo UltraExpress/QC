@@ -407,6 +407,9 @@ async function generatePDF() {
     const doc = new jsPDF();
     let yPosition = 20;
     const pageHeight = doc.internal.pageSize.height;
+    const pageWidth = doc.internal.pageSize.width;
+    const marginLeft = 20;
+    const availableWidth = pageWidth - (marginLeft * 2);
     
     // Add title
     doc.setFontSize(24);
@@ -421,13 +424,15 @@ async function generatePDF() {
     
     // Process each checklist item
     for (const item of checklistItems) {
+        yPosition += 20;
+        
         // Calculate space needed for this item
         const titleHeight = 15;
         const scoreHeight = 15;
         const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
         const notesHeight = notesLines * 7;
-        const imageHeight = 80;
-        const totalItemHeight = titleHeight + scoreHeight + notesHeight + imageHeight + 40; // 40 for padding
+        const imageHeight = 60; // Reduced image height
+        const totalItemHeight = titleHeight + scoreHeight + notesHeight + imageHeight + 40;
         
         // Check if we need a new page
         if (yPosition + totalItemHeight > pageHeight - 20) {
@@ -446,12 +451,12 @@ async function generatePDF() {
         doc.setTextColor(item.score < 4 ? 255 : 0, 0, 0);
         doc.setFontSize(14);
         doc.setFont(undefined, 'bold');
-        doc.text(`${item.name} (Weight: ${item.weight})`, 20, yPosition);
+        doc.text(`${item.name} (Weight: ${item.weight})`, marginLeft, yPosition);
         
         // Score
         yPosition += 15;
         doc.setFontSize(12);
-        doc.text(`SCORE: ${item.score}`, 20, yPosition);
+        doc.text(`SCORE: ${item.score}`, marginLeft, yPosition);
         if (item.score < 4) {
             doc.text('NEEDS ATTENTION', 70, yPosition);
         }
@@ -460,30 +465,53 @@ async function generatePDF() {
         yPosition += 15;
         doc.setFont(undefined, 'normal');
         const splitNotes = doc.splitTextToSize(`Notes: ${item.notes}`, 170);
-        doc.text(splitNotes, 20, yPosition);
+        doc.text(splitNotes, marginLeft, yPosition);
         yPosition += notesHeight;
         
         // Handle image
         if (item.image) {
             try {
-                // Create temporary image to check dimensions
                 const img = new Image();
                 img.src = item.image;
                 
                 await new Promise((resolve) => {
                     img.onload = () => {
                         try {
-                            const imageWidth = img.width;
-                            const imageHeight = img.height;
+                            const imgWidth = img.width;
+                            const imgHeight = img.height;
                             
-                            // Determine if image is portrait or landscape
-                            if (imageWidth > imageHeight) {
-                                // Landscape image
-                                doc.addImage(item.image, 'JPEG', 20, yPosition, 120, 80);
+                            // Calculate aspect ratio
+                            const aspectRatio = imgWidth / imgHeight;
+                            
+                            // Set maximum dimensions that fit the page
+                            const maxWidth = availableWidth * 0.8; // 80% of available width
+                            const maxHeight = 60; // Fixed maximum height
+                            
+                            let finalWidth, finalHeight;
+                            
+                            if (imgWidth > imgHeight) {
+                                // Landscape
+                                finalWidth = Math.min(maxWidth, 140);
+                                finalHeight = finalWidth / aspectRatio;
                             } else {
-                                // Portrait image - rotate 90 degrees
-                                doc.addImage(item.image, 'JPEG', 20, yPosition, 80, 120, null, 'NONE', 90);
+                                // Portrait
+                                finalHeight = maxHeight;
+                                finalWidth = maxHeight * aspectRatio;
                             }
+                            
+                            // Ensure image fits within margins
+                            doc.addImage(
+                                item.image,
+                                'JPEG',
+                                marginLeft,
+                                yPosition,
+                                finalWidth,
+                                finalHeight,
+                                undefined,
+                                'NONE'
+                            );
+                            
+                            yPosition += finalHeight;
                             resolve();
                         } catch (e) {
                             console.error('Error processing image:', e);
@@ -493,20 +521,19 @@ async function generatePDF() {
                     img.onerror = () => resolve();
                 });
                 
-                yPosition += imageHeight + 10;
+                yPosition += 10;
             } catch (e) {
                 console.error('Error adding image:', e);
             }
         }
         
-        yPosition += 20; // Space between items
+        yPosition += 20;
     }
     
     // Save the PDF
     const date = new Date().toISOString().split('T')[0];
     doc.save(`QC-Report-${date}.pdf`);
 }
-
 
 
 
