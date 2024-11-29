@@ -409,9 +409,19 @@ async function generatePDF() {
     const pageHeight = doc.internal.pageSize.height;
     const marginLeft = 20;
     
-    // Add title
-    doc.setFontSize(24);
+    // Add date
+    const currentDate = new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
+    doc.text(currentDate, 105, yPosition, { align: "center" });
+    
+    // Add title
+    yPosition += 20;
+    doc.setFontSize(24);
     doc.text("Quality Control Report", 105, yPosition, { align: "center" });
     
     // Add total score
@@ -438,10 +448,13 @@ async function generatePDF() {
             yPosition = 20;
         }
         
-        // Draw red box for low scores (will adjust height after image)
+        // Draw colored box for scores
         const boxStartY = yPosition - 5;
         if (item.score < 4) {
-            doc.setDrawColor(255, 0, 0);
+            doc.setDrawColor(255, 0, 0); // Red for low scores
+            doc.setLineWidth(0.5);
+        } else if (item.score >= 4) {
+            doc.setDrawColor(0, 255, 0); // Green for high scores
             doc.setLineWidth(0.5);
         }
         
@@ -475,18 +488,15 @@ async function generatePDF() {
                 await new Promise((resolve) => {
                     img.onload = async () => {
                         try {
-                            // Create a temporary canvas with high resolution
                             const canvas = document.createElement('canvas');
                             const ctx = canvas.getContext('2d', { alpha: false });
                             
-                            // Calculate dimensions maintaining aspect ratio
                             const maxWidth = 150;
                             const maxHeight = 100;
                             
                             let finalWidth = img.width;
                             let finalHeight = img.height;
                             
-                            // Scale down if needed while maintaining aspect ratio
                             if (finalWidth > maxWidth) {
                                 const ratio = maxWidth / finalWidth;
                                 finalWidth = maxWidth;
@@ -498,18 +508,14 @@ async function generatePDF() {
                                 finalWidth = Math.floor(finalWidth * ratio);
                             }
                             
-                            // Set canvas size to 4x for better quality
                             canvas.width = finalWidth * 4;
                             canvas.height = finalHeight * 4;
                             
-                            // Enable image smoothing
                             ctx.imageSmoothingEnabled = true;
                             ctx.imageSmoothingQuality = 'high';
                             
-                            // Draw image with high quality
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                             
-                            // Add to PDF with high quality settings
                             const properImage = canvas.toDataURL('image/jpeg', 1.0);
                             doc.addImage(
                                 properImage,
@@ -524,8 +530,8 @@ async function generatePDF() {
                             
                             yPosition += finalHeight + 10;
                             
-                            // Draw red box if needed (after we know final height)
-                            if (item.score < 4) {
+                            // Draw colored box after we know the final height
+                            if (item.score < 4 || item.score >= 4) {
                                 const boxHeight = yPosition - boxStartY;
                                 doc.rect(15, boxStartY, 180, boxHeight, 'S');
                             }
