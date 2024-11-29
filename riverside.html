@@ -409,24 +409,24 @@ async function generatePDF() {
     const pageHeight = doc.internal.pageSize.height;
     const marginLeft = 20;
     
-    // Add date
+    // Add date - increased from 12 to 14
     const currentDate = new Date().toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
     });
-    doc.setFontSize(12);
+    doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text(currentDate, 105, yPosition, { align: "center" });
     
-    // Add title
+    // Add title - increased from 24 to 28
     yPosition += 20;
-    doc.setFontSize(24);
-    doc.text("Riverside Quality Control Report", 105, yPosition, { align: "center" });
+    doc.setFontSize(28);
+    doc.text("Quality Control Report", 105, yPosition, { align: "center" });
     
-    // Add total score
+    // Add total score - increased from 16 to 20
     yPosition += 20;
-    doc.setFontSize(16);
+    doc.setFontSize(20);
     const totalScoreElement = document.getElementById('total-score');
     doc.text(totalScoreElement.textContent, 105, yPosition, { align: "center" });
     
@@ -438,7 +438,7 @@ async function generatePDF() {
         const titleHeight = 15;
         const scoreHeight = 15;
         const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
-        const notesHeight = notesLines * 7;
+        const notesHeight = notesLines * 8; // Increased from 7 to 8 for more space between note lines
         const targetImageHeight = 100;
         const totalItemHeight = titleHeight + scoreHeight + notesHeight + targetImageHeight + 40;
         
@@ -451,35 +451,36 @@ async function generatePDF() {
         // Draw colored box for scores
         const boxStartY = yPosition - 5;
         if (item.score < 4) {
-            doc.setDrawColor(255, 0, 0); // Red for low scores
+            doc.setDrawColor(255, 0, 0);
             doc.setLineWidth(0.5);
         } else if (item.score >= 4) {
-            doc.setDrawColor(0, 255, 0); // Green for high scores
+            doc.setDrawColor(0, 255, 0);
             doc.setLineWidth(0.5);
         }
         
-        // Item name and weight
+        // Item name and weight - increased from 14 to 18
         doc.setTextColor(item.score < 4 ? 255 : 0, 0, 0);
-        doc.setFontSize(14);
+        doc.setFontSize(18);
         doc.setFont(undefined, 'bold');
         doc.text(`${item.name} (Weight: ${item.weight})`, marginLeft, yPosition);
         
-        // Score
+        // Score - increased from 12 to 16
         yPosition += 15;
-        doc.setFontSize(12);
+        doc.setFontSize(16);
         doc.text(`SCORE: ${item.score}`, marginLeft, yPosition);
         if (item.score < 4) {
             doc.text('NEEDS ATTENTION', 70, yPosition);
         }
         
-        // Notes
+        // Notes - increased from 12 to 14
         yPosition += 15;
         doc.setFont(undefined, 'normal');
+        doc.setFontSize(14);
         const splitNotes = doc.splitTextToSize(`Notes: ${item.notes}`, 170);
         doc.text(splitNotes, marginLeft, yPosition);
         yPosition += notesHeight;
         
-        // Handle image
+        // Rest of the image handling code stays the same
         if (item.image) {
             try {
                 const img = new Image();
@@ -530,7 +531,6 @@ async function generatePDF() {
                             
                             yPosition += finalHeight + 10;
                             
-                            // Draw colored box after we know the final height
                             if (item.score < 4 || item.score >= 4) {
                                 const boxHeight = yPosition - boxStartY;
                                 doc.rect(15, boxStartY, 180, boxHeight, 'S');
