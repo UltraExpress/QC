@@ -407,9 +407,7 @@ async function generatePDF() {
     const doc = new jsPDF();
     let yPosition = 20;
     const pageHeight = doc.internal.pageSize.height;
-    const pageWidth = doc.internal.pageSize.width;
     const marginLeft = 20;
-    const availableWidth = pageWidth - (marginLeft * 2);
     
     // Add title
     doc.setFontSize(24);
@@ -426,12 +424,12 @@ async function generatePDF() {
     for (const item of checklistItems) {
         yPosition += 20;
         
-        // Calculate space needed for this item
+        // Calculate space needed
         const titleHeight = 15;
         const scoreHeight = 15;
         const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
         const notesHeight = notesLines * 7;
-        const imageHeight = 60; // Reduced image height
+        const imageHeight = 100; // Increased height for images
         const totalItemHeight = titleHeight + scoreHeight + notesHeight + imageHeight + 40;
         
         // Check if we need a new page
@@ -475,43 +473,47 @@ async function generatePDF() {
                 img.src = item.image;
                 
                 await new Promise((resolve) => {
-                    img.onload = () => {
+                    img.onload = async () => {
                         try {
-                            const imgWidth = img.width;
-                            const imgHeight = img.height;
+                            // Create a temporary canvas to handle orientation
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
                             
-                            // Calculate aspect ratio
-                            const aspectRatio = imgWidth / imgHeight;
-                            
-                            // Set maximum dimensions that fit the page
-                            const maxWidth = availableWidth * 0.8; // 80% of available width
-                            const maxHeight = 60; // Fixed maximum height
-                            
-                            let finalWidth, finalHeight;
-                            
-                            if (imgWidth > imgHeight) {
-                                // Landscape
-                                finalWidth = Math.min(maxWidth, 140);
-                                finalHeight = finalWidth / aspectRatio;
+                            // Set proper dimensions based on orientation
+                            if (img.width > img.height) {
+                                // Landscape orientation from iPhone
+                                canvas.width = img.height;
+                                canvas.height = img.width;
+                                
+                                // Rotate and flip as needed
+                                ctx.translate(canvas.width/2, canvas.height/2);
+                                ctx.rotate(90 * Math.PI/180);
+                                ctx.drawImage(img, -img.width/2, -img.height/2);
                             } else {
-                                // Portrait
-                                finalHeight = maxHeight;
-                                finalWidth = maxHeight * aspectRatio;
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                ctx.drawImage(img, 0, 0);
                             }
                             
-                            // Ensure image fits within margins
+                            // Convert to proper orientation
+                            const properImage = canvas.toDataURL('image/jpeg');
+                            
+                            // Add to PDF with proper dimensions
+                            const pdfWidth = 160; // Increased width
+                            const pdfHeight = 100; // Increased height
+                            
                             doc.addImage(
-                                item.image,
+                                properImage,
                                 'JPEG',
                                 marginLeft,
                                 yPosition,
-                                finalWidth,
-                                finalHeight,
+                                pdfWidth,
+                                pdfHeight,
                                 undefined,
-                                'NONE'
+                                'FAST'
                             );
                             
-                            yPosition += finalHeight;
+                            yPosition += pdfHeight + 10;
                             resolve();
                         } catch (e) {
                             console.error('Error processing image:', e);
@@ -520,8 +522,6 @@ async function generatePDF() {
                     };
                     img.onerror = () => resolve();
                 });
-                
-                yPosition += 10;
             } catch (e) {
                 console.error('Error adding image:', e);
             }
@@ -534,7 +534,6 @@ async function generatePDF() {
     const date = new Date().toISOString().split('T')[0];
     doc.save(`QC-Report-${date}.pdf`);
 }
-
 
 
 
