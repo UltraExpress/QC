@@ -1,322 +1,230 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Car Wash Quality Check - Riverside</title>
-    <!-- Include jsPDF and html2canvas libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
         }
-
-        fieldset {
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            padding: 10px;
         }
-
-        label {
+        .reset-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .reset-btn:hover {
+            background: #ff5252;
+        }
+        .qc-item {
+            background: #f7f7f7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .item-title {
+            font-size: 18px;
             font-weight: bold;
         }
-
-        textarea {
+        .item-weight {
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .rating-group {
+            margin: 15px 0;
+        }
+        .rating-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+        .rating-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .rating-btn .number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .rating-btn .description {
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .rating-btn.selected {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .notes {
             width: 100%;
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+            box-sizing: border-box;
         }
-
-        img {
-            margin-top: 10px;
+        .image-upload {
+            margin: 15px 0;
+        }
+        .image-preview {
             max-width: 200px;
-            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 4px;
         }
-
-        button {
-            margin: 10px 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #resetButton {
-            position: fixed;
-            top: 10px;
-            right: 10px;
+        .section-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h2>Quality Control Checklist</h2>
+        <button class="reset-btn" onclick="resetForm()">Reset Item</button>
+    </div>
+    
+    <div id="checklist-container">
+        <div class="qc-item" data-id="1">
+            <div class="item-header">
+                <span class="item-title">Roller Up</span>
+                <span class="item-weight">Weight: 0.6</span>
+            </div>
+            
+            <div class="rating-group">
+                <div class="section-label">Quality Rating</div>
+                <div class="rating-options">
+                    <button class="rating-btn" onclick="setRating(1)">
+                        <span class="number">1</span>
+                        <span class="description">Critical Issues<br>Immediate Action Required</span>
+                    </button>
+                    <button class="rating-btn" onclick="setRating(2)">
+                        <span class="number">2</span>
+                        <span class="description">Major Issues<br>Needs Significant Work</span>
+                    </button>
+                    <button class="rating-btn" onclick="setRating(3)">
+                        <span class="number">3</span>
+                        <span class="description">Minor Issues<br>Acceptable with Fixes</span>
+                    </button>
+                    <button class="rating-btn" onclick="setRating(4)">
+                        <span class="number">4</span>
+                        <span class="description">Good Quality<br>Minor Improvements</span>
+                    </button>
+                    <button class="rating-btn" onclick="setRating(5)">
+                        <span class="number">5</span>
+                        <span class="description">Perfect Quality<br>Meets All Standards</span>
+                    </button>
+                </div>
+            </div>
 
-<h1>Car Wash Quality Check - Riverside</h1>
+            <div>
+                <div class="section-label">Notes</div>
+                <textarea class="notes" id="notes" 
+                    onchange="updateNotes()" 
+                    placeholder="Enter detailed observations here..."></textarea>
+            </div>
 
-<!-- Reset Button at the Top -->
-<button id="resetButton">Reset</button>
+            <div class="image-upload">
+                <div class="section-label">Upload Images</div>
+                <input type="file" id="imageInput" 
+                    accept="image/*" multiple 
+                    onchange="handleImageUpload(event)">
+                <div id="imagePreview"></div>
+            </div>
+        </div>
+    </div>
 
-<form id="qualityCheckForm">
+    <script>
+        // Single item data
+        let itemData = {
+            "id": 1,
+            "name": "Roller Up",
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
+        };
 
-    <!-- The form content will be generated dynamically from the JSON data -->
-
-</form>
-
-<!-- Moved the buttons below the form -->
-<button id="generatePdfButton" disabled>Make PDF Report</button>
-
-<script>
-    // *** Data Definition ***
-    // Site Name
-    var siteName = "Riverside";
-
-    // JSON Data Embedded in the Script
-    // This is where you can modify or replace the data as needed
-    var jsonData = {
-        "items": [
-            {
-                "id": 1,
-                "name": "Roller Up",
-                "weight": 0.6,
-                "score": 0,
-                "notes": "",
-                "image": null
-            },
-            {
-                "id": 2,
-                "name": "PRE SOAK #1 Wash Service",
-                "weight": 0.8,
-                "score": 0,
-                "notes": "",
-                "image": null
-            },
-            {
-                "id": 3,
-                "name": "GRAND ENTRY FX Wash Service",
-                "weight": 0.8,
-                "score": 0,
-                "notes": "",
-                "image": null
-            },
-            {
-                "id": 4,
-                "name": "PRE SOAK #2 Wash Service",
-                "weight": 0.5,
-                "score": 0,
-                "notes": "",
-                "image": null
-            }
-            // Add more items as needed
-        ]
-    };
-
-    // Function to generate form content
-    function generateForm() {
-        var form = document.getElementById('qualityCheckForm');
-        form.innerHTML = ''; // Clear any existing content
-
-        jsonData.items.forEach(function(item) {
-            var fieldset = document.createElement('fieldset');
-            fieldset.id = 'item-' + item.id;
-
-            var legend = document.createElement('legend');
-            legend.textContent = item.name + ' (Weight: ' + item.weight + ')';
-            fieldset.appendChild(legend);
-
-            // Notes input
-            var notesLabel = document.createElement('label');
-            notesLabel.textContent = 'Notes: ';
-            var notesInput = document.createElement('textarea');
-            notesInput.id = 'notes-' + item.id;
-            notesInput.rows = 3;
-            notesInput.cols = 50;
-            notesInput.addEventListener('input', checkFormCompletion);
-            fieldset.appendChild(notesLabel);
-            fieldset.appendChild(document.createElement('br'));
-            fieldset.appendChild(notesInput);
-            fieldset.appendChild(document.createElement('br'));
-
-            // Image upload
-            var imageLabel = document.createElement('label');
-            imageLabel.textContent = 'Image: ';
-            var imageInput = document.createElement('input');
-            imageInput.type = 'file';
-            imageInput.accept = 'image/*';
-            imageInput.id = 'image-' + item.id;
-            imageInput.addEventListener('change', function(event) {
-                handleImageUpload(event, item.id);
+        function setRating(rating) {
+            const buttons = document.querySelectorAll('.rating-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('selected');
+                if (parseInt(btn.querySelector('.number').textContent) === rating) {
+                    btn.classList.add('selected');
+                }
             });
-            fieldset.appendChild(imageLabel);
-            fieldset.appendChild(imageInput);
-            fieldset.appendChild(document.createElement('br'));
-
-            // Image preview
-            var imagePreview = document.createElement('img');
-            imagePreview.id = 'preview-' + item.id;
-            imagePreview.classList.add('hidden');
-            fieldset.appendChild(imagePreview);
-            fieldset.appendChild(document.createElement('br'));
-
-            // Rating input
-            var ratingLabel = document.createElement('label');
-            ratingLabel.textContent = 'Rating (1-5): ';
-            var ratingSelect = document.createElement('select');
-            ratingSelect.id = 'rating-' + item.id;
-            ratingSelect.addEventListener('change', checkFormCompletion);
-            var defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select a rating';
-            ratingSelect.appendChild(defaultOption);
-            for (var i = 1; i <= 5; i++) {
-                var option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                ratingSelect.appendChild(option);
-            }
-            fieldset.appendChild(ratingLabel);
-            fieldset.appendChild(ratingSelect);
-            fieldset.appendChild(document.createElement('br'));
-
-            form.appendChild(fieldset);
-            form.appendChild(document.createElement('hr'));
-        });
-    }
-
-    // Function to handle image upload and preview
-    function handleImageUpload(event, itemId) {
-        var file = event.target.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                // Update the image preview
-                var preview = document.getElementById('preview-' + itemId);
-                preview.src = e.target.result;
-                preview.classList.remove('hidden');
-                // Update the image data in jsonData
-                var item = jsonData.items.find(function(i) { return i.id === itemId; });
-                item.image = e.target.result;
-                checkFormCompletion();
-            };
-            reader.readAsDataURL(file);
+            
+            itemData.score = rating;
         }
-    }
 
-    // Function to check if all fields are completed
-    function checkFormCompletion() {
-        var allCompleted = true;
-        jsonData.items.forEach(function(item) {
-            // Get notes
-            var notesInput = document.getElementById('notes-' + item.id);
-            var notesValue = notesInput.value.trim();
-            item.notes = notesValue;
-            if (!notesValue) {
-                allCompleted = false;
-            }
-            // Get rating
-            var ratingSelect = document.getElementById('rating-' + item.id);
-            var ratingValue = ratingSelect.value;
-            item.score = parseInt(ratingValue) || 0;
-            if (item.score === 0) {
-                allCompleted = false;
-            }
-            // Check image
-            if (!item.image) {
-                allCompleted = false;
-            }
-        });
-        var generatePdfButton = document.getElementById('generatePdfButton');
-        generatePdfButton.disabled = !allCompleted;
-    }
+        function updateNotes() {
+            const notes = document.getElementById('notes').value;
+            itemData.notes = notes;
+        }
 
-    // Function to reset the form
-    function resetForm() {
-        // Reset jsonData
-        jsonData.items.forEach(function(item) {
-            item.score = 0;
-            item.notes = '';
-            item.image = null;
-        });
-        // Regenerate the form
-        generateForm();
-        checkFormCompletion();
-    }
-
-    // Function to generate the PDF report
-    async function generatePdfReport() {
-        var { jsPDF } = window.jspdf;
-        var doc = new jsPDF();
-
-        var totalWeightedScore = 0;
-        var maximumWeightedScore = 0;
-
-        // Write the report title on the first page
-        doc.setFontSize(16);
-        doc.text('Quality Check Report for ' + siteName, 10, 20);
-
-        // Placeholder for the starting Y position on the first page
-        var startY = 30;
-
-        for (var i = 0; i < jsonData.items.length; i++) {
-            var item = jsonData.items[i];
-
-            totalWeightedScore += item.score * item.weight;
-            maximumWeightedScore += 5 * item.weight;
-
-            // If not first item, add a new page
-            if (i > 0) {
-                doc.addPage();
-                // Reset startY for new pages
-                startY = 20;
-            }
-
-            // Add item name
-            doc.setFontSize(14);
-            doc.text(item.name, 10, startY);
-
-            // Add notes
-            doc.setFontSize(12);
-            doc.text('Notes:', 10, startY + 10);
-            var splitNotes = doc.splitTextToSize(item.notes, 180);
-            doc.text(splitNotes, 10, startY + 15);
-
-            // Add rating
-            doc.text('Rating: ' + item.score + ' (Weight: ' + item.weight + ')', 10, startY + 35);
-
-            // Add image
-            if (item.image) {
-                await new Promise(function(resolve) {
-                    var img = new Image();
-                    img.onload = function() {
-                        var width = this.width;
-                        var height = this.height;
-                        var maxWidth = 180;
-                        var maxHeight = 100;
-                        if (width > maxWidth) {
-                            height *= maxWidth / width;
-                            width = maxWidth;
-                        }
-                        if (height > maxHeight) {
-                            width *= maxHeight / height;
-                            height = maxHeight;
-                        }
-                        doc.addImage(this, 'JPEG', 10, startY + 45, width, height);
-                        resolve();
-                    };
-                    img.src = item.image;
-                });
+        function handleImageUpload(event) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            for (const file of event.target.files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    preview.appendChild(img);
+                    itemData.image = e.target.result;
+                }
+                reader.readAsDataURL(file);
             }
         }
 
-        // Calculate and write site score on the first page
-        var siteScorePercentage = (totalWeightedScore / maximumWeightedScore) * 100;
-        doc.setPage(1);
-        doc.setFontSize(16);
-        doc.text('Site Score: ' + siteScorePercentage.toFixed(2) + '%', 10, 30);
-
-        // Save the PDF
-        doc.save('Quality_Check_Report_' + siteName + '.pdf');
-    }
-
-    // Initialize the form when the page loads
-    window.onload = function() {
-        generateForm();
-    };
-
-    // Event listeners
-    document.getElementById('resetButton').addEvent
+        function resetForm() {
+            if (confirm('Are you sure you want to reset this item? This will clear the rating, notes, and images.')) {
+                itemData.score = 0;
+                itemData.notes = '';
+                itemData.image = null;
+                
+                // Reset UI
+                document.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
+                document.getElementById('notes').value = '';
+                document.getElementById('imageInput').value = '';
+                document.getElementById('imagePreview').innerHTML = '';
+            }
+        }
+    </script>
+</body>
+</html>
