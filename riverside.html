@@ -245,10 +245,12 @@
         var totalWeightedScore = 0;
         var maximumWeightedScore = 0;
 
-        // Placeholder for site score
+        // Write the report title on the first page
         doc.setFontSize(16);
-        doc.text('Quality Check Report for ' + siteName, 10, 10);
-        doc.text('Site Score: Calculating...', 10, 20);
+        doc.text('Quality Check Report for ' + siteName, 10, 20);
+
+        // Placeholder for the starting Y position on the first page
+        var startY = 30;
 
         for (var i = 0; i < jsonData.items.length; i++) {
             var item = jsonData.items[i];
@@ -256,11 +258,11 @@
             totalWeightedScore += item.score * item.weight;
             maximumWeightedScore += 5 * item.weight;
 
-            var startY = 30;
-
-            // Add a new page except for the first item
+            // If not first item, add a new page
             if (i > 0) {
                 doc.addPage();
+                // Reset startY for new pages
+                startY = 20;
             }
 
             // Add item name
@@ -301,12 +303,11 @@
             }
         }
 
-        // Calculate and update site score
+        // Calculate and write site score on the first page
         var siteScorePercentage = (totalWeightedScore / maximumWeightedScore) * 100;
         doc.setPage(1);
         doc.setFontSize(16);
-        doc.text('Quality Check Report for ' + siteName, 10, 10);
-        doc.text('Site Score: ' + siteScorePercentage.toFixed(2) + '%', 10, 20);
+        doc.text('Site Score: ' + siteScorePercentage.toFixed(2) + '%', 10, 30);
 
         // Save the PDF
         doc.save('Quality_Check_Report_' + siteName + '.pdf');
@@ -318,14 +319,4 @@
     };
 
     // Event listeners
-    document.getElementById('resetButton').addEventListener('click', function() {
-        if (confirm('Are you sure you want to reset? All data will be lost.')) {
-            resetForm();
-        }
-    });
-    document.getElementById('generatePdfButton').addEventListener('click', generatePdfReport);
-
-</script>
-
-</body>
-</html>
+    document.getElementById('resetButton').addEvent
