@@ -402,8 +402,7 @@
         
         
         
-        
-       async function generatePDF() {
+ async function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     let yPosition = 20;
@@ -434,7 +433,7 @@
             // Draw red rectangle around the item
             doc.setDrawColor(255, 0, 0);
             doc.setLineWidth(0.5);
-            doc.rect(15, yPosition - 5, 180, 90 + (item.notes.length / 50) * 5, 'S');
+            doc.rect(15, yPosition - 5, 180, 120 + (item.notes.length / 50) * 5, 'S');
             doc.setTextColor(255, 0, 0); // Red text for low ratings
         } else {
             doc.setTextColor(0, 0, 0); // Black text for good ratings
@@ -445,13 +444,16 @@
         doc.text(`${item.name} (Weight: ${item.weight})`, 20, yPosition);
         yPosition += 10;
         
-        // Score with rating description
-        doc.setFont(undefined, 'normal');
-        const ratingText = `Quality Rating: ${item.score}/5 ${item.score < 4 ? '- NEEDS ATTENTION' : ''}`;
-        doc.text(ratingText, 20, yPosition);
+        // Score with improved formatting
+        doc.setFont(undefined, 'bold');
+        doc.text(`SCORE: ${item.score}`, 20, yPosition);
+        if (item.score < 4) {
+            doc.text('NEEDS ATTENTION', 60, yPosition);
+        }
         yPosition += 10;
         
         // Notes (with word wrap)
+        doc.setFont(undefined, 'normal');
         const splitNotes = doc.splitTextToSize(`Notes: ${item.notes}`, 170);
         doc.text(splitNotes, 20, yPosition);
         yPosition += (splitNotes.length * 7);
@@ -459,11 +461,39 @@
         // Reset text color to black
         doc.setTextColor(0, 0, 0);
         
-        // Image (if it exists)
+        // Image handling with rotation fix and larger size
         if (item.image) {
             try {
-                doc.addImage(item.image, 'JPEG', 20, yPosition, 100, 60);
-                yPosition += 70;
+                // Create a temporary image element to get dimensions
+                const img = new Image();
+                img.src = item.image;
+                
+                await new Promise((resolve, reject) => {
+                    img.onload = () => {
+                        try {
+                            // Calculate orientation
+                            let width = 150; // Increased from 100
+                            let height = 90;  // Increased from 60
+                            
+                            // If image is landscape
+                            if (img.width > img.height) {
+                                doc.addImage(item.image, 'JPEG', 20, yPosition, width, height);
+                            } 
+                            // If image is portrait
+                            else {
+                                // Swap dimensions for portrait orientation
+                                doc.addImage(item.image, 'JPEG', 20, yPosition, height, width);
+                            }
+                            
+                            yPosition += height + 10;
+                            resolve();
+                        } catch (e) {
+                            console.error('Error processing image:', e);
+                            reject(e);
+                        }
+                    };
+                    img.onerror = reject;
+                });
             } catch (e) {
                 console.error('Error adding image:', e);
             }
