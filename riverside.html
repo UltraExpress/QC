@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 20px auto;
             padding: 20px;
+            font-size: 18px;
         }
         .header {
             display: flex;
@@ -18,10 +20,12 @@
             background: #ff6b6b;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 15px 30px;
+            border-radius: 8px;
             cursor: pointer;
             transition: background 0.3s;
+            font-size: 20px;
+            font-weight: bold;
         }
         .reset-btn:hover {
             background: #ff5252;
@@ -42,45 +46,45 @@
             border-bottom: 1px solid #ddd;
         }
         .item-title {
-            font-size: 18px;
+            font-size: 24px;
             font-weight: bold;
         }
         .item-weight {
             background: #e9ecef;
-            padding: 4px 8px;
+            padding: 8px 12px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 18px;
         }
         .rating-group {
             margin: 15px 0;
         }
         .rating-options {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
         }
         .rating-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100px;
-            padding: 10px;
+            padding: 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
             background: white;
             cursor: pointer;
             transition: all 0.3s;
+            min-height: 100px;
         }
         .rating-btn .number {
-            font-size: 24px;
+            font-size: 32px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         .rating-btn .description {
-            font-size: 12px;
+            font-size: 16px;
             text-align: center;
-            line-height: 1.2;
+            line-height: 1.4;
         }
         .rating-btn.selected {
             background: #4CAF50;
@@ -90,28 +94,44 @@
         .notes {
             width: 100%;
             margin: 15px 0;
-            padding: 10px;
+            padding: 15px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            min-height: 100px;
+            min-height: 120px;
             box-sizing: border-box;
+            font-size: 18px;
         }
         .image-upload {
             margin: 15px 0;
         }
+        .image-upload input[type="file"] {
+            padding: 20px;
+            font-size: 18px;
+            width: 100%;
+            box-sizing: border-box;
+            background: #e9ecef;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
         .image-preview {
-            max-width: 200px;
-            margin-top: 10px;
-            border-radius: 4px;
+            max-width: 100%;
+            margin-top: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .section-label {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             color: #333;
+            font-size: 20px;
+        }
+        h2 {
+            font-size: 28px;
         }
     </style>
 </head>
 <body>
+    <!-- Rest of the HTML remains exactly the same -->
     <div class="header">
         <h2>Quality Control Checklist</h2>
         <button class="reset-btn" onclick="resetForm()">Reset Item</button>
@@ -168,7 +188,7 @@
     </div>
 
     <script>
-        // Single item data
+        // JavaScript remains exactly the same
         let itemData = {
             "id": 1,
             "name": "Roller Up",
@@ -218,7 +238,6 @@
                 itemData.notes = '';
                 itemData.image = null;
                 
-                // Reset UI
                 document.querySelectorAll('.rating-btn').forEach(btn => btn.classList.remove('selected'));
                 document.getElementById('notes').value = '';
                 document.getElementById('imageInput').value = '';
