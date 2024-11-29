@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Car Wash Quality Check</title>
+    <title>Car Wash Quality Check - Riverside</title>
     <!-- Include jsPDF and html2canvas libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -37,11 +37,20 @@
         .hidden {
             display: none;
         }
+
+        #resetButton {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
     </style>
 </head>
 <body>
 
-<h1>Car Wash Quality Check</h1>
+<h1>Car Wash Quality Check - Riverside</h1>
+
+<!-- Reset Button at the Top -->
+<button id="resetButton">Reset</button>
 
 <form id="qualityCheckForm">
 
@@ -49,10 +58,16 @@
 
 </form>
 
-<button id="refreshButton">Refresh</button>
+<!-- Moved the buttons below the form -->
 <button id="generatePdfButton" disabled>Make PDF Report</button>
 
 <script>
+    // *** Data Definition ***
+    // Site Name
+    var siteName = "Riverside";
+
+    // JSON Data Embedded in the Script
+    // This is where you can modify or replace the data as needed
     var jsonData = {
         "items": [
             {
@@ -87,6 +102,7 @@
                 "notes": "",
                 "image": null
             }
+            // Add more items as needed
         ]
     };
 
@@ -208,8 +224,8 @@
         generatePdfButton.disabled = !allCompleted;
     }
 
-    // Function to refresh the form
-    function refreshForm() {
+    // Function to reset the form
+    function resetForm() {
         // Reset jsonData
         jsonData.items.forEach(function(item) {
             item.score = 0;
@@ -231,7 +247,8 @@
 
         // Placeholder for site score
         doc.setFontSize(16);
-        doc.text('Site Score: Calculating...', 10, 10);
+        doc.text('Quality Check Report for ' + siteName, 10, 10);
+        doc.text('Site Score: Calculating...', 10, 20);
 
         for (var i = 0; i < jsonData.items.length; i++) {
             var item = jsonData.items[i];
@@ -239,7 +256,7 @@
             totalWeightedScore += item.score * item.weight;
             maximumWeightedScore += 5 * item.weight;
 
-            var startY = 20;
+            var startY = 30;
 
             // Add a new page except for the first item
             if (i > 0) {
@@ -267,7 +284,7 @@
                         var width = this.width;
                         var height = this.height;
                         var maxWidth = 180;
-                        var maxHeight = 60;
+                        var maxHeight = 100;
                         if (width > maxWidth) {
                             height *= maxWidth / width;
                             width = maxWidth;
@@ -288,10 +305,11 @@
         var siteScorePercentage = (totalWeightedScore / maximumWeightedScore) * 100;
         doc.setPage(1);
         doc.setFontSize(16);
-        doc.text('Site Score: ' + siteScorePercentage.toFixed(2) + '%', 10, 10);
+        doc.text('Quality Check Report for ' + siteName, 10, 10);
+        doc.text('Site Score: ' + siteScorePercentage.toFixed(2) + '%', 10, 20);
 
         // Save the PDF
-        doc.save('Quality_Check_Report.pdf');
+        doc.save('Quality_Check_Report_' + siteName + '.pdf');
     }
 
     // Initialize the form when the page loads
@@ -300,9 +318,9 @@
     };
 
     // Event listeners
-    document.getElementById('refreshButton').addEventListener('click', function() {
-        if (confirm('Are you sure you want to refresh? All data will be lost.')) {
-            refreshForm();
+    document.getElementById('resetButton').addEventListener('click', function() {
+        if (confirm('Are you sure you want to reset? All data will be lost.')) {
+            resetForm();
         }
     });
     document.getElementById('generatePdfButton').addEventListener('click', generatePdfReport);
