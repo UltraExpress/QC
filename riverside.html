@@ -424,13 +424,13 @@ async function generatePDF() {
     for (const item of checklistItems) {
         yPosition += 20;
         
-        // Calculate space needed
+        // Calculate initial space needed
         const titleHeight = 15;
         const scoreHeight = 15;
         const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
         const notesHeight = notesLines * 7;
-        const imageHeight = 100; // Increased height for images
-        const totalItemHeight = titleHeight + scoreHeight + notesHeight + imageHeight + 40;
+        const targetImageHeight = 100; // Target height for images
+        const totalItemHeight = titleHeight + scoreHeight + notesHeight + targetImageHeight + 40;
         
         // Check if we need a new page
         if (yPosition + totalItemHeight > pageHeight - 20) {
@@ -438,11 +438,11 @@ async function generatePDF() {
             yPosition = 20;
         }
         
-        // Draw red box for low scores
+        // Draw red box for low scores (will adjust height after image)
+        const boxStartY = yPosition - 5;
         if (item.score < 4) {
             doc.setDrawColor(255, 0, 0);
             doc.setLineWidth(0.5);
-            doc.rect(15, yPosition - 5, 180, totalItemHeight, 'S');
         }
         
         // Item name and weight
@@ -475,45 +475,57 @@ async function generatePDF() {
                 await new Promise((resolve) => {
                     img.onload = async () => {
                         try {
-                            // Create a temporary canvas to handle orientation
+                            // Create a temporary canvas
                             const canvas = document.createElement('canvas');
                             const ctx = canvas.getContext('2d');
                             
-                            // Set proper dimensions based on orientation
-                            if (img.width > img.height) {
-                                // Landscape orientation from iPhone
-                                canvas.width = img.height;
-                                canvas.height = img.width;
-                                
-                                // Rotate and flip as needed
-                                ctx.translate(canvas.width/2, canvas.height/2);
-                                ctx.rotate(90 * Math.PI/180);
-                                ctx.drawImage(img, -img.width/2, -img.height/2);
-                            } else {
-                                canvas.width = img.width;
-                                canvas.height = img.height;
-                                ctx.drawImage(img, 0, 0);
+                            // Calculate dimensions maintaining aspect ratio
+                            const maxWidth = 150; // Maximum width allowed
+                            const maxHeight = 100; // Maximum height allowed
+                            
+                            let finalWidth = img.width;
+                            let finalHeight = img.height;
+                            
+                            // Scale down if needed while maintaining aspect ratio
+                            if (finalWidth > maxWidth) {
+                                const ratio = maxWidth / finalWidth;
+                                finalWidth = maxWidth;
+                                finalHeight = Math.floor(finalHeight * ratio);
+                            }
+                            if (finalHeight > maxHeight) {
+                                const ratio = maxHeight / finalHeight;
+                                finalHeight = maxHeight;
+                                finalWidth = Math.floor(finalWidth * ratio);
                             }
                             
-                            // Convert to proper orientation
+                            // Set canvas size
+                            canvas.width = finalWidth;
+                            canvas.height = finalHeight;
+                            
+                            // Draw image with correct orientation
+                            ctx.drawImage(img, 0, 0, finalWidth, finalHeight);
+                            
+                            // Add to PDF
                             const properImage = canvas.toDataURL('image/jpeg');
-                            
-                            // Add to PDF with proper dimensions
-                            const pdfWidth = 160; // Increased width
-                            const pdfHeight = 100; // Increased height
-                            
                             doc.addImage(
                                 properImage,
                                 'JPEG',
                                 marginLeft,
                                 yPosition,
-                                pdfWidth,
-                                pdfHeight,
+                                finalWidth,
+                                finalHeight,
                                 undefined,
                                 'FAST'
                             );
                             
-                            yPosition += pdfHeight + 10;
+                            yPosition += finalHeight + 10;
+                            
+                            // Draw red box if needed (after we know final height)
+                            if (item.score < 4) {
+                                const boxHeight = yPosition - boxStartY;
+                                doc.rect(15, boxStartY, 180, boxHeight, 'S');
+                            }
+                            
                             resolve();
                         } catch (e) {
                             console.error('Error processing image:', e);
@@ -534,7 +546,6 @@ async function generatePDF() {
     const date = new Date().toISOString().split('T')[0];
     doc.save(`QC-Report-${date}.pdf`);
 }
-
 
 
 
