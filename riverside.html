@@ -310,7 +310,14 @@
                 return sum;
             }, 0);
             
-            document.getElementById('total-score').textContent = `Total Score: ${totalScore.toFixed(2)}`;
+            const maxPossibleScore = checklistItems.reduce((sum, item) => {
+                return sum + (5 * item.weight);
+            }, 0);
+            
+            const percentage = ((totalScore / maxPossibleScore) * 100).toFixed(1);
+            
+            document.getElementById('total-score').textContent = 
+                `Total Score: ${totalScore.toFixed(2)} (${percentage}% of maximum)`;
         }
 
         function resetForm() {
