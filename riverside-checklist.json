@@ -3,7 +3,6 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* All previous styles exactly the same */
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -110,8 +109,14 @@
             margin: 15px 0;
         }
         .image-upload input[type="file"] {
-            height: 50px;
-            font-size: 16px;
+            padding: 20px;
+            font-size: 18px;
+            width: 100%;
+            box-sizing: border-box;
+            background: #e9ecef;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            height: 50px; /* Added for larger tap target on mobile */
         }
         .image-preview {
             max-width: 100%;
@@ -144,7 +149,6 @@
     </style>
 </head>
 <body>
-    <!-- Rest of the HTML and JavaScript remains exactly the same -->
     <div class="header">
         <h2>Quality Control Checklist</h2>
         <button class="reset-btn" onclick="resetForm()">Reset All Items</button>
