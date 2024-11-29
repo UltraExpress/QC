@@ -8,21 +8,14 @@
             "notes": "",
             "image": null
         },
+  
         {
-            "id": 2,
-            "name": "PRE SOAK #1 Wash Service",
+            "id": 100,
+            "name": "vac area clean on ground ",
             "weight": 0.8,
             "score": 0,
             "notes": "",
             "image": null
-        },
-        {
-            "id": 3,
-            "name": "GRAND ENTRY FX Wash Service",
-            "weight": 0.8,
-            "score": 0,
-            "notes": "",
-            "image": null
-        },
-]
+        }
+    ]
 }
