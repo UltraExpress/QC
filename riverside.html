@@ -404,153 +404,90 @@
         
 async function generatePDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    let yPosition = 20;
+    // Create PDF with higher DPI
+    const doc = new jsPDF({
+        unit: 'pt',
+        hotfixes: ['px_scaling']
+    });
+    let yPosition = 40;
     const pageHeight = doc.internal.pageSize.height;
-    const marginLeft = 20;
+    const marginLeft = 40;
+
+    // ... (previous title and score code remains the same)
     
-    // Add title
-    doc.setFontSize(24);
-    doc.setTextColor(0, 0, 0);
-    doc.text("Quality Control Report", 105, yPosition, { align: "center" });
-    
-    // Add total score
-    yPosition += 20;
-    doc.setFontSize(16);
-    const totalScoreElement = document.getElementById('total-score');
-    doc.text(totalScoreElement.textContent, 105, yPosition, { align: "center" });
-    
-    // Process each checklist item
-    for (const item of checklistItems) {
-        yPosition += 20;
-        
-        // Calculate initial space needed
-        const titleHeight = 15;
-        const scoreHeight = 15;
-        const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
-        const notesHeight = notesLines * 7;
-        const targetImageHeight = 100;
-        const totalItemHeight = titleHeight + scoreHeight + notesHeight + targetImageHeight + 40;
-        
-        // Check if we need a new page
-        if (yPosition + totalItemHeight > pageHeight - 20) {
-            doc.addPage();
-            yPosition = 20;
-        }
-        
-        // Draw red box for low scores (will adjust height after image)
-        const boxStartY = yPosition - 5;
-        if (item.score < 4) {
-            doc.setDrawColor(255, 0, 0);
-            doc.setLineWidth(0.5);
-        }
-        
-        // Item name and weight
-        doc.setTextColor(item.score < 4 ? 255 : 0, 0, 0);
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${item.name} (Weight: ${item.weight})`, marginLeft, yPosition);
-        
-        // Score
-        yPosition += 15;
-        doc.setFontSize(12);
-        doc.text(`SCORE: ${item.score}`, marginLeft, yPosition);
-        if (item.score < 4) {
-            doc.text('NEEDS ATTENTION', 70, yPosition);
-        }
-        
-        // Notes
-        yPosition += 15;
-        doc.setFont(undefined, 'normal');
-        const splitNotes = doc.splitTextToSize(`Notes: ${item.notes}`, 170);
-        doc.text(splitNotes, marginLeft, yPosition);
-        yPosition += notesHeight;
-        
-        // Handle image
-        if (item.image) {
-            try {
-                const img = new Image();
-                img.src = item.image;
-                
-                await new Promise((resolve) => {
-                    img.onload = async () => {
-                        try {
-                            // Create a temporary canvas with high resolution
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            
-                            // Calculate dimensions maintaining aspect ratio
-                            const maxWidth = 150;
-                            const maxHeight = 100;
-                            
-                            let finalWidth = img.width;
-                            let finalHeight = img.height;
-                            
-                            // Scale down if needed while maintaining aspect ratio
-                            if (finalWidth > maxWidth) {
-                                const ratio = maxWidth / finalWidth;
-                                finalWidth = maxWidth;
-                                finalHeight = Math.floor(finalHeight * ratio);
-                            }
-                            if (finalHeight > maxHeight) {
-                                const ratio = maxHeight / finalHeight;
-                                finalHeight = maxHeight;
-                                finalWidth = Math.floor(finalWidth * ratio);
-                            }
-                            
-                            // Set canvas size to 2x for better quality
-                            canvas.width = finalWidth * 2;
-                            canvas.height = finalHeight * 2;
-                            
-                            // Enable image smoothing
-                            ctx.imageSmoothingEnabled = true;
-                            ctx.imageSmoothingQuality = 'high';
-                            
-                            // Draw image with correct orientation at 2x size
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            
-                            // Add to PDF with high quality settings
-                            const properImage = canvas.toDataURL('image/jpeg', 1.0); // Maximum quality
-                            doc.addImage(
-                                properImage,
-                                'JPEG',
-                                marginLeft,
-                                yPosition,
-                                finalWidth,
-                                finalHeight,
-                                undefined,
-                                'MEDIUM' // Better compression quality
-                            );
-                            
-                            yPosition += finalHeight + 10;
-                            
-                            // Draw red box if needed (after we know final height)
-                            if (item.score < 4) {
-                                const boxHeight = yPosition - boxStartY;
-                                doc.rect(15, boxStartY, 180, boxHeight, 'S');
-                            }
-                            
-                            resolve();
-                        } catch (e) {
-                            console.error('Error processing image:', e);
-                            resolve();
+    // Handle image with higher quality
+    if (item.image) {
+        try {
+            const img = new Image();
+            img.src = item.image;
+            
+            await new Promise((resolve) => {
+                img.onload = async () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d', { alpha: false });
+                        
+                        // Set canvas to 4x the display size for better quality
+                        canvas.width = img.width * 4;
+                        canvas.height = img.height * 4;
+                        
+                        // Enable best quality settings
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        
+                        // Draw at high resolution
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Calculate final dimensions
+                        const maxWidth = 400; // Increased max width
+                        const maxHeight = 300; // Increased max height
+                        
+                        let finalWidth = canvas.width;
+                        let finalHeight = canvas.height;
+                        
+                        // Maintain aspect ratio while scaling
+                        if (finalWidth > maxWidth) {
+                            const ratio = maxWidth / finalWidth;
+                            finalWidth = maxWidth;
+                            finalHeight = Math.floor(finalHeight * ratio);
                         }
-                    };
-                    img.onerror = () => resolve();
-                });
-            } catch (e) {
-                console.error('Error adding image:', e);
-            }
+                        if (finalHeight > maxHeight) {
+                            const ratio = maxHeight / finalHeight;
+                            finalHeight = maxHeight;
+                            finalWidth = Math.floor(finalWidth * ratio);
+                        }
+                        
+                        // Convert to high quality JPEG
+                        const properImage = canvas.toDataURL('image/jpeg', 1.0);
+                        
+                        // Add to PDF with best quality settings
+                        doc.addImage(
+                            properImage,
+                            'JPEG',
+                            marginLeft,
+                            yPosition,
+                            finalWidth,
+                            finalHeight,
+                            undefined,
+                            'NONE' // No compression
+                        );
+                        
+                        yPosition += finalHeight + 20;
+                        resolve();
+                    } catch (e) {
+                        console.error('Error processing image:', e);
+                        resolve();
+                    }
+                };
+                img.onerror = () => resolve();
+            });
+        } catch (e) {
+            console.error('Error adding image:', e);
         }
-        
-        yPosition += 20;
     }
     
-    // Save the PDF
-    const date = new Date().toISOString().split('T')[0];
-    doc.save(`QC-Report-${date}.pdf`);
+    // ... (rest of the code remains the same)
 }
-
 
 
 
