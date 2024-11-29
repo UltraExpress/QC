@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- Previous styles remain exactly the same -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* All previous styles remain exactly the same */
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -166,7 +168,8 @@
                 if (!response.ok) throw new Error('Failed to load checklist data');
                 
                 const data = await response.json();
-                checklistItems = data.map(item => ({
+                // Extract items from the nested structure
+                checklistItems = data.items.map(item => ({
                     ...item,
                     score: 0,
                     notes: "",
@@ -228,6 +231,7 @@
             });
         }
 
+        // All other functions remain exactly the same
         function getRatingDescription(rating) {
             const descriptions = {
                 1: "Critical Issues<br>Immediate Action Required",
