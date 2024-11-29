@@ -3,6 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* All previous styles exactly the same */
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -36,6 +37,10 @@
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color 0.3s;
+        }
+        .qc-item.complete {
+            background: #90EE90;
         }
         .item-header {
             display: flex;
@@ -131,7 +136,6 @@
     </style>
 </head>
 <body>
-    <!-- Rest of the HTML remains exactly the same -->
     <div class="header">
         <h2>Quality Control Checklist</h2>
         <button class="reset-btn" onclick="resetForm()">Reset Item</button>
@@ -188,7 +192,6 @@
     </div>
 
     <script>
-        // JavaScript remains exactly the same
         let itemData = {
             "id": 1,
             "name": "Roller Up",
@@ -197,6 +200,19 @@
             "notes": "",
             "image": null
         };
+
+        function checkComplete() {
+            const hasScore = itemData.score > 0;
+            const hasNotes = itemData.notes.trim() !== '';
+            const hasImage = itemData.image !== null;
+            
+            const item = document.querySelector('.qc-item');
+            if (hasScore && hasNotes && hasImage) {
+                item.classList.add('complete');
+            } else {
+                item.classList.remove('complete');
+            }
+        }
 
         function setRating(rating) {
             const buttons = document.querySelectorAll('.rating-btn');
@@ -208,11 +224,13 @@
             });
             
             itemData.score = rating;
+            checkComplete();
         }
 
         function updateNotes() {
             const notes = document.getElementById('notes').value;
             itemData.notes = notes;
+            checkComplete();
         }
 
         function handleImageUpload(event) {
@@ -227,6 +245,7 @@
                     img.className = 'image-preview';
                     preview.appendChild(img);
                     itemData.image = e.target.result;
+                    checkComplete();
                 }
                 reader.readAsDataURL(file);
             }
@@ -242,6 +261,7 @@
                 document.getElementById('notes').value = '';
                 document.getElementById('imageInput').value = '';
                 document.getElementById('imagePreview').innerHTML = '';
+                checkComplete();
             }
         }
     </script>
