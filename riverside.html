@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -154,6 +155,26 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
+        .pdf-button {
+            width: 100%;
+            padding: 20px;
+            font-size: 24px;
+            background: #ccc;
+            color: #666;
+            border: none;
+            border-radius: 8px;
+            margin-top: 30px;
+            cursor: not-allowed;
+            transition: all 0.3s;
+        }
+        .pdf-button.ready {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .pdf-button.ready:hover {
+            background: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -166,6 +187,10 @@
     <div id="checklist-container">
         <div class="loading">Loading checklist items...</div>
     </div>
+
+    <button id="pdfButton" class="pdf-button" onclick="generatePDF()" disabled>
+        Make a PDF Report
+    </button>
 
     <script>
         let checklistItems = [];
@@ -236,6 +261,7 @@
             checklistItems.forEach((item, index) => {
                 checkComplete(index);
             });
+            checkAllItemsComplete();
         }
 
         function getRatingDescription(rating) {
@@ -263,6 +289,23 @@
             }
         }
 
+        function checkAllItemsComplete() {
+            const allComplete = checklistItems.every(item => 
+                item.score > 0 && 
+                item.notes.trim() !== '' && 
+                item.image !== null
+            );
+            
+            const pdfButton = document.getElementById('pdfButton');
+            if (allComplete) {
+                pdfButton.classList.add('ready');
+                pdfButton.disabled = false;
+            } else {
+                pdfButton.classList.remove('ready');
+                pdfButton.disabled = true;
+            }
+        }
+
         function setRating(index, rating) {
             const itemElement = document.querySelector(`.qc-item[data-id="${checklistItems[index].id}"]`);
             const buttons = itemElement.querySelectorAll('.rating-btn');
@@ -277,11 +320,13 @@
             checklistItems[index].score = rating;
             checkComplete(index);
             updateTotalScore();
+            checkAllItemsComplete();
         }
 
         function updateNotes(index, notes) {
             checklistItems[index].notes = notes;
             checkComplete(index);
+            checkAllItemsComplete();
         }
 
         function handleImageUpload(index, event) {
@@ -297,6 +342,7 @@
                     preview.appendChild(img);
                     checklistItems[index].image = e.target.result;
                     checkComplete(index);
+                    checkAllItemsComplete();
                 }
                 reader.readAsDataURL(file);
             }
@@ -329,7 +375,66 @@
                 });
                 renderChecklist();
                 updateTotalScore();
+                checkAllItemsComplete();
             }
+        }
+
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let yPosition = 20;
+            
+            // Add title and total score
+            doc.setFontSize(24);
+            doc.text("Quality Control Report", 105, yPosition, { align: "center" });
+            
+            yPosition += 20;
+            doc.setFontSize(16);
+            const totalScoreElement = document.getElementById('total-score');
+            doc.text(totalScoreElement.textContent, 105, yPosition, { align: "center" });
+            
+            // Add each checklist item
+            yPosition += 20;
+            doc.setFontSize(12);
+            
+            for (const item of checklistItems) {
+                // Check if we need a new page
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                // Item header
+                doc.setFont(undefined, 'bold');
+                doc.text(`${item.name} (Weight: ${item.weight})`, 20, yPosition);
+                yPosition += 10;
+                
+                // Score
+                doc.setFont(undefined, 'normal');
+                doc.text(`Quality Rating: ${item.score}/5`, 20, yPosition);
+                yPosition += 10;
+                
+                // Notes (with word wrap)
+                const splitNotes = doc.splitTextToSize(`Notes: ${item.notes}`, 170);
+                doc.text(splitNotes, 20, yPosition);
+                yPosition += (splitNotes.length * 7);
+                
+                // Image (if it exists)
+                if (item.image) {
+                    try {
+                        doc.addImage(item.image, 'JPEG', 20, yPosition, 100, 60);
+                        yPosition += 70;
+                    } catch (e) {
+                        console.error('Error adding image:', e);
+                    }
+                }
+                
+                yPosition += 10; // Space between items
+            }
+            
+            // Save the PDF
+            const date = new Date().toISOString().split('T')[0];
+            doc.save(`QC-Report-${date}.pdf`);
         }
 
         // Load the checklist when the page loads
