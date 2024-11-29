@@ -1,247 +1,313 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Car Wash Quality Check</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Include local copies of jQuery and jsPDF -->
-  <script src="jquery-3.6.0.min.js"></script>
-  <script src="jspdf.umd.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 10px;
-    }
-    h1 {
-      text-align: center;
-    }
-    .item {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-    }
-    .item h2 {
-      margin-top: 0;
-    }
-    .item label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    .item textarea {
-      width: 100%;
-      padding: 5px;
-      margin-top: 5px;
-      resize: vertical;
-    }
-    .item select, .item input[type="file"] {
-      width: 100%;
-      padding: 5px;
-      margin-top: 5px;
-    }
-    .item img {
-      max-width: 100%;
-      margin-top: 10px;
-      display: none;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    #buttons {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    #buttons button {
-      padding: 10px 20px;
-      margin: 5px;
-      font-size: 16px;
-    }
-    #buttons button:hover {
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Car Wash Quality Check</title>
+    <!-- Include jsPDF and html2canvas libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        fieldset {
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+        }
+
+        img {
+            margin-top: 10px;
+            max-width: 200px;
+            max-height: 200px;
+        }
+
+        button {
+            margin: 10px 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <h1>Car Wash Quality Check</h1>
-  <form id="qualityForm">
-    <!-- Dynamic content will be inserted here -->
-  </form>
-  <div id="buttons">
-    <button id="refreshBtn">Refresh</button>
-    <button id="generatePdfBtn">Make PDF Report</button>
-  </div>
 
-  <!-- JavaScript Code -->
-  <script>
-    $(document).ready(function() {
-      // Items to be quality checked
-      const items = [
-        {
-          "id": 1,
-          "name": "Exterior Wash",
-          "weight": 0.3
-        },
-        {
-          "id": 2,
-          "name": "Interior Vacuum",
-          "weight": 0.2
-        },
-        {
-          "id": 3,
-          "name": "Window Cleaning",
-          "weight": 0.5
-        },
-        {
-          "id": 4,
-          "name": "Tire Shine",
-          "weight": 0.1
-        },
-        {
-          "id": 5,
-          "name": "Wax Application",
-          "weight": 0.4
-        }
-      ];
+<h1>Car Wash Quality Check</h1>
 
-      // Load items into the form
-      const form = $('#qualityForm');
-      items.forEach(function(item) {
-        const itemDiv = $(`
-          <div class="item" data-id="${item.id}">
-            <h2>${item.name}</h2>
-            <label>Notes:</label>
-            <textarea name="notes" required></textarea>
+<form id="qualityCheckForm">
 
-            <label>Upload Image:</label>
-            <input type="file" name="image" accept="image/*" required />
-            <img src="#" alt="Image Preview" />
+    <!-- The form content will be generated dynamically from the JSON data -->
 
-            <label>Rating (1-5):</label>
-            <select name="rating" required>
-              <option value="">Select Rating</option>
-              <option value="1">1 - Poor</option>
-              <option value="2">2 - Fair</option>
-              <option value="3">3 - Good</option>
-              <option value="4">4 - Very Good</option>
-              <option value="5">5 - Excellent</option>
-            </select>
+</form>
 
-            <input type="hidden" name="weight" value="${item.weight}" />
-          </div>
-        `);
-        form.append(itemDiv);
-      });
+<button id="refreshButton">Refresh</button>
+<button id="generatePdfButton" disabled>Make PDF Report</button>
 
-      // Image preview functionality
-      $('#qualityForm').on('change', 'input[type="file"]', function() {
-        const fileInput = $(this);
-        const file = this.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            fileInput.next('img').attr('src', e.target.result).show();
-          };
-          reader.readAsDataURL(file);
-        }
-      });
+<script>
+    var jsonData = {
+        "items": [
+            {
+                "id": 1,
+                "name": "Roller Up",
+                "weight": 0.6,
+                "score": 0,
+                "notes": "",
+                "image": null
+            },
+            {
+                "id": 2,
+                "name": "PRE SOAK #1 Wash Service",
+                "weight": 0.8,
+                "score": 0,
+                "notes": "",
+                "image": null
+            },
+            {
+                "id": 3,
+                "name": "GRAND ENTRY FX Wash Service",
+                "weight": 0.8,
+                "score": 0,
+                "notes": "",
+                "image": null
+            },
+            {
+                "id": 4,
+                "name": "PRE SOAK #2 Wash Service",
+                "weight": 0.5,
+                "score": 0,
+                "notes": "",
+                "image": null
+            }
+        ]
+    };
 
-      // Refresh button to clear the form
-      $('#refreshBtn').click(function() {
-        $('#qualityForm')[0].reset();
-        $('#qualityForm img').hide();
-      });
+    // Function to generate form content
+    function generateForm() {
+        var form = document.getElementById('qualityCheckForm');
+        form.innerHTML = ''; // Clear any existing content
 
-      // Validate the form before generating PDF
-      $('#generatePdfBtn').click(function() {
-        if (validateForm()) {
-          generatePdfReport();
-        } else {
-          alert('Please complete notes, upload an image, and select a rating for each item.');
-        }
-      });
+        jsonData.items.forEach(function(item) {
+            var fieldset = document.createElement('fieldset');
+            fieldset.id = 'item-' + item.id;
 
-      // Form validation function
-      function validateForm() {
-        let isValid = true;
-        $('#qualityForm .item').each(function() {
-          const notes = $(this).find('textarea[name="notes"]').val();
-          const imageUploaded = $(this).find('input[name="image"]')[0].files.length > 0;
-          const rating = $(this).find('select[name="rating"]').val();
+            var legend = document.createElement('legend');
+            legend.textContent = item.name + ' (Weight: ' + item.weight + ')';
+            fieldset.appendChild(legend);
 
-          if (!notes || !imageUploaded || !rating) {
-            isValid = false;
-            return false; // Exit the loop
-          }
-        });
-        return isValid;
-      }
+            // Notes input
+            var notesLabel = document.createElement('label');
+            notesLabel.textContent = 'Notes: ';
+            var notesInput = document.createElement('textarea');
+            notesInput.id = 'notes-' + item.id;
+            notesInput.rows = 3;
+            notesInput.cols = 50;
+            notesInput.addEventListener('input', checkFormCompletion);
+            fieldset.appendChild(notesLabel);
+            fieldset.appendChild(document.createElement('br'));
+            fieldset.appendChild(notesInput);
+            fieldset.appendChild(document.createElement('br'));
 
-      // Function to generate the PDF report
-      async function generatePdfReport() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        let totalScore = 0;
-        let totalWeight = 0;
-        let yOffset = 20;
-
-        // Loop through each item to add to PDF
-        for (let i = 0; i < items.length; i++) {
-          const itemDiv = $('#qualityForm .item').eq(i);
-          const itemName = items[i].name;
-          const notes = itemDiv.find('textarea[name="notes"]').val();
-          const rating = parseInt(itemDiv.find('select[name="rating"]').val());
-          const weight = parseFloat(itemDiv.find('input[name="weight"]').val());
-          const imageSrc = itemDiv.find('img').attr('src');
-
-          totalScore += rating * weight;
-          totalWeight += weight;
-
-          // Add item details to PDF
-          doc.setFontSize(14);
-          doc.text(`Item: ${itemName}`, 10, yOffset);
-          yOffset += 10;
-          doc.setFontSize(12);
-          doc.text(`Notes: ${notes}`, 10, yOffset);
-          yOffset += 10;
-          doc.text(`Rating: ${rating}`, 10, yOffset);
-          yOffset += 10;
-
-          // Add image to PDF
-          if (imageSrc && imageSrc !== '#') {
-            const img = new Image();
-            img.src = imageSrc;
-            await new Promise(resolve => {
-              img.onload = () => {
-                const imgWidth = doc.internal.pageSize.getWidth() - 20;
-                const imgHeight = (img.height * imgWidth) / img.width;
-                if (yOffset + imgHeight > doc.internal.pageSize.getHeight() - 20) {
-                  doc.addPage();
-                  yOffset = 20;
-                }
-                doc.addImage(img, 'JPEG', 10, yOffset, imgWidth, imgHeight);
-                yOffset += imgHeight + 10;
-                resolve();
-              };
+            // Image upload
+            var imageLabel = document.createElement('label');
+            imageLabel.textContent = 'Image: ';
+            var imageInput = document.createElement('input');
+            imageInput.type = 'file';
+            imageInput.accept = 'image/*';
+            imageInput.id = 'image-' + item.id;
+            imageInput.addEventListener('change', function(event) {
+                handleImageUpload(event, item.id);
             });
-          }
+            fieldset.appendChild(imageLabel);
+            fieldset.appendChild(imageInput);
+            fieldset.appendChild(document.createElement('br'));
 
-          // Check for page overflow
-          if (yOffset > doc.internal.pageSize.getHeight() - 30) {
-            doc.addPage();
-            yOffset = 20;
-          }
+            // Image preview
+            var imagePreview = document.createElement('img');
+            imagePreview.id = 'preview-' + item.id;
+            imagePreview.classList.add('hidden');
+            fieldset.appendChild(imagePreview);
+            fieldset.appendChild(document.createElement('br'));
+
+            // Rating input
+            var ratingLabel = document.createElement('label');
+            ratingLabel.textContent = 'Rating (1-5): ';
+            var ratingSelect = document.createElement('select');
+            ratingSelect.id = 'rating-' + item.id;
+            ratingSelect.addEventListener('change', checkFormCompletion);
+            var defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select a rating';
+            ratingSelect.appendChild(defaultOption);
+            for (var i = 1; i <= 5; i++) {
+                var option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                ratingSelect.appendChild(option);
+            }
+            fieldset.appendChild(ratingLabel);
+            fieldset.appendChild(ratingSelect);
+            fieldset.appendChild(document.createElement('br'));
+
+            form.appendChild(fieldset);
+            form.appendChild(document.createElement('hr'));
+        });
+    }
+
+    // Function to handle image upload and preview
+    function handleImageUpload(event, itemId) {
+        var file = event.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                // Update the image preview
+                var preview = document.getElementById('preview-' + itemId);
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                // Update the image data in jsonData
+                var item = jsonData.items.find(function(i) { return i.id === itemId; });
+                item.image = e.target.result;
+                checkFormCompletion();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Function to check if all fields are completed
+    function checkFormCompletion() {
+        var allCompleted = true;
+        jsonData.items.forEach(function(item) {
+            // Get notes
+            var notesInput = document.getElementById('notes-' + item.id);
+            var notesValue = notesInput.value.trim();
+            item.notes = notesValue;
+            if (!notesValue) {
+                allCompleted = false;
+            }
+            // Get rating
+            var ratingSelect = document.getElementById('rating-' + item.id);
+            var ratingValue = ratingSelect.value;
+            item.score = parseInt(ratingValue) || 0;
+            if (item.score === 0) {
+                allCompleted = false;
+            }
+            // Check image
+            if (!item.image) {
+                allCompleted = false;
+            }
+        });
+        var generatePdfButton = document.getElementById('generatePdfButton');
+        generatePdfButton.disabled = !allCompleted;
+    }
+
+    // Function to refresh the form
+    function refreshForm() {
+        // Reset jsonData
+        jsonData.items.forEach(function(item) {
+            item.score = 0;
+            item.notes = '';
+            item.image = null;
+        });
+        // Regenerate the form
+        generateForm();
+        checkFormCompletion();
+    }
+
+    // Function to generate the PDF report
+    async function generatePdfReport() {
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+
+        var totalWeightedScore = 0;
+        var maximumWeightedScore = 0;
+
+        // Placeholder for site score
+        doc.setFontSize(16);
+        doc.text('Site Score: Calculating...', 10, 10);
+
+        for (var i = 0; i < jsonData.items.length; i++) {
+            var item = jsonData.items[i];
+
+            totalWeightedScore += item.score * item.weight;
+            maximumWeightedScore += 5 * item.weight;
+
+            var startY = 20;
+
+            // Add a new page except for the first item
+            if (i > 0) {
+                doc.addPage();
+            }
+
+            // Add item name
+            doc.setFontSize(14);
+            doc.text(item.name, 10, startY);
+
+            // Add notes
+            doc.setFontSize(12);
+            doc.text('Notes:', 10, startY + 10);
+            var splitNotes = doc.splitTextToSize(item.notes, 180);
+            doc.text(splitNotes, 10, startY + 15);
+
+            // Add rating
+            doc.text('Rating: ' + item.score + ' (Weight: ' + item.weight + ')', 10, startY + 35);
+
+            // Add image
+            if (item.image) {
+                await new Promise(function(resolve) {
+                    var img = new Image();
+                    img.onload = function() {
+                        var width = this.width;
+                        var height = this.height;
+                        var maxWidth = 180;
+                        var maxHeight = 60;
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                        doc.addImage(this, 'JPEG', 10, startY + 45, width, height);
+                        resolve();
+                    };
+                    img.src = item.image;
+                });
+            }
         }
 
-        // Calculate and display site score
-        const siteScore = ((totalScore / (totalWeight * 5)) * 100).toFixed(2);
+        // Calculate and update site score
+        var siteScorePercentage = (totalWeightedScore / maximumWeightedScore) * 100;
+        doc.setPage(1);
         doc.setFontSize(16);
-        doc.text(`Site Score: ${siteScore}%`, 10, 10);
+        doc.text('Site Score: ' + siteScorePercentage.toFixed(2) + '%', 10, 10);
 
         // Save the PDF
-        doc.save('CarWashQualityReport.pdf');
-      }
+        doc.save('Quality_Check_Report.pdf');
+    }
+
+    // Initialize the form when the page loads
+    window.onload = function() {
+        generateForm();
+    };
+
+    // Event listeners
+    document.getElementById('refreshButton').addEventListener('click', function() {
+        if (confirm('Are you sure you want to refresh? All data will be lost.')) {
+            refreshForm();
+        }
     });
-  </script>
+    document.getElementById('generatePdfButton').addEventListener('click', generatePdfReport);
+
+</script>
+
 </body>
 </html>
