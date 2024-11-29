@@ -429,7 +429,7 @@ async function generatePDF() {
         const scoreHeight = 15;
         const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
         const notesHeight = notesLines * 7;
-        const targetImageHeight = 100; // Target height for images
+        const targetImageHeight = 100;
         const totalItemHeight = titleHeight + scoreHeight + notesHeight + targetImageHeight + 40;
         
         // Check if we need a new page
@@ -475,13 +475,13 @@ async function generatePDF() {
                 await new Promise((resolve) => {
                     img.onload = async () => {
                         try {
-                            // Create a temporary canvas
+                            // Create a temporary canvas with high resolution
                             const canvas = document.createElement('canvas');
                             const ctx = canvas.getContext('2d');
                             
                             // Calculate dimensions maintaining aspect ratio
-                            const maxWidth = 150; // Maximum width allowed
-                            const maxHeight = 100; // Maximum height allowed
+                            const maxWidth = 150;
+                            const maxHeight = 100;
                             
                             let finalWidth = img.width;
                             let finalHeight = img.height;
@@ -498,15 +498,19 @@ async function generatePDF() {
                                 finalWidth = Math.floor(finalWidth * ratio);
                             }
                             
-                            // Set canvas size
-                            canvas.width = finalWidth;
-                            canvas.height = finalHeight;
+                            // Set canvas size to 2x for better quality
+                            canvas.width = finalWidth * 2;
+                            canvas.height = finalHeight * 2;
                             
-                            // Draw image with correct orientation
-                            ctx.drawImage(img, 0, 0, finalWidth, finalHeight);
+                            // Enable image smoothing
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
                             
-                            // Add to PDF
-                            const properImage = canvas.toDataURL('image/jpeg');
+                            // Draw image with correct orientation at 2x size
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            
+                            // Add to PDF with high quality settings
+                            const properImage = canvas.toDataURL('image/jpeg', 1.0); // Maximum quality
                             doc.addImage(
                                 properImage,
                                 'JPEG',
@@ -515,7 +519,7 @@ async function generatePDF() {
                                 finalWidth,
                                 finalHeight,
                                 undefined,
-                                'FAST'
+                                'MEDIUM' // Better compression quality
                             );
                             
                             yPosition += finalHeight + 10;
@@ -546,7 +550,6 @@ async function generatePDF() {
     const date = new Date().toISOString().split('T')[0];
     doc.save(`QC-Report-${date}.pdf`);
 }
-
 
 
 
