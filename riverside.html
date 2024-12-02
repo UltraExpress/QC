@@ -258,28 +258,66 @@ x<!DOCTYPE html>
 
 
 
-let inspectorName = '';
+
+
+
+
+
+
+
+
+
+
+
+        let inspectorName = '';
+
 document.getElementById('inspector-name').addEventListener('input', function(e) {
     inspectorName = e.target.value.trim();
     
-    // Get all score inputs and the PDF button
+    // Get all interactive elements
     const ratingButtons = document.querySelectorAll('.rating-btn');
+    const noteInputs = document.querySelectorAll('.notes');
+    const fileInputs = document.querySelectorAll('input[type="file"]');
     const pdfButton = document.getElementById('pdfButton');
     
     // Enable/disable based on inspector name
     if (inspectorName) {
-        ratingButtons.forEach(btn => btn.disabled = false);
+        ratingButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.cursor = 'pointer';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'text';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'pointer';
+        });
         if (allItemsComplete()) {
             pdfButton.disabled = false;
             pdfButton.classList.add('ready');
         }
     } else {
-        ratingButtons.forEach(btn => btn.disabled = true);
+        ratingButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
         pdfButton.disabled = true;
         pdfButton.classList.remove('ready');
     }
-});
 
+    // Force a re-render to ensure all elements are properly disabled/enabled
+    renderChecklist();
+});
 
 
         
@@ -301,6 +339,14 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
                 }));
                 
                 renderChecklist();
+
+
+
+
+
+
+
+                
             } catch (error) {
                 document.getElementById('checklist-container').innerHTML = `
                     <div class="error">
