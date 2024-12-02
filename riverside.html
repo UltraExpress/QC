@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+x<!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -171,10 +171,36 @@
             background: #007bff;
             color: white;
             cursor: pointer;
+        
+        
+        
+        
+        
         }
         .pdf-button.ready:hover {
             background: #0056b3;
         }
+        .inspector-section {
+            margin: 1rem 0;
+            padding: 0 1rem;
+        }
+        .inspector-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: white;
+            background-color: #343a40;
+        }
+        .inspector-input:focus {
+            outline: none;
+            border-color: #0056b3;
+
+
+
+        
     </style>
 </head>
 <body>
@@ -182,6 +208,31 @@
         <h2>Quality Control Checklist</h2>
         <button class="reset-btn" onclick="resetForm()">Reset All Items</button>
     </div>
+
+
+
+
+
+
+    
+
+ <div class="inspector-section">
+        <input 
+            type="text" 
+            id="inspector-name" 
+            placeholder="Inspector Name" 
+            class="inspector-input"
+        >
+    </div>
+
+
+    
+
+
+
+
+
+    
     <div id="total-score" class="total-score">Total Score: 0</div>
     
     <div id="checklist-container">
@@ -191,6 +242,15 @@
     <button id="pdfButton" class="pdf-button" onclick="generatePDF()" disabled>
         Make a PDF Report
     </button>
+
+
+
+
+
+
+
+
+    
 
     <script>
         let checklistItems = [];
