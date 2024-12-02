@@ -1,22 +1,49 @@
-{
-    "items": [
-        {
-            "id": 1,
-            "name": "Roller Up",
-            "weight": 0.6,
-            "score": 0,
-            "notes": "",
-            "image": null
-        },
-        
-        {
-            "id": 100,
-            "name": "vac area clean on ground ",
-            "weight": 0.8,
-            "score": 0,
-            "notes": "",
-            "image": null
-        }
+let inspectorName = '';
 
-    ]
-}
+document.getElementById('inspector-name').addEventListener('input', function(e) {
+    inspectorName = e.target.value.trim();
+    
+    // Get all interactive elements
+    const ratingButtons = document.querySelectorAll('.rating-btn');
+    const noteInputs = document.querySelectorAll('.notes');
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    const pdfButton = document.getElementById('pdfButton');
+    
+    // Enable/disable based on inspector name
+    if (inspectorName) {
+        ratingButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.cursor = 'pointer';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'text';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'pointer';
+        });
+        if (allItemsComplete()) {
+            pdfButton.disabled = false;
+            pdfButton.classList.add('ready');
+        }
+    } else {
+        ratingButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        pdfButton.disabled = true;
+        pdfButton.classList.remove('ready');
+    }
+
+    // Force a re-render to ensure all elements are properly disabled/enabled
+    renderChecklist();
+});
