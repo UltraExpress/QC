@@ -1,539 +1,860 @@
 {
     "items": [
         {
-            "ID": 1,
+            "id": 1,
             "name": "Conveyor Hydraulic Power Pack",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 2,
+            "id": 2,
             "name": "Roller Up",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 3,
+            "id": 3,
             "name": "Instructional Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 4,
+            "id": 4,
             "name": "Prep Gun On",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 5,
+            "id": 5,
             "name": "Protection Plus Service Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 6,
+            "id": 6,
             "name": "Protect & Shine Service Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 7,
+            "id": 7,
             "name": "Clean & Shine Service Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 8,
+            "id": 8,
             "name": "Clean & Dry Service Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 9,
+            "id": 9,
             "name": "Tsunami On",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 10,
+            "id": 10,
             "name": "Tsunami LED",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 11,
+            "id": 11,
             "name": "PreSoak.Soap1",
-            "weight": 0.8
+            "weight": 0.8,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 12,
+            "id": 12,
             "name": "Drying Agent",
-            "weight": 0.8
+            "weight": 0.8,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 13,
+            "id": 13,
             "name": "Fragrance",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 14,
+            "id": 14,
             "name": "CTA 1",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 15,
+            "id": 15,
             "name": "Mitter Curtain #1",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 16,
+            "id": 16,
             "name": "Mitter Curtain Water",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 17,
+            "id": 17,
             "name": "CTA 2",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 18,
+            "id": 18,
             "name": "Brushes Hydraulic Power Pack",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 19,
+            "id": 19,
             "name": "Wrap Water",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 20,
+            "id": 20,
             "name": "Wrap Retract",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 21,
+            "id": 21,
             "name": "Tri Color Polish",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 22,
+            "id": 22,
             "name": "Tri Color Polish Sign & LED",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 23,
+            "id": 23,
             "name": "Soap Arch #2",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 24,
+            "id": 24,
             "name": "Van High Brush Water",
-            "weight": 0.4
+            "weight": 0.4,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 25,
+            "id": 25,
             "name": "Van High Brush Retract",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 26,
+            "id": 26,
             "name": "Wheel Brush Hydraulic Motor",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 27,
+            "id": 27,
             "name": "Wheel Brush Water",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 28,
+            "id": 28,
             "name": "Wheel Brush Retract",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 29,
+            "id": 29,
             "name": "Soap Rinse",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 30,
+            "id": 30,
             "name": "Extreme Shine Wax",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 31,
+            "id": 31,
             "name": "Extreme Shine Wax Sign & LED Light",
-            "weight": 0.4
+            "weight": 0.4,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 32,
+            "id": 32,
             "name": "High Pressure Wheel Blaster",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 33,
+            "id": 33,
             "name": "High Pressure Wheel Blaster",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 34,
+            "id": 34,
             "name": "Mitter Curtain #2",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 35,
+            "id": 35,
             "name": "Mitter Curtain #2 & Rocker Brush Water",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 36,
+            "id": 36,
             "name": "Main Rinse",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 37,
+            "id": 37,
             "name": "Paint Shine",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 38,
+            "id": 38,
             "name": "Paint Shine Sign & LED Light",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 39,
+            "id": 39,
             "name": "RainX Arch",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 40,
+            "id": 40,
             "name": "RainX Sign & LED Light",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 41,
+            "id": 41,
             "name": "Drying Agent",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 42,
+            "id": 42,
             "name": "Spot Free Rinse",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 43,
+            "id": 43,
             "name": "Spot Free Rinse Sign & LED Light",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 44,
+            "id": 44,
             "name": "Dryer Arch #1 D/S",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 45,
+            "id": 45,
             "name": "Dryer Arch #1 P/S",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 46,
+            "id": 46,
             "name": "Dryer #1 & #2 LED Light",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 47,
+            "id": 47,
             "name": "Dryer Arch #2 D/S",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 48,
+            "id": 48,
             "name": "Dryer Arch #4 P/S",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 49,
+            "id": 49,
             "name": "Dryer #3 & #4 LED Light",
-            "weight": 0.4
+            "weight": 0.4,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 50,
+            "id": 50,
             "name": "Dryer #5 D/S Side Nozzle",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 51,
+            "id": 51,
             "name": "Dryer #6 P/S Side Nozzle",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 52,
+            "id": 52,
             "name": "Dry N Shine Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 53,
+            "id": 53,
             "name": "Dry N Shine Side Brushes",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 54,
+            "id": 54,
             "name": "Dry N Shine Top Brush",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 55,
+            "id": 55,
             "name": "Durashiner",
-            "weight": 0.8
+            "weight": 0.8,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 56,
+            "id": 56,
             "name": "Durashiner Dressing Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 57,
+            "id": 57,
             "name": "Neutral Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 58,
+            "id": 58,
             "name": "Go Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 59,
+            "id": 59,
             "name": "Booster Pump",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 60,
+            "id": 60,
             "name": "Reclaim Pump #1",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 61,
+            "id": 61,
             "name": "Reclaim Pump #2",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 62,
+            "id": 62,
             "name": "Wheel Brite Sign",
-            "weight": 0.3
+            "weight": 0.3,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 63,
+            "id": 63,
             "name": "Wraps Retract",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 64,
+            "id": 64,
             "name": "DNS Top Wheel Retract",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 65,
+            "id": 65,
             "name": "Tire Shine Retract",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 66,
+            "id": 66,
             "name": "PREP GUN #22",
-            "weight": 0.8
+            "weight": 0.8,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 67,
+            "id": 67,
             "name": "Chain tension readout",
-            "weight": 0.4
+            "weight": 0.4,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 68,
+            "id": 68,
             "name": "rollers poping up",
-            "weight": 0.8
+            "weight": 0.8,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 69,
+            "id": 69,
             "name": "rollers condition",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
-        {
-            "ID": 70,
+	{
+            "id": 70,
             "name": "track loading area condition",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 71,
+            "id": 71,
             "name": "track rails in tunnel condition",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 72,
+            "id": 72,
             "name": "lights in tunnel working",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 73,
+            "id": 73,
             "name": "lights in tunnel on signs and arches working",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 74,
+            "id": 74,
             "name": "drain workging in pit",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 75,
+            "id": 75,
             "name": "pit condition",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 76,
+            "id": 76,
             "name": "air leaks on eqipment in tunnel",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 77,
+            "id": 77,
             "name": "water leaks in tunnel when tunnel off",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 78,
+            "id": 78,
             "name": "tunnel entrance clean",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 79,
-            "name": "tunnel exit clean",
-            "weight": 0.7
+            "id": 79,
+            "name": "tunnel exit clean", 
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 80,
+            "id": 80,
             "name": "tunnel clean",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 81,
+            "id": 81,
             "name": "RO system working",
-            "weight": 0.8
+            "weight": 0.8,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 82,
+            "id": 82,
             "name": "sight lights working",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 83,
+            "id": 83,
             "name": "vac 1 working",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 84,
+            "id": 84,
             "name": "vack 2 working",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 85,
+            "id": 85,
             "name": "vac parts on lot condition pipes connectors hoses etc",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 86,
+            "id": 86,
             "name": "air on lot working all stalls",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 87,
+            "id": 87,
             "name": "site clean ",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 88,
+            "id": 88,
             "name": "gates working",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 89,
+            "id": 89,
             "name": "pay stations working test all ",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 90,
+            "id": 90,
             "name": "gates hardware condition ",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 91,
+            "id": 91,
             "name": "SITE SIGN LIGHT working",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 92,
+            "id": 92,
             "name": "site landscaping condition",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 93,
+            "id": 93,
             "name": "air leaks on site",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 94,
+            "id": 94,
             "name": "water leaks on site",
-            "weight": 0.9
+            "weight": 0.9,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 95,
+            "id": 95,
             "name": "bathrooms condition",
-            "weight": 0.6
+            "weight": 0.6,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 96,
+            "id": 96,
             "name": "customer area in building condition",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 97,
+            "id": 97,
             "name": "cameras on site all working and clear",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 98,
+            "id": 98,
             "name": "air leaks in back room",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 99,
+            "id": 99,
             "name": "water leaks in back room",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 100,
+            "id": 100,
             "name": "electrical safety issues on site",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 101,
+            "id": 101,
             "name": "electrical safety issues in back room",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 102,
+            "id": 102,
             "name": "air regulator guages no leaks",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 103,
+            "id": 103,
             "name": "asphault on site condition",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 104,
+            "id": 104,
             "name": "customer stalls clean",
-            "weight": 0.8
+            "weight": 0.8,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 105,
+            "id": 105,
             "name": "garbage cans ok or overflowing",
-            "weight": 0.7
+            "weight": 0.7,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 106,
+            "id": 106,
             "name": "vac hoses all out",
-            "weight": 0.8
+            "weight": 0.8,
+            "score": 0,
+            "notes": "",
+            "image": null
         },
         {
-            "ID": 107,
+            "id": 107,
             "name": "vac area clean on ground ",
-            "weight": 0.5
+            "weight": 0.5,
+            "score": 0,
+            "notes": "",
+            "image": null
         }
     ]
 }
