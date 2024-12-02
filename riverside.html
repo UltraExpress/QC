@@ -255,6 +255,39 @@ x<!DOCTYPE html>
     <script>
         let checklistItems = [];
 
+
+
+
+let inspectorName = '';
+
+document.getElementById('inspector-name').addEventListener('input', function(e) {
+    inspectorName = e.target.value.trim();
+    
+    // Get all score inputs and the PDF button
+    const ratingButtons = document.querySelectorAll('.rating-btn');
+    const pdfButton = document.getElementById('pdfButton');
+    
+    // Enable/disable based on inspector name
+    if (inspectorName) {
+        ratingButtons.forEach(btn => btn.disabled = false);
+        if (allItemsComplete()) {
+            pdfButton.disabled = false;
+            pdfButton.classList.add('ready');
+        }
+    } else {
+        ratingButtons.forEach(btn => btn.disabled = true);
+        pdfButton.disabled = true;
+        pdfButton.classList.remove('ready');
+    }
+});
+
+
+
+        
+
+
+        
+
         async function loadChecklist() {
             try {
                 const response = await fetch('https://ultraexpress.github.io/QC/riverside-checklist.json');
@@ -483,6 +516,18 @@ async function generatePDF() {
     yPosition += 20;
     doc.setFontSize(28);
     doc.text("Quality Control Report", 105, yPosition, { align: "center" });
+
+
+
+
+      // Add inspector name
+    yPosition += 10;
+    doc.setFontSize(14);
+    doc.text(`Inspector: ${inspectorName || 'Not Specified'}`, 105, yPosition, { align: "center" });
+    // END NEW CODE
+
+
+    
     
     // Add total score - increased from 16 to 20
     yPosition += 20;
