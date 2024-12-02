@@ -312,50 +312,57 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
             }
         }
 
-        function renderChecklist() {
-            const container = document.getElementById('checklist-container');
-            container.innerHTML = checklistItems.map((item, index) => `
-                <div class="qc-item" data-id="${item.id}">
-                    <div class="item-header">
-                        <span class="item-title">${item.name}</span>
-                        <span class="item-weight">Weight: ${item.weight}</span>
-                    </div>
-                    
-                    <div class="rating-group">
-                        <div class="section-label">Quality Rating</div>
-                        <div class="rating-options">
-                            ${[1,2,3,4,5].map(rating => `
-                                <button class="rating-btn" onclick="setRating(${index}, ${rating})">
-                                    <span class="number">${rating}</span>
-                                    <span class="description">${getRatingDescription(rating)}</span>
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
 
-                    <div>
-                        <div class="section-label">Notes</div>
-                        <textarea class="notes" 
-                            onchange="updateNotes(${index}, this.value)" 
-                            placeholder="Enter detailed observations here...">${item.notes}</textarea>
-                    </div>
 
-                    <div class="image-upload">
-                        <div class="section-label">Upload Images</div>
-                        <input type="file" 
-                            accept="image/*" 
-                            multiple 
-                            onchange="handleImageUpload(${index}, event)">
-                        <div class="image-preview-${index}"></div>
-                    </div>
-                </div>
-            `).join('');
+
+
+function renderChecklist() {
+    const container = document.getElementById('checklist-container');
+    container.innerHTML = checklistItems.map((item, index) => `
+        <div class="qc-item" data-id="${item.id}">
+            <div class="item-header">
+                <span class="item-title">${item.name}</span>
+                <span class="item-weight">Weight: ${item.weight}</span>
+            </div>
             
-            checklistItems.forEach((item, index) => {
-                checkComplete(index);
-            });
-            checkAllItemsComplete();
-        }
+            <div class="rating-group">
+                <div class="section-label">Quality Rating</div>
+                <div class="rating-options">
+                    ${[1,2,3,4,5].map(rating => `
+                        <button class="rating-btn" onclick="setRating(${index}, ${rating})" ${!inspectorName ? 'disabled' : ''}>
+                            <span class="number">${rating}</span>
+                            <span class="description">${getRatingDescription(rating)}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label">Notes</div>
+                <textarea class="notes" 
+                    onchange="updateNotes(${index}, this.value)" 
+                    placeholder="Enter detailed observations here..."
+                    ${!inspectorName ? 'disabled' : ''}>${item.notes}</textarea>
+            </div>
+
+            <div class="image-upload">
+                <div class="section-label">Upload Images</div>
+                <input type="file" 
+                    accept="image/*" 
+                    multiple 
+                    onchange="handleImageUpload(${index}, event)"
+                    ${!inspectorName ? 'disabled' : ''}>
+                <div class="image-preview-${index}"></div>
+            </div>
+        </div>
+    `).join('');
+    
+    checklistItems.forEach((item, index) => {
+        checkComplete(index);
+    });
+    checkAllItemsComplete();
+}
+
 
         function getRatingDescription(rating) {
             const descriptions = {
