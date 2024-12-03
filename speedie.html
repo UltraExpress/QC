@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+x<!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -172,17 +171,68 @@
             background: #007bff;
             color: white;
             cursor: pointer;
+        
+        
+        
+        
+        
         }
         .pdf-button.ready:hover {
             background: #0056b3;
         }
+        .inspector-section {
+            margin: 1rem 0;
+            padding: 0 1rem;
+        }
+        .inspector-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: white;
+            background-color: #343a40;
+        }
+        .inspector-input:focus {
+            outline: none;
+            border-color: #0056b3;
+
+
+
+        
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>Quality Control Checklist</h2>
+        <h2>Quality Control Checklist SPEEDIE</h2>
         <button class="reset-btn" onclick="resetForm()">Reset All Items</button>
     </div>
+
+
+
+
+
+
+    
+
+ <div class="inspector-section">
+        <input 
+            type="text" 
+            id="inspector-name" 
+            placeholder="Inspector Name" 
+            class="inspector-input"
+        >
+    </div>
+
+
+    
+
+
+
+
+
+    
     <div id="total-score" class="total-score">Total Score: 0</div>
     
     <div id="checklist-container">
@@ -193,12 +243,91 @@
         Make a PDF Report
     </button>
 
+
+
+
+
+
+
+
+    
+
     <script>
         let checklistItems = [];
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        let inspectorName = '';
+
+document.getElementById('inspector-name').addEventListener('input', function(e) {
+    inspectorName = e.target.value.trim();
+    
+    // Get all interactive elements
+    const ratingButtons = document.querySelectorAll('.rating-btn');
+    const noteInputs = document.querySelectorAll('.notes');
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    const pdfButton = document.getElementById('pdfButton');
+    
+    // Enable/disable based on inspector name
+    if (inspectorName) {
+        ratingButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.cursor = 'pointer';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'text';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'pointer';
+        });
+        if (allItemsComplete()) {
+            pdfButton.disabled = false;
+            pdfButton.classList.add('ready');
+        }
+    } else {
+        ratingButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        pdfButton.disabled = true;
+        pdfButton.classList.remove('ready');
+    }
+
+    // Force a re-render to ensure all elements are properly disabled/enabled
+    renderChecklist();
+});
+
+
+        
+
+
+        
+
         async function loadChecklist() {
             try {
-                const response = await fetch('https://ultraexpress.github.io/QC/speedie-checklist.json');
+                const response = await fetch('https://ultraexpress.github.io/QC/riverside-checklist.json');
                 if (!response.ok) throw new Error('Failed to load checklist data');
                 
                 const data = await response.json();
@@ -210,6 +339,14 @@
                 }));
                 
                 renderChecklist();
+
+
+
+
+
+
+
+                
             } catch (error) {
                 document.getElementById('checklist-container').innerHTML = `
                     <div class="error">
@@ -220,50 +357,57 @@
             }
         }
 
-        function renderChecklist() {
-            const container = document.getElementById('checklist-container');
-            container.innerHTML = checklistItems.map((item, index) => `
-                <div class="qc-item" data-id="${item.id}">
-                    <div class="item-header">
-                        <span class="item-title">${item.name}</span>
-                        <span class="item-weight">Weight: ${item.weight}</span>
-                    </div>
-                    
-                    <div class="rating-group">
-                        <div class="section-label">Quality Rating</div>
-                        <div class="rating-options">
-                            ${[1,2,3,4,5].map(rating => `
-                                <button class="rating-btn" onclick="setRating(${index}, ${rating})">
-                                    <span class="number">${rating}</span>
-                                    <span class="description">${getRatingDescription(rating)}</span>
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
 
-                    <div>
-                        <div class="section-label">Notes</div>
-                        <textarea class="notes" 
-                            onchange="updateNotes(${index}, this.value)" 
-                            placeholder="Enter detailed observations here...">${item.notes}</textarea>
-                    </div>
 
-                    <div class="image-upload">
-                        <div class="section-label">Upload Images</div>
-                        <input type="file" 
-                            accept="image/*" 
-                            multiple 
-                            onchange="handleImageUpload(${index}, event)">
-                        <div class="image-preview-${index}"></div>
-                    </div>
-                </div>
-            `).join('');
+
+
+function renderChecklist() {
+    const container = document.getElementById('checklist-container');
+    container.innerHTML = checklistItems.map((item, index) => `
+        <div class="qc-item" data-id="${item.id}">
+            <div class="item-header">
+                <span class="item-title">${item.name}</span>
+                <span class="item-weight">Weight: ${item.weight}</span>
+            </div>
             
-            checklistItems.forEach((item, index) => {
-                checkComplete(index);
-            });
-            checkAllItemsComplete();
-        }
+            <div class="rating-group">
+                <div class="section-label">Quality Rating</div>
+                <div class="rating-options">
+                    ${[1,2,3,4,5].map(rating => `
+                        <button class="rating-btn" onclick="setRating(${index}, ${rating})" ${!inspectorName ? 'disabled' : ''}>
+                            <span class="number">${rating}</span>
+                            <span class="description">${getRatingDescription(rating)}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label">Notes</div>
+                <textarea class="notes" 
+                    onchange="updateNotes(${index}, this.value)" 
+                    placeholder="Enter detailed observations here..."
+                    ${!inspectorName ? 'disabled' : ''}>${item.notes}</textarea>
+            </div>
+
+            <div class="image-upload">
+                <div class="section-label">Upload Images</div>
+                <input type="file" 
+                    accept="image/*" 
+                    multiple 
+                    onchange="handleImageUpload(${index}, event)"
+                    ${!inspectorName ? 'disabled' : ''}>
+                <div class="image-preview-${index}"></div>
+            </div>
+        </div>
+    `).join('');
+    
+    checklistItems.forEach((item, index) => {
+        checkComplete(index);
+    });
+    checkAllItemsComplete();
+}
+
 
         function getRatingDescription(rating) {
             const descriptions = {
@@ -424,6 +568,18 @@ async function generatePDF() {
     yPosition += 20;
     doc.setFontSize(28);
     doc.text("Quality Control Report", 105, yPosition, { align: "center" });
+
+
+
+
+      // Add inspector name
+    yPosition += 10;
+    doc.setFontSize(14);
+    doc.text(`Inspector: ${inspectorName || 'Not Specified'}`, 105, yPosition, { align: "center" });
+    // END NEW CODE
+
+
+    
     
     // Add total score - increased from 16 to 20
     yPosition += 20;
