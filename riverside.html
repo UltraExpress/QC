@@ -322,7 +322,17 @@ body {
 }
 
 
-
+function loadSavedProgress() {
+    const saved = localStorage.getItem('checklistData');
+    if (saved) {
+        const data = JSON.parse(saved);
+        checklistItems = data.items;
+        inspectorName = data.inspectorName;
+        document.getElementById('inspector-name').value = data.inspectorName;
+        renderChecklist();
+        updateTotalScore();
+    }
+}
 
 
         
@@ -380,30 +390,30 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
 
 
         
-
-        async function loadChecklist() {
-            try {
-                const response = await fetch('https://ultraexpress.github.io/QC/riverside-checklist.json');
-                if (!response.ok) throw new Error('Failed to load checklist data');
-                
-                const data = await response.json();
-                checklistItems = data.items.map(item => ({
-                    ...item,
-                    score: 0,
-                    notes: "",
-                    image: null
-                }));
-                
-                renderChecklist();
-
-
-
-
-
-
-
-                
-            } catch (error) {
+async function loadChecklist() {
+    try {
+        const response = await fetch('https://ultraexpress.github.io/QC/riverside-checklist.json');
+        if (!response.ok) throw new Error('Failed to load checklist data');
+        
+        const data = await response.json();
+        checklistItems = data.items.map(item => ({
+            ...item,
+            score: 0,
+            notes: "",
+            image: null
+        }));
+        
+        renderChecklist();
+        loadSavedProgress();  // Add this line here
+    } catch (error) {
+        // ... error handling
+    }
+}
+            
+            
+            
+            
+            {
                 document.getElementById('checklist-container').innerHTML = `
                     <div class="error">
                         Error loading checklist: ${error.message}
@@ -507,47 +517,50 @@ function renderChecklist() {
             }
         }
 
-        function setRating(index, rating) {
-            const itemElement = document.querySelector(`.qc-item[data-id="${checklistItems[index].id}"]`);
-            const buttons = itemElement.querySelectorAll('.rating-btn');
-            
-            buttons.forEach(btn => {
-                btn.classList.remove('selected');
-                if (parseInt(btn.querySelector('.number').textContent) === rating) {
-                    btn.classList.add('selected');
-                }
-            });
-            
-            checklistItems[index].score = rating;
-            checkComplete(index);
-            updateTotalScore();
-            checkAllItemsComplete();
+     function setRating(index, rating) {
+    const itemElement = document.querySelector(`.qc-item[data-id="${checklistItems[index].id}"]`);
+    const buttons = itemElement.querySelectorAll('.rating-btn');
+    
+    buttons.forEach(btn => {
+        btn.classList.remove('selected');
+        if (parseInt(btn.querySelector('.number').textContent) === rating) {
+            btn.classList.add('selected');
         }
+    });
+    
+    checklistItems[index].score = rating;
+    checkComplete(index);
+    updateTotalScore();
+    checkAllItemsComplete();
+    saveProgress();  // Add it here at the end
+}
 
-        function updateNotes(index, notes) {
-            checklistItems[index].notes = notes;
+     function updateNotes(index, notes) {
+    checklistItems[index].notes = notes;
+    checkComplete(index);
+    checkAllItemsComplete();
+    saveProgress();  // Add it here at the end
+}
+
+function handleImageUpload(index, event) {
+    const preview = document.querySelector(`.image-preview-${index}`);
+    preview.innerHTML = '';
+    
+    for (const file of event.target.files) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'image-preview';
+            preview.appendChild(img);
+            checklistItems[index].image = e.target.result;
             checkComplete(index);
             checkAllItemsComplete();
+            saveProgress();  // Add it here
         }
-
-        function handleImageUpload(index, event) {
-            const preview = document.querySelector(`.image-preview-${index}`);
-            preview.innerHTML = '';
-            
-            for (const file of event.target.files) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.className = 'image-preview';
-                    preview.appendChild(img);
-                    checklistItems[index].image = e.target.result;
-                    checkComplete(index);
-                    checkAllItemsComplete();
-                }
-                reader.readAsDataURL(file);
-            }
-        }
+        reader.readAsDataURL(file);
+    }
+}
 
         function updateTotalScore() {
             const totalScore = checklistItems.reduce((sum, item) => {
@@ -782,6 +795,11 @@ async function generatePDF() {
 
         // Load the checklist when the page loads
         loadChecklist();
+
+
+
+
+        
     </script>
 </body>
 </html>
