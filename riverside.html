@@ -359,13 +359,39 @@ body {
 }
 
 
+// Find and modify the loadSavedProgress function
 function loadSavedProgress() {
     const saved = localStorage.getItem('checklistData');
     if (saved) {
         const data = JSON.parse(saved);
         checklistItems = data.items;
-        inspectorName = data.inspectorName;
-        document.getElementById('inspector-name').value = data.inspectorName;
+        
+        // Load and set inspector name
+        if (data.inspectorName) {
+            inspectorName = data.inspectorName;
+            document.getElementById('inspector-name').value = data.inspectorName;
+            
+            // Re-enable form elements since we have an inspector name
+            const ratingButtons = document.querySelectorAll('.rating-btn');
+            const noteInputs = document.querySelectorAll('.notes');
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            
+            ratingButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.cursor = 'pointer';
+            });
+            
+            noteInputs.forEach(input => {
+                input.disabled = false;
+                input.style.cursor = 'text';
+            });
+            
+            fileInputs.forEach(input => {
+                input.disabled = false;
+                input.style.cursor = 'pointer';
+            });
+        }
+        
         renderChecklist();
         updateTotalScore();
     }
