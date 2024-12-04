@@ -554,7 +554,6 @@ function renderChecklist() {
 function handleImageUpload(index, event) {
     const preview = document.querySelector(`.image-preview-${index}`);
     preview.innerHTML = '';
-    
     for (const file of event.target.files) {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -562,14 +561,15 @@ function handleImageUpload(index, event) {
             img.src = e.target.result;
             img.className = 'image-preview';
             preview.appendChild(img);
-            checklistItems[index].image = e.target.result;
+            checklistItems[index].image = e.target.result; // Ensure image is updated
             checkComplete(index);
             checkAllItemsComplete();
-            saveProgress();  // Add it here
+            saveProgress();
         }
         reader.readAsDataURL(file);
     }
 }
+
 
         function updateTotalScore() {
     const totalScore = checklistItems.reduce((sum, item) => {
