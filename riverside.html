@@ -294,29 +294,117 @@ body {
     <script>
         let checklistItems = [];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         let inspectorName = '';
 
 
 
 
+// Add this new IndexedDB initialization code
+const dbName = 'QCImagesDB';
+const storeName = 'images';
+let db;
+
+const initDB = () => {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, 1);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+            db = request.result;
+            resolve(db);
+        };
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName, { keyPath: 'id' });
+            }
+        };
+    });
+};
+
+
+        
+// Add the event listener for DB initialization
+document.addEventListener('DOMContentLoaded', initDB);
+
+
+        async function compressImage(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Max dimensions
+                const MAX_WIDTH = 1024;
+                const MAX_HEIGHT = 1024;
+                
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convert to blob with compression
+                canvas.toBlob((blob) => {
+                    resolve(blob);
+                }, 'image/jpeg', 0.6); // 60% quality
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
 
 
 
+
+
+        // Save image to IndexedDB
+async function saveImageToIndexedDB(index, imageData) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([storeName], 'readwrite');
+        const store = transaction.objectStore(storeName);
+        
+        const imageRecord = {
+            id: `image_${index}`,
+            data: imageData
+        };
+        
+        const request = store.put(imageRecord);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Load image from IndexedDB
+async function loadImageFromIndexedDB(index) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([storeName], 'readonly');
+        const store = transaction.objectStore(storeName);
+        const request = store.get(`image_${index}`);
+        
+        request.onsuccess = () => resolve(request?.result?.data || null);
+        request.onerror = () => reject(request.error);
+    });
+}
         
 
 document.getElementById('inspector-name').addEventListener('input', function(e) {
@@ -378,34 +466,41 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
     localStorage.setItem('qcFormData', JSON.stringify(storageData));
 }
 
-function loadFromLocalStorage() {
+async function loadFromLocalStorage() {
+    await initDB(); // Make sure DB is initialized
+    
     const savedData = localStorage.getItem('qcFormData');
     if (savedData) {
         const parsedData = JSON.parse(savedData);
         
-        // Restore inspector name
         inspectorName = parsedData.inspectorName;
         document.getElementById('inspector-name').value = inspectorName;
         
-        // Restore checklist items
         if (parsedData.checklistItems && parsedData.checklistItems.length > 0) {
             checklistItems = parsedData.checklistItems;
             renderChecklist();
             updateTotalScore();
             
-            // Restore images
-            checklistItems.forEach((item, index) => {
-                if (item.image) {
-                    const preview = document.querySelector(`.image-preview-${index}`);
-                    if (preview) {
-                        const img = document.createElement('img');
-                        img.src = item.image;
-                        img.className = 'image-preview';
-                        preview.innerHTML = '';
-                        preview.appendChild(img);
+            // Load images from IndexedDB
+            setTimeout(async () => {
+                for (let i = 0; i < checklistItems.length; i++) {
+                    try {
+                        const imageData = await loadImageFromIndexedDB(i);
+                        if (imageData) {
+                            const preview = document.querySelector(`.image-preview-${i}`);
+                            if (preview) {
+                                const img = document.createElement('img');
+                                img.src = imageData;
+                                img.className = 'image-preview';
+                                preview.innerHTML = '';
+                                preview.appendChild(img);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading image:', error);
                     }
                 }
-            });
+            }, 100);
         }
     }
 }
@@ -560,23 +655,44 @@ function renderChecklist() {
     saveToLocalStorage(); // Added this line to save after updating notes
 }
 
-function handleImageUpload(index, event) {
+async function handleImageUpload(index, event) {
     const preview = document.querySelector(`.image-preview-${index}`);
     preview.innerHTML = '';
     
-    for (const file of event.target.files) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'image-preview';
-            preview.appendChild(img);
-            checklistItems[index].image = e.target.result;
-            checkComplete(index);
-            checkAllItemsComplete();
-            saveToLocalStorage(); // Added this line to save after uploading image
+    const file = event.target.files[0]; // Handle one file at a time
+    if (file) {
+        try {
+            // Compress image before storing
+            const compressedImage = await compressImage(file);
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
+                const imageData = e.target.result;
+                
+                // Display preview
+                const img = document.createElement('img');
+                img.src = imageData;
+                img.className = 'image-preview';
+                preview.appendChild(img);
+                
+                // Store in IndexedDB
+                try {
+                    await saveImageToIndexedDB(index, imageData);
+                    checklistItems[index].image = true; // Just store a flag
+                    checkComplete(index);
+                    checkAllItemsComplete();
+                    saveToLocalStorage();
+                } catch (error) {
+                    console.error('Error saving image:', error);
+                    alert('Failed to save image. Please try again.');
+                }
+            };
+            
+            reader.readAsDataURL(compressedImage);
+        } catch (error) {
+            console.error('Error handling image upload:', error);
+            alert('Failed to process image. Please try again.');
         }
-        reader.readAsDataURL(file);
     }
 }
 
@@ -598,16 +714,31 @@ function handleImageUpload(index, event) {
                 `Total Score: ${totalScore.toFixed(2)} (${percentage}% of maximum)`;
         }
 
-function resetForm() {
+async function resetForm() {
     if (confirm('Are you sure you want to reset all items? This will clear all ratings, notes, and images.')) {
+        // Clear checklist items
         checklistItems.forEach(item => {
             item.score = 0;
             item.notes = '';
             item.image = null;
         });
-        inspectorName = ''; // Clear inspector name too
-        document.getElementById('inspector-name').value = ''; // Clear inspector name input
-        localStorage.removeItem('qcFormData'); // Remove data from local storage
+        
+        // Clear inspector name
+        inspectorName = '';
+        document.getElementById('inspector-name').value = '';
+        
+        // Clear localStorage
+        localStorage.removeItem('qcFormData');
+        
+        // Clear IndexedDB
+        try {
+            const transaction = db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            await store.clear();
+        } catch (error) {
+            console.error('Error clearing IndexedDB:', error);
+        }
+        
         renderChecklist();
         updateTotalScore();
         checkAllItemsComplete();
@@ -659,17 +790,10 @@ async function generatePDF() {
     doc.setFontSize(28);
     doc.text("Quality Control Report", 105, yPosition, { align: "center" });
 
-
-
-
-      // Add inspector name
+    // Add inspector name
     yPosition += 10;
     doc.setFontSize(14);
     doc.text(`Inspector: ${inspectorName || 'Not Specified'}`, 105, yPosition, { align: "center" });
-    // END NEW CODE
-
-
-    
     
     // Add total score - increased from 16 to 20
     yPosition += 20;
@@ -685,7 +809,7 @@ async function generatePDF() {
         const titleHeight = 15;
         const scoreHeight = 15;
         const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
-        const notesHeight = notesLines * 8; // Increased from 7 to 8 for more space between note lines
+        const notesHeight = notesLines * 8;
         const targetImageHeight = 100;
         const totalItemHeight = titleHeight + scoreHeight + notesHeight + targetImageHeight + 40;
         
@@ -727,11 +851,14 @@ async function generatePDF() {
         doc.text(splitNotes, marginLeft, yPosition);
         yPosition += notesHeight;
         
-        // Rest of the image handling code stays the same
+        // Handle image - now with IndexedDB support
         if (item.image) {
             try {
+                const imageData = await loadImageFromIndexedDB(checklistItems.indexOf(item));
+                if (!imageData) continue;
+                
                 const img = new Image();
-                img.src = item.image;
+                img.src = imageData;
                 
                 await new Promise((resolve) => {
                     img.onload = async () => {
