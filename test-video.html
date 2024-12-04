@@ -46,7 +46,7 @@
 </head>
 <body style="background: #1a1a1a;">
     <div class="container">
-        <h1>Cloudinary Video Test</h1>
+        <h1>Cloudinary Video </h1>
         <button class="record-btn" onclick="toggleRecording()">Start Recording</button>
         <div class="timer" style="display: none;">00:00</div>
         <video class="video-preview" style="display: none;" controls></video>
@@ -166,7 +166,7 @@
         async function uploadToCloudinary(blob) {
             const formData = new FormData();
             formData.append('file', blob);
-            formData.append('upload_preset', 'test');  // Updated to use your preset
+            formData.append('upload_preset', 'testvideo');  // Updated to use your preset
             formData.append('api_key', API_KEY);
             
             try {
