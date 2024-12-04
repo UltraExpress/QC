@@ -413,13 +413,6 @@ async function loadChecklist() {
     }
 }
 
-            
-            
-            
-
-
-
-
 function renderChecklist() {
     const container = document.getElementById('checklist-container');
     container.innerHTML = checklistItems.map((item, index) => `
@@ -464,9 +457,30 @@ function renderChecklist() {
     checklistItems.forEach((item, index) => {
         checkComplete(index);
     });
+
+    // Add this restore block for ratings
+    checklistItems.forEach((item, index) => {
+        if (item.score > 0) {
+            const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
+            const buttons = itemElement.querySelectorAll('.rating-btn');
+            buttons.forEach(btn => {
+                if (parseInt(btn.querySelector('.number').textContent) === item.score) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+        // Restore images if they exist
+        if (item.image) {
+            const preview = document.querySelector(`.image-preview-${index}`);
+            const img = document.createElement('img');
+            img.src = item.image;
+            img.className = 'image-preview';
+            preview.appendChild(img);
+        }
+    });
+
     checkAllItemsComplete();
 }
-
 
         function getRatingDescription(rating) {
             const descriptions = {
@@ -574,19 +588,21 @@ function handleImageUpload(index, event) {
     saveProgress();  // Add this at the very end
 }
 
-        function resetForm() {
-            if (confirm('Are you sure you want to reset all items? This will clear all ratings, notes, and images.')) {
-                localStorage.removeItem('checklistData');
-                checklistItems.forEach(item => {
-                    item.score = 0;
-                    item.notes = '';
-                    item.image = null;
-                });
-                renderChecklist();
-                updateTotalScore();
-                checkAllItemsComplete();
-            }
-        }
+     function resetForm() {
+    if (confirm('Are you sure you want to reset all items? This will clear all ratings, notes, and images.')) {
+        localStorage.removeItem('checklistData');
+        inspectorName = '';  // Add this
+        document.getElementById('inspector-name').value = '';  // Add this
+        checklistItems.forEach(item => {
+            item.score = 0;
+            item.notes = '';
+            item.image = null;
+        });
+        renderChecklist();
+        updateTotalScore();
+        checkAllItemsComplete();
+    }
+}
 
        
         
