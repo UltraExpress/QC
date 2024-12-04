@@ -364,7 +364,6 @@ function loadSavedProgress() {
     const saved = localStorage.getItem('checklistData');
     if (saved) {
         const data = JSON.parse(saved);
-        console.log('Saved Data:', data); // Debugging step
 
         if (data.inspectorName) {
             inspectorName = data.inspectorName;
@@ -372,16 +371,16 @@ function loadSavedProgress() {
         }
 
         if (Array.isArray(data.items)) {
-            // Merge saved data with current checklistItems
-            checklistItems = checklistItems.map(item => {
+            checklistItems.forEach(item => {
                 const savedItem = data.items.find(saved => saved.id === item.id);
-                return savedItem
-                    ? { ...item, ...savedItem } // Merge saved item into the current item
-                    : item; // Keep the default if no saved data exists
+                if (savedItem) {
+                    item.score = savedItem.score;
+                    item.notes = savedItem.notes;
+                    item.image = savedItem.image;
+                }
             });
         }
 
-        // Re-render checklist with saved data
         renderChecklist();
         updateTotalScore();
     }
