@@ -369,19 +369,23 @@ function loadSavedProgress() {
     if (saved) {
         const data = JSON.parse(saved);
 
-        // Load inspector name if available
         if (data.inspectorName) {
             inspectorName = data.inspectorName;
             document.getElementById('inspector-name').value = data.inspectorName;
         }
 
-        // Ensure saved items are mapped correctly to existing checklist items
-    if (Array.isArray(data.items)) {
-    checklistItems = checklistItems.map(item => {
-        const savedItem = data.items.find(saved => saved.id === item.id);
-        return savedItem ? { ...item, ...savedItem } : item;
-    });
+        if (Array.isArray(data.items)) {
+            checklistItems = checklistItems.map(item => {
+                const savedItem = data.items.find(saved => saved.id === item.id);
+                return savedItem ? { ...item, ...savedItem } : item;
+            });
+        }
+
+        renderChecklist();
+        updateTotalScore();
+    }
 }
+
 
 
         // Re-render checklist and update totals
@@ -421,7 +425,6 @@ async function loadChecklist() {
 function renderChecklist() {
     const container = document.getElementById('checklist-container');
     
-    // Clear the container and populate it dynamically
     container.innerHTML = checklistItems.map((item, index) => `
         <div class="qc-item ${item.score > 0 ? 'complete' : ''}" data-id="${item.id}">
             <div class="item-header">
@@ -465,13 +468,10 @@ function renderChecklist() {
         </div>
     `).join('');
 
-    // Update completeness and enable buttons
-    checklistItems.forEach((_, index) => {
-        checkComplete(index);
-    });
-
+    checklistItems.forEach((_, index) => checkComplete(index));
     checkAllItemsComplete();
 }
+
 
 
 
