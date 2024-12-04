@@ -483,35 +483,19 @@ function renderChecklist() {
         }
 
         function checkComplete(index) {
-            const item = checklistItems[index];
-            const hasScore = item.score > 0;
-            const hasNotes = item.notes.trim() !== '';
-            const hasImage = item.image !== null;
-            
-            const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
-            if (hasScore && hasNotes && hasImage) {
-                itemElement.classList.add('complete');
-            } else {
-                itemElement.classList.remove('complete');
-            }
-        }
+    const item = checklistItems[index];
+    const complete = item.score > 0 && item.notes.trim() !== '' && item.image;
+    document.querySelector(`.qc-item[data-id="${item.id}"]`).classList.toggle('complete', complete);
+}
+
 
         function checkAllItemsComplete() {
-            const allComplete = checklistItems.every(item => 
-                item.score > 0 && 
-                item.notes.trim() !== '' && 
-                item.image !== null
-            );
-            
-            const pdfButton = document.getElementById('pdfButton');
-            if (allComplete) {
-                pdfButton.classList.add('ready');
-                pdfButton.disabled = false;
-            } else {
-                pdfButton.classList.remove('ready');
-                pdfButton.disabled = true;
-            }
-        }
+    const allComplete = checklistItems.every(item => item.score > 0 && item.notes.trim() && item.image);
+    const pdfButton = document.getElementById('pdfButton');
+    pdfButton.disabled = !allComplete;
+    pdfButton.classList.toggle('ready', allComplete);
+}
+
 
      function setRating(index, rating) {
     const itemElement = document.querySelector(`.qc-item[data-id="${checklistItems[index].id}"]`);
