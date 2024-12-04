@@ -4,7 +4,243 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* CSS styles remain the same */
+      
+        
+
+
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    font-size: 18px;
+    background-color: #1a1a1a;
+    color: white;
+}
+
+
+
+        
+        
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .reset-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .reset-btn:hover {
+            background: #ff5252;
+        }
+        
+        
+        
+        
+        
+        .qc-item {
+    background: #2a2a2a;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.3s;
+}
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      
+        .qc-item.complete {
+            background: #90EE90;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .item-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .item-weight {
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 18px;
+        }
+        .rating-group {
+            margin: 15px 0;
+        }
+        .rating-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .rating-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 100px;
+        }
+        .rating-btn .number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .rating-btn .description {
+            font-size: 16px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .rating-btn.selected {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        .notes {
+            width: 100%;
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 120px;
+            box-sizing: border-box;
+            font-size: 18px;
+        }
+        .image-upload {
+            margin: 15px 0;
+        }
+        .image-upload input[type="file"] {
+            padding: 20px;
+            font-size: 18px;
+            width: 100%;
+            box-sizing: border-box;
+            background: #e9ecef;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            height: 50px;
+        }
+        .image-preview {
+            max-width: 100%;
+            margin-top: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 20px;
+        }
+        h2 {
+            font-size: 28px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 20px;
+            color: #666;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+
+
+.total-score {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 15px;
+    background: #2a2a2a;
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+
+
+
+
+
+        
+        .pdf-button {
+            width: 100%;
+            padding: 20px;
+            font-size: 24px;
+            background: #ccc;
+            color: #666;
+            border: none;
+            border-radius: 8px;
+            margin-top: 30px;
+            cursor: not-allowed;
+            transition: all 0.3s;
+        }
+        .pdf-button.ready {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        
+        
+        
+        
+        
+        }
+        .pdf-button.ready:hover {
+            background: #0056b3;
+        }
+        .inspector-section {
+            margin: 1rem 0;
+            padding: 0 1rem;
+        }
+        .inspector-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: white;
+            background-color: #343a40;
+        }
+        .inspector-input:focus {
+            outline: none;
+            border-color: #0056b3;
+
+
+
+        
     </style>
 </head>
 <body>
@@ -13,7 +249,14 @@
         <button class="reset-btn" onclick="resetForm()">Reset All Items</button>
     </div>
 
-    <div class="inspector-section">
+
+
+
+
+
+    
+
+ <div class="inspector-section">
         <input 
             type="text" 
             id="inspector-name" 
@@ -22,6 +265,14 @@
         >
     </div>
 
+
+    
+
+
+
+
+
+    
     <div id="total-score" class="total-score">Total Score: 0</div>
     
     <div id="checklist-container">
@@ -32,58 +283,96 @@
         Make a PDF Report
     </button>
 
+
+
+
+
+
+
+
+    
+
     <script>
         let checklistItems = [];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         let inspectorName = '';
 
-        document.getElementById('inspector-name').addEventListener('input', function(e) {
-            inspectorName = e.target.value.trim();
-            localStorage.setItem('inspectorName', inspectorName);
-            
-            // Get all interactive elements
-            const ratingButtons = document.querySelectorAll('.rating-btn');
-            const noteInputs = document.querySelectorAll('.notes');
-            const fileInputs = document.querySelectorAll('input[type="file"]');
-            const pdfButton = document.getElementById('pdfButton');
-            
-            // Enable/disable based on inspector name
-            if (inspectorName) {
-                ratingButtons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.style.cursor = 'pointer';
-                });
-                noteInputs.forEach(input => {
-                    input.disabled = false;
-                    input.style.cursor = 'text';
-                });
-                fileInputs.forEach(input => {
-                    input.disabled = false;
-                    input.style.cursor = 'pointer';
-                });
-                if (allItemsComplete()) {
-                    pdfButton.disabled = false;
-                    pdfButton.classList.add('ready');
-                }
-            } else {
-                ratingButtons.forEach(btn => {
-                    btn.disabled = true;
-                    btn.style.cursor = 'not-allowed';
-                });
-                noteInputs.forEach(input => {
-                    input.disabled = true;
-                    input.style.cursor = 'not-allowed';
-                });
-                fileInputs.forEach(input => {
-                    input.disabled = true;
-                    input.style.cursor = 'not-allowed';
-                });
-                pdfButton.disabled = true;
-                pdfButton.classList.remove('ready');
-            }
 
-            // Force a re-render to ensure all elements are properly disabled/enabled
-            renderChecklist();
+
+
+
+
+
+
+        
+
+document.getElementById('inspector-name').addEventListener('input', function(e) {
+    inspectorName = e.target.value.trim();
+    
+    // Get all interactive elements
+    const ratingButtons = document.querySelectorAll('.rating-btn');
+    const noteInputs = document.querySelectorAll('.notes');
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    const pdfButton = document.getElementById('pdfButton');
+    
+    // Enable/disable based on inspector name
+    if (inspectorName) {
+        ratingButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.cursor = 'pointer';
         });
+        noteInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'text';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'pointer';
+        });
+        if (allItemsComplete()) {
+            pdfButton.disabled = false;
+            pdfButton.classList.add('ready');
+        }
+    } else {
+        ratingButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        pdfButton.disabled = true;
+        pdfButton.classList.remove('ready');
+    }
+
+    // Force a re-render to ensure all elements are properly disabled/enabled
+    renderChecklist();
+});
+
+
+        
+
+
+        
 
         async function loadChecklist() {
             try {
@@ -98,17 +387,15 @@
                     image: null
                 }));
                 
-                const storedItems = localStorage.getItem('checklistItems');
-                if (storedItems) {
-                    checklistItems = JSON.parse(storedItems);
-                }
                 renderChecklist();
 
-                const storedName = localStorage.getItem('inspectorName');
-                if (storedName) {
-                    inspectorName = storedName;
-                    document.getElementById('inspector-name').value = inspectorName;
-                }
+
+
+
+
+
+
+                
             } catch (error) {
                 document.getElementById('checklist-container').innerHTML = `
                     <div class="error">
@@ -119,42 +406,158 @@
             }
         }
 
-        function renderChecklist() {
-            // Rendering code remains the same
-        }
+
+
+
+
+function renderChecklist() {
+    const container = document.getElementById('checklist-container');
+    container.innerHTML = checklistItems.map((item, index) => `
+        <div class="qc-item" data-id="${item.id}">
+            <div class="item-header">
+                <span class="item-title">${item.name}</span>
+                <span class="item-weight">Weight: ${item.weight}</span>
+            </div>
+            
+            <div class="rating-group">
+                <div class="section-label">Quality Rating</div>
+                <div class="rating-options">
+                    ${[1,2,3,4,5].map(rating => `
+                        <button class="rating-btn" onclick="setRating(${index}, ${rating})" ${!inspectorName ? 'disabled' : ''}>
+                            <span class="number">${rating}</span>
+                            <span class="description">${getRatingDescription(rating)}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div>
+                <div class="section-label">Notes</div>
+                <textarea class="notes" 
+                    onchange="updateNotes(${index}, this.value)" 
+                    placeholder="Enter detailed observations here..."
+                    ${!inspectorName ? 'disabled' : ''}>${item.notes}</textarea>
+            </div>
+
+            <div class="image-upload">
+                <div class="section-label">Upload Images</div>
+                <input type="file" 
+                    accept="image/*" 
+                    multiple 
+                    onchange="handleImageUpload(${index}, event)"
+                    ${!inspectorName ? 'disabled' : ''}>
+                <div class="image-preview-${index}"></div>
+            </div>
+        </div>
+    `).join('');
+    
+    checklistItems.forEach((item, index) => {
+        checkComplete(index);
+    });
+    checkAllItemsComplete();
+}
+
 
         function getRatingDescription(rating) {
-            // Rating descriptions remain the same
+            const descriptions = {
+                1: "Critical Issues<br>Immediate Action Required",
+                2: "Major Issues<br>Needs Significant Work",
+                3: "Minor Issues<br>Acceptable with Fixes",
+                4: "Good Quality<br>Minor Improvements",
+                5: "Perfect Quality<br>Meets All Standards"
+            };
+            return descriptions[rating];
         }
 
         function checkComplete(index) {
-            // Check complete function remains the same
+            const item = checklistItems[index];
+            const hasScore = item.score > 0;
+            const hasNotes = item.notes.trim() !== '';
+            const hasImage = item.image !== null;
+            
+            const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
+            if (hasScore && hasNotes && hasImage) {
+                itemElement.classList.add('complete');
+            } else {
+                itemElement.classList.remove('complete');
+            }
         }
 
         function checkAllItemsComplete() {
-            // Check all items complete function remains the same
+            const allComplete = checklistItems.every(item => 
+                item.score > 0 && 
+                item.notes.trim() !== '' && 
+                item.image !== null
+            );
+            
+            const pdfButton = document.getElementById('pdfButton');
+            if (allComplete) {
+                pdfButton.classList.add('ready');
+                pdfButton.disabled = false;
+            } else {
+                pdfButton.classList.remove('ready');
+                pdfButton.disabled = true;
+            }
         }
 
         function setRating(index, rating) {
-            // Set rating code remains the same
-            localStorage.setItem('checklistItems', JSON.stringify(checklistItems));
+            const itemElement = document.querySelector(`.qc-item[data-id="${checklistItems[index].id}"]`);
+            const buttons = itemElement.querySelectorAll('.rating-btn');
+            
+            buttons.forEach(btn => {
+                btn.classList.remove('selected');
+                if (parseInt(btn.querySelector('.number').textContent) === rating) {
+                    btn.classList.add('selected');
+                }
+            });
+            
+            checklistItems[index].score = rating;
+            checkComplete(index);
+            updateTotalScore();
+            checkAllItemsComplete();
         }
 
         function updateNotes(index, notes) {
-            // Update notes code remains the same
-            localStorage.setItem('checklistItems', JSON.stringify(checklistItems));
+            checklistItems[index].notes = notes;
+            checkComplete(index);
+            checkAllItemsComplete();
         }
 
         function handleImageUpload(index, event) {
-            // Handle image upload code remains the same
-            reader.onload = function(e) {
-                // Rest of the code remains the same
-                localStorage.setItem('checklistItems', JSON.stringify(checklistItems));
+            const preview = document.querySelector(`.image-preview-${index}`);
+            preview.innerHTML = '';
+            
+            for (const file of event.target.files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    preview.appendChild(img);
+                    checklistItems[index].image = e.target.result;
+                    checkComplete(index);
+                    checkAllItemsComplete();
+                }
+                reader.readAsDataURL(file);
             }
         }
 
         function updateTotalScore() {
-            // Update total score function remains the same
+            const totalScore = checklistItems.reduce((sum, item) => {
+                if (item.score > 0) {
+                    return sum + (item.score * item.weight);
+                }
+                return sum;
+            }, 0);
+            
+            const maxPossibleScore = checklistItems.reduce((sum, item) => {
+                return sum + (5 * item.weight);
+            }, 0);
+            
+            const percentage = ((totalScore / maxPossibleScore) * 100).toFixed(1);
+            
+            document.getElementById('total-score').textContent = 
+                `Total Score: ${totalScore.toFixed(2)} (${percentage}% of maximum)`;
         }
 
         function resetForm() {
@@ -167,14 +570,208 @@
                 renderChecklist();
                 updateTotalScore();
                 checkAllItemsComplete();
-                localStorage.removeItem('checklistItems');
-                localStorage.removeItem('inspectorName');
             }
         }
 
-        async function generatePDF() {
-            // PDF generation code remains the same
+       
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let yPosition = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const marginLeft = 20;
+    
+    // Add date - increased from 12 to 14
+    const currentDate = new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text(currentDate, 105, yPosition, { align: "center" });
+    
+    // Add title - increased from 24 to 28
+    yPosition += 20;
+    doc.setFontSize(28);
+    doc.text("Quality Control Report", 105, yPosition, { align: "center" });
+
+
+
+
+      // Add inspector name
+    yPosition += 10;
+    doc.setFontSize(14);
+    doc.text(`Inspector: ${inspectorName || 'Not Specified'}`, 105, yPosition, { align: "center" });
+    // END NEW CODE
+
+
+    
+    
+    // Add total score - increased from 16 to 20
+    yPosition += 20;
+    doc.setFontSize(20);
+    const totalScoreElement = document.getElementById('total-score');
+    doc.text(totalScoreElement.textContent, 105, yPosition, { align: "center" });
+    
+    // Process each checklist item
+    for (const item of checklistItems) {
+        yPosition += 20;
+        
+        // Calculate initial space needed
+        const titleHeight = 15;
+        const scoreHeight = 15;
+        const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
+        const notesHeight = notesLines * 8; // Increased from 7 to 8 for more space between note lines
+        const targetImageHeight = 100;
+        const totalItemHeight = titleHeight + scoreHeight + notesHeight + targetImageHeight + 40;
+        
+        // Check if we need a new page
+        if (yPosition + totalItemHeight > pageHeight - 20) {
+            doc.addPage();
+            yPosition = 20;
         }
+        
+        // Draw colored box for scores
+        const boxStartY = yPosition - 5;
+        if (item.score < 4) {
+            doc.setDrawColor(255, 0, 0);
+            doc.setLineWidth(0.5);
+        } else if (item.score >= 4) {
+            doc.setDrawColor(0, 255, 0);
+            doc.setLineWidth(0.5);
+        }
+        
+        // Item name and weight - increased from 14 to 18
+        doc.setTextColor(item.score < 4 ? 255 : 0, 0, 0);
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${item.name} (Weight: ${item.weight})`, marginLeft, yPosition);
+        
+        // Score - increased from 12 to 16
+        yPosition += 15;
+        doc.setFontSize(16);
+        doc.text(`SCORE: ${item.score}`, marginLeft, yPosition);
+        if (item.score < 4) {
+            doc.text('NEEDS ATTENTION', 70, yPosition);
+        }
+        
+        // Notes - increased from 12 to 14
+        yPosition += 15;
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(14);
+        const splitNotes = doc.splitTextToSize(`Notes: ${item.notes}`, 170);
+        doc.text(splitNotes, marginLeft, yPosition);
+        yPosition += notesHeight;
+        
+        // Rest of the image handling code stays the same
+        if (item.image) {
+            try {
+                const img = new Image();
+                img.src = item.image;
+                
+                await new Promise((resolve) => {
+                    img.onload = async () => {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d', { alpha: false });
+                            
+                            const maxWidth = 150;
+                            const maxHeight = 100;
+                            
+                            let finalWidth = img.width;
+                            let finalHeight = img.height;
+                            
+                            if (finalWidth > maxWidth) {
+                                const ratio = maxWidth / finalWidth;
+                                finalWidth = maxWidth;
+                                finalHeight = Math.floor(finalHeight * ratio);
+                            }
+                            if (finalHeight > maxHeight) {
+                                const ratio = maxHeight / finalHeight;
+                                finalHeight = maxHeight;
+                                finalWidth = Math.floor(finalWidth * ratio);
+                            }
+                            
+                            canvas.width = finalWidth * 4;
+                            canvas.height = finalHeight * 4;
+                            
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                            
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            
+                            const properImage = canvas.toDataURL('image/jpeg', 1.0);
+                            doc.addImage(
+                                properImage,
+                                'JPEG',
+                                marginLeft,
+                                yPosition,
+                                finalWidth,
+                                finalHeight,
+                                undefined,
+                                'NONE'
+                            );
+                            
+                            yPosition += finalHeight + 10;
+                            
+                            if (item.score < 4 || item.score >= 4) {
+                                const boxHeight = yPosition - boxStartY;
+                                doc.rect(15, boxStartY, 180, boxHeight, 'S');
+                            }
+                            
+                            resolve();
+                        } catch (e) {
+                            console.error('Error processing image:', e);
+                            resolve();
+                        }
+                    };
+                    img.onerror = () => resolve();
+                });
+            } catch (e) {
+                console.error('Error adding image:', e);
+            }
+        }
+        
+        yPosition += 20;
+    }
+    
+    // Save the PDF
+    const date = new Date().toISOString().split('T')[0];
+    doc.save(`QC-Report-${date}.pdf`);
+}
+    
+
+
+
+
+
+
+
+
+        
 
         // Load the checklist when the page loads
         loadChecklist();
