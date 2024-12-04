@@ -365,26 +365,26 @@ function loadSavedProgress() {
     if (saved) {
         const data = JSON.parse(saved);
 
+        // Load inspector name if available
         if (data.inspectorName) {
             inspectorName = data.inspectorName;
             document.getElementById('inspector-name').value = data.inspectorName;
         }
 
+        // Ensure saved items are mapped correctly to existing checklist items
         if (Array.isArray(data.items)) {
-            checklistItems.forEach(item => {
+            checklistItems = checklistItems.map(item => {
                 const savedItem = data.items.find(saved => saved.id === item.id);
-                if (savedItem) {
-                    item.score = savedItem.score;
-                    item.notes = savedItem.notes;
-                    item.image = savedItem.image;
-                }
+                return savedItem ? { ...item, ...savedItem } : item; // Merge or keep original
             });
         }
 
+        // Re-render checklist and update totals
         renderChecklist();
         updateTotalScore();
     }
 }
+
 
 
 
