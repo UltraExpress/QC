@@ -429,60 +429,59 @@ async function loadChecklist() {
 
 function renderChecklist() {
     const container = document.getElementById('checklist-container');
+    
+    // Clear the container and populate it dynamically
     container.innerHTML = checklistItems.map((item, index) => `
-        <div class="qc-item" data-id="${item.id}">
-            <!-- Previous HTML remains the same -->
-            <div class="image-upload">
-                <div class="section-label">Upload Images</div>
-                <input type="file" 
-                    accept="image/*" 
-                    multiple 
-                    onchange="handleImageUpload(${index}, event)"
-                    ${!inspectorName ? 'disabled' : ''}>
-                <div class="image-preview-${index}">
-                    ${item.image ? `<img src="${item.image}" class="image-preview">` : ''}
+        <div class="qc-item ${item.score > 0 ? 'complete' : ''}" data-id="${item.id}">
+            <div class="item-header">
+                <div class="item-title">${item.name}</div>
+                <div class="item-weight">Weight: ${item.weight}</div>
+            </div>
+            <div class="rating-group">
+                <div class="section-label">Rate this item</div>
+                <div class="rating-options">
+                    ${[1, 2, 3, 4, 5]
+                        .map(rating => `
+                            <button 
+                                class="rating-btn ${item.score === rating ? 'selected' : ''}" 
+                                onclick="setRating(${index}, ${rating})">
+                                <div class="number">${rating}</div>
+                                <div class="description">${getRatingDescription(rating)}</div>
+                            </button>
+                        `).join('')}
                 </div>
             </div>
-        </div>
-    `).join('');}
-                </div>
-            </div>
-
             <div>
                 <div class="section-label">Notes</div>
-                <textarea class="notes" 
+                <textarea 
+                    class="notes" 
                     onchange="updateNotes(${index}, this.value)" 
                     placeholder="Enter detailed observations here..."
                     ${!inspectorName ? 'disabled' : ''}>${item.notes}</textarea>
             </div>
-
             <div class="image-upload">
                 <div class="section-label">Upload Images</div>
-                <input type="file" 
+                <input 
+                    type="file" 
                     accept="image/*" 
                     multiple 
                     onchange="handleImageUpload(${index}, event)"
                     ${!inspectorName ? 'disabled' : ''}>
-                <div class="image-preview-${index}"></div>
+                <div class="image-preview image-preview-${index}">
+                    ${item.image ? `<img src="${item.image}" class="image-preview">` : ''}
+                </div>
             </div>
         </div>
     `).join('');
-    
-      checklistItems.forEach((item, index) => {
+
+    // Update completeness and enable buttons
+    checklistItems.forEach((_, index) => {
         checkComplete(index);
-        if (item.score > 0) {
-            const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
-            const buttons = itemElement.querySelectorAll('.rating-btn');
-            buttons.forEach(btn => {
-                if (parseInt(btn.querySelector('.number').textContent) === item.score) {
-                    btn.classList.add('selected');
-                }
-            });
-        }
     });
 
     checkAllItemsComplete();
 }
+
 }
 
         function getRatingDescription(rating) {
