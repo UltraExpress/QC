@@ -350,13 +350,17 @@ body {
 
 
 
-        function saveProgress() {
+function saveProgress() {
     localStorage.setItem('checklistData', JSON.stringify({
-        items: checklistItems,
+        items: checklistItems.map(item => ({
+            ...item,
+            image: item.image || null // Ensure the image is saved as Base64 or null
+        })),
         inspectorName: inspectorName || '',
         lastSaved: new Date().toISOString()
     }));
 }
+
 
 
 // Find and modify the loadSavedProgress function
