@@ -372,12 +372,13 @@ function loadSavedProgress() {
         }
 
         // Ensure saved items are mapped correctly to existing checklist items
-        if (Array.isArray(data.items)) {
-            checklistItems = checklistItems.map(item => {
-                const savedItem = data.items.find(saved => saved.id === item.id);
-                return savedItem ? { ...item, ...savedItem } : item; // Merge or keep original
-            });
-        }
+    if (Array.isArray(data.items)) {
+    checklistItems = checklistItems.map(item => {
+        const savedItem = data.items.find(saved => saved.id === item.id);
+        return savedItem ? { ...item, ...savedItem } : item;
+    });
+}
+
 
         // Re-render checklist and update totals
         renderChecklist();
@@ -394,37 +395,23 @@ function loadSavedProgress() {
         
 
 async function loadChecklist() {
-    console.log("Starting to fetch checklist data...");
     try {
         const response = await fetch('https://ultraexpress.github.io/QC/riverside-checklist.json');
-        console.log("Response received:", response);
-
-        if (!response.ok) {
-            throw new Error(`Fetch failed with status ${response.status}: ${response.statusText}`);
-        }
-
+        if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
         const data = await response.json();
-        console.log("Checklist data successfully loaded:", data);
-
         checklistItems = data.items.map(item => ({
             ...item,
             score: 0,
             notes: "",
             image: null,
         }));
-        console.log("Processed checklist items:", checklistItems);
-
-        renderChecklist(); // Render the loaded checklist items
-        loadSavedProgress(); // Load any saved progress
+        loadSavedProgress(); // Merge saved data
+        renderChecklist(); // Render after loading
     } catch (error) {
-        console.error("Error in loadChecklist:", error.message);
-        document.getElementById('checklist-container').innerHTML = `
-            <div class="error">
-                Error loading checklist: ${error.message}<br>Please refresh the page to try again.
-            </div>
-        `;
+        document.getElementById('checklist-container').innerHTML = `<div class="error">${error.message}</div>`;
     }
 }
+
 
 
 function renderChecklist() {
