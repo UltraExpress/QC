@@ -364,34 +364,30 @@ function saveProgress() {
 
 
 // Find and modify the loadSavedProgress function
-function loadSavedProgress() {
-    const saved = localStorage.getItem('checklistData');
-    if (saved) {
-        const data = JSON.parse(saved);
-
-        if (data.inspectorName) {
-            inspectorName = data.inspectorName;
-            document.getElementById('inspector-name').value = data.inspectorName;
-        }
-
-        if (Array.isArray(data.items)) {
+async function loadChecklist() {
+    if (checklistItems.length === 0) {
+        try {
+            const response = await fetch('https://ultraexpress.github.io/QC/riverside-checklist.json');
+            if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+            const data = await response.json();
             checklistItems = data.items.map(item => ({
                 ...item,
-                score: item.score || 0, // Ensure score has a default value
-                notes: item.notes || "", // Ensure notes has a default value
-                image: item.image || null // Ensure image has a default value
+                score: 0,
+                notes: "",
+                image: null,
             }));
-        } else {
-            checklistItems = []; // Reset checklistItems if saved data is empty or invalid
+            loadSavedProgress(); // Merge saved data
+            renderChecklist(); // Render after loading
+        } catch (error) {
+            document.getElementById('checklist-container').innerHTML = `<div class="error">${error.message}</div>`;
         }
     } else {
-        checklistItems = []; // Reset checklistItems if no saved data is found
+        // If checklistItems is already populated, just call loadSavedProgress and renderChecklist
+        loadSavedProgress();
+        renderChecklist();
     }
+}
 
-    renderChecklist();
-    updateTotalScore();
-}
-}
 
 
 
