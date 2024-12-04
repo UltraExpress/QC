@@ -364,38 +364,27 @@ function loadSavedProgress() {
     const saved = localStorage.getItem('checklistData');
     if (saved) {
         const data = JSON.parse(saved);
-        checklistItems = data.items;
-        
-        // Load and set inspector name
         if (data.inspectorName) {
             inspectorName = data.inspectorName;
             document.getElementById('inspector-name').value = data.inspectorName;
-            
-            // Re-enable form elements since we have an inspector name
-            const ratingButtons = document.querySelectorAll('.rating-btn');
-            const noteInputs = document.querySelectorAll('.notes');
-            const fileInputs = document.querySelectorAll('input[type="file"]');
-            
-            ratingButtons.forEach(btn => {
-                btn.disabled = false;
-                btn.style.cursor = 'pointer';
-            });
-            
-            noteInputs.forEach(input => {
-                input.disabled = false;
-                input.style.cursor = 'text';
-            });
-            
-            fileInputs.forEach(input => {
-                input.disabled = false;
-                input.style.cursor = 'pointer';
+        }
+
+        if (Array.isArray(data.items) && data.items.length > 0) {
+            // Map saved data back to checklistItems
+            checklistItems = checklistItems.map((item, index) => {
+                const savedItem = data.items.find(saved => saved.id === item.id);
+                return savedItem
+                    ? { ...item, ...savedItem } // Merge saved data
+                    : item; // Keep original if no saved data exists
             });
         }
         
+        // Re-render checklist with saved data
         renderChecklist();
         updateTotalScore();
     }
 }
+
 
 
 
