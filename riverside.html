@@ -294,22 +294,59 @@ body {
 
     <script>
         let checklistItems = [];
+ let inspectorName = '';
 
 
 
 
 
+        document.getElementById('inspector-name').addEventListener('input', function(e) {
+    inspectorName = e.target.value.trim();
+    
+    // Get all interactive elements
+    const ratingButtons = document.querySelectorAll('.rating-btn');
+    const noteInputs = document.querySelectorAll('.notes');
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    const pdfButton = document.getElementById('pdfButton');
+    
+    // Enable/disable based on inspector name
+    if (inspectorName) {
+        ratingButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.cursor = 'pointer';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'text';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = false;
+            input.style.cursor = 'pointer';
+        });
+        if (checkAllItemsComplete()) {
+            pdfButton.disabled = false;
+            pdfButton.classList.add('ready');
+        }
+    } else {
+        ratingButtons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
+        });
+        noteInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        fileInputs.forEach(input => {
+            input.disabled = true;
+            input.style.cursor = 'not-allowed';
+        });
+        pdfButton.disabled = true;
+        pdfButton.classList.remove('ready');
+    }
 
-
-
-
-
-
-
-
-
-
-        let inspectorName = '';
+    // Force a re-render to ensure all elements are properly disabled/enabled
+    renderChecklist();
+});
 
 
 
@@ -335,55 +372,6 @@ function loadSavedProgress() {
 }
 
 
-        
-
-document.getElementById('inspector-name').addEventListener('input', function(e) {
-    inspectorName = e.target.value.trim();
-    
-    // Get all interactive elements
-    const ratingButtons = document.querySelectorAll('.rating-btn');
-    const noteInputs = document.querySelectorAll('.notes');
-    const fileInputs = document.querySelectorAll('input[type="file"]');
-    const pdfButton = document.getElementById('pdfButton');
-    
-    // Enable/disable based on inspector name
-    if (inspectorName) {
-        ratingButtons.forEach(btn => {
-            btn.disabled = false;
-            btn.style.cursor = 'pointer';
-        });
-        noteInputs.forEach(input => {
-            input.disabled = false;
-            input.style.cursor = 'text';
-        });
-        fileInputs.forEach(input => {
-            input.disabled = false;
-            input.style.cursor = 'pointer';
-        });
-        if (allItemsComplete()) {
-            pdfButton.disabled = false;
-            pdfButton.classList.add('ready');
-        }
-    } else {
-        ratingButtons.forEach(btn => {
-            btn.disabled = true;
-            btn.style.cursor = 'not-allowed';
-        });
-        noteInputs.forEach(input => {
-            input.disabled = true;
-            input.style.cursor = 'not-allowed';
-        });
-        fileInputs.forEach(input => {
-            input.disabled = true;
-            input.style.cursor = 'not-allowed';
-        });
-        pdfButton.disabled = true;
-        pdfButton.classList.remove('ready');
-    }
-
-    // Force a re-render to ensure all elements are properly disabled/enabled
-    renderChecklist();
-});
 
 
         
@@ -455,11 +443,8 @@ function renderChecklist() {
     `).join('');
     
     checklistItems.forEach((item, index) => {
+        // Restore ratings and show completion status
         checkComplete(index);
-    });
-
-    // Add this restore block for ratings
-    checklistItems.forEach((item, index) => {
         if (item.score > 0) {
             const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
             const buttons = itemElement.querySelectorAll('.rating-btn');
@@ -469,9 +454,11 @@ function renderChecklist() {
                 }
             });
         }
-        // Restore images if they exist
+        
+        // Restore images
         if (item.image) {
             const preview = document.querySelector(`.image-preview-${index}`);
+            preview.innerHTML = ''; // Clear existing content
             const img = document.createElement('img');
             img.src = item.image;
             img.className = 'image-preview';
