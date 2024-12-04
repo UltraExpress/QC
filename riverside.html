@@ -375,15 +375,22 @@ function loadSavedProgress() {
         }
 
         if (Array.isArray(data.items)) {
-            checklistItems = checklistItems.map(item => {
-                const savedItem = data.items.find(saved => saved.id === item.id);
-                return savedItem ? { ...item, ...savedItem } : item;
-            });
+            checklistItems = data.items.map(item => ({
+                ...item,
+                score: item.score || 0, // Ensure score has a default value
+                notes: item.notes || "", // Ensure notes has a default value
+                image: item.image || null // Ensure image has a default value
+            }));
+        } else {
+            checklistItems = []; // Reset checklistItems if saved data is empty or invalid
         }
-
-        renderChecklist();
-        updateTotalScore();
+    } else {
+        checklistItems = []; // Reset checklistItems if no saved data is found
     }
+
+    renderChecklist();
+    updateTotalScore();
+}
 }
 
 
