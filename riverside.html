@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -343,7 +342,8 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
             input.disabled = false;
             input.style.cursor = 'pointer';
         });
-        if (allItemsComplete()) {
+        
+            if (checkAllItemsComplete()) {
             pdfButton.disabled = false;
             pdfButton.classList.add('ready');
         }
@@ -364,10 +364,51 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
         pdfButton.classList.remove('ready');
     }
 
-    // Force a re-render to ensure all elements are properly disabled/enabled
+    saveToLocalStorage(); // Added this line to save when inspector name changes
     renderChecklist();
 });
 
+
+        function saveToLocalStorage() {
+    const storageData = {
+        inspectorName: inspectorName,
+        checklistItems: checklistItems,
+        lastUpdated: new Date().toISOString()
+    };
+    localStorage.setItem('qcFormData', JSON.stringify(storageData));
+}
+
+function loadFromLocalStorage() {
+    const savedData = localStorage.getItem('qcFormData');
+    if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        
+        // Restore inspector name
+        inspectorName = parsedData.inspectorName;
+        document.getElementById('inspector-name').value = inspectorName;
+        
+        // Restore checklist items
+        if (parsedData.checklistItems && parsedData.checklistItems.length > 0) {
+            checklistItems = parsedData.checklistItems;
+            renderChecklist();
+            updateTotalScore();
+            
+            // Restore images
+            checklistItems.forEach((item, index) => {
+                if (item.image) {
+                    const preview = document.querySelector(`.image-preview-${index}`);
+                    if (preview) {
+                        const img = document.createElement('img');
+                        img.src = item.image;
+                        img.className = 'image-preview';
+                        preview.innerHTML = '';
+                        preview.appendChild(img);
+                    }
+                }
+            });
+        }
+    }
+}
 
         
 
@@ -375,37 +416,31 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
         
 
         async function loadChecklist() {
-            try {
-                const response = await fetch('https://ultraexpress.github.io/QC/riverside-checklist.json');
-                if (!response.ok) throw new Error('Failed to load checklist data');
-                
-                const data = await response.json();
-                checklistItems = data.items.map(item => ({
-                    ...item,
-                    score: 0,
-                    notes: "",
-                    image: null
-                }));
-                
-                renderChecklist();
-
-
-
-
-
-
-
-                
-            } catch (error) {
-                document.getElementById('checklist-container').innerHTML = `
-                    <div class="error">
-                        Error loading checklist: ${error.message}
-                        <br>Please refresh the page to try again.
-                    </div>
-                `;
-            }
-        }
-
+    try {
+        const response = await fetch('https://ultraexpress.github.io/QC/riverside-checklist.json');
+        if (!response.ok) throw new Error('Failed to load checklist data');
+        
+        const data = await response.json();
+        checklistItems = data.items.map(item => ({
+            ...item,
+            score: 0,
+            notes: "",
+            image: null
+        }));
+        
+        // Load saved data after initializing checklist
+        loadFromLocalStorage();
+        
+        renderChecklist();
+    } catch (error) {
+        document.getElementById('checklist-container').innerHTML = `
+            <div class="error">
+                Error loading checklist: ${error.message}
+                <br>Please refresh the page to try again.
+            </div>
+        `;
+    }
+}
 
 
 
@@ -501,46 +536,49 @@ function renderChecklist() {
         }
 
         function setRating(index, rating) {
-            const itemElement = document.querySelector(`.qc-item[data-id="${checklistItems[index].id}"]`);
-            const buttons = itemElement.querySelectorAll('.rating-btn');
-            
-            buttons.forEach(btn => {
-                btn.classList.remove('selected');
-                if (parseInt(btn.querySelector('.number').textContent) === rating) {
-                    btn.classList.add('selected');
-                }
-            });
-            
-            checklistItems[index].score = rating;
-            checkComplete(index);
-            updateTotalScore();
-            checkAllItemsComplete();
+    const itemElement = document.querySelector(`.qc-item[data-id="${checklistItems[index].id}"]`);
+    const buttons = itemElement.querySelectorAll('.rating-btn');
+    
+    buttons.forEach(btn => {
+        btn.classList.remove('selected');
+        if (parseInt(btn.querySelector('.number').textContent) === rating) {
+            btn.classList.add('selected');
         }
+    });
+    
+    checklistItems[index].score = rating;
+    checkComplete(index);
+    updateTotalScore();
+    checkAllItemsComplete();
+    saveToLocalStorage(); // Added this line to save after setting rating
+}
 
-        function updateNotes(index, notes) {
-            checklistItems[index].notes = notes;
+     function updateNotes(index, notes) {
+    checklistItems[index].notes = notes;
+    checkComplete(index);
+    checkAllItemsComplete();
+    saveToLocalStorage(); // Added this line to save after updating notes
+}
+
+function handleImageUpload(index, event) {
+    const preview = document.querySelector(`.image-preview-${index}`);
+    preview.innerHTML = '';
+    
+    for (const file of event.target.files) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'image-preview';
+            preview.appendChild(img);
+            checklistItems[index].image = e.target.result;
             checkComplete(index);
             checkAllItemsComplete();
+            saveToLocalStorage(); // Added this line to save after uploading image
         }
-
-        function handleImageUpload(index, event) {
-            const preview = document.querySelector(`.image-preview-${index}`);
-            preview.innerHTML = '';
-            
-            for (const file of event.target.files) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.className = 'image-preview';
-                    preview.appendChild(img);
-                    checklistItems[index].image = e.target.result;
-                    checkComplete(index);
-                    checkAllItemsComplete();
-                }
-                reader.readAsDataURL(file);
-            }
-        }
+        reader.readAsDataURL(file);
+    }
+}
 
         function updateTotalScore() {
             const totalScore = checklistItems.reduce((sum, item) => {
@@ -560,18 +598,21 @@ function renderChecklist() {
                 `Total Score: ${totalScore.toFixed(2)} (${percentage}% of maximum)`;
         }
 
-        function resetForm() {
-            if (confirm('Are you sure you want to reset all items? This will clear all ratings, notes, and images.')) {
-                checklistItems.forEach(item => {
-                    item.score = 0;
-                    item.notes = '';
-                    item.image = null;
-                });
-                renderChecklist();
-                updateTotalScore();
-                checkAllItemsComplete();
-            }
-        }
+function resetForm() {
+    if (confirm('Are you sure you want to reset all items? This will clear all ratings, notes, and images.')) {
+        checklistItems.forEach(item => {
+            item.score = 0;
+            item.notes = '';
+            item.image = null;
+        });
+        inspectorName = ''; // Clear inspector name too
+        document.getElementById('inspector-name').value = ''; // Clear inspector name input
+        localStorage.removeItem('qcFormData'); // Remove data from local storage
+        renderChecklist();
+        updateTotalScore();
+        checkAllItemsComplete();
+    }
+}
 
        
         
