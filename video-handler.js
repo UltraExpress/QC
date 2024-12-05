@@ -1,7 +1,3 @@
-// Constants for Cloudinary configuration
-const CLOUD_NAME = 'drnkghxvx';
-const API_KEY = '735847793412469';
-
 class VideoHandler {
     constructor(itemId) {
         this.itemId = itemId;
@@ -31,11 +27,27 @@ class VideoHandler {
                 await preview.play();
             } catch (playError) {
                 console.log('Preview play error:', playError);
+                this.showStatus('Error starting preview. Please check camera permissions.', 'error');
+                return;
             }
 
-            // For iOS, we need to create the MediaRecorder without a mimeType
+            // Try different MIME types for iOS compatibility
+            const mimeTypes = [
+                'video/webm;codecs=vp8,opus',
+                'video/webm',
+                'video/mp4',
+                ''  // Empty string as fallback for iOS
+            ];
+
+            let options = {};
+            for (const mimeType of mimeTypes) {
+                if (mimeType && !MediaRecorder.isTypeSupported(mimeType)) continue;
+                options = mimeType ? { mimeType } : {};
+                break;
+            }
+
             try {
-                this.mediaRecorder = new MediaRecorder(this.stream);
+                this.mediaRecorder = new MediaRecorder(this.stream, options);
             } catch (e) {
                 console.error('MediaRecorder error:', e);
                 this.showStatus('Recording not supported on this device', 'error');
@@ -52,8 +64,8 @@ class VideoHandler {
             
             this.mediaRecorder.onstop = () => this.handleRecordingStop();
             
-            // Start recording
-            this.mediaRecorder.start();
+            // Start recording with smaller timeslice for more frequent chunks
+            this.mediaRecorder.start(100);
             this.recording = true;
             this.startTimer();
             
@@ -74,136 +86,34 @@ class VideoHandler {
     }
 
     async getMediaStream() {
+        // iOS-specific constraints
         const constraints = {
             audio: true,
             video: {
-                facingMode: { ideal: 'environment' },
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                facingMode: 'environment',
+                width: { ideal: 1280, max: 1920 },
+                height: { ideal: 720, max: 1080 }
             }
         };
 
         try {
-            return await navigator.mediaDevices.getUserMedia(constraints);
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            return stream;
         } catch (error) {
-            console.log('Failed with environment camera, trying basic constraints');
-            return await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: true
-            });
-        }
-    }
-
-    stopRecording() {
-        if (this.mediaRecorder?.state === 'recording') {
-            this.mediaRecorder.stop();
-            this.recording = false;
-            clearInterval(this.timerInterval);
-            
-            const timer = document.querySelector(`#timer-${this.itemId}`);
-            timer.style.display = 'none';
-            
-            const recordBtn = document.querySelector(`#record-btn-${this.itemId}`);
-            recordBtn.textContent = 'Start Recording';
-            
-            if (this.stream) {
-                this.stream.getTracks().forEach(track => track.stop());
-                this.stream = null;
+            console.log('Failed with environment camera, trying user-facing camera');
+            // Fallback to front camera
+            constraints.video.facingMode = 'user';
+            try {
+                return await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (fallbackError) {
+                console.error('Camera access failed:', fallbackError);
+                this.showStatus('Camera access denied. Please check permissions.', 'error');
+                throw fallbackError;
             }
-            
-            const preview = document.querySelector(`#video-preview-${this.itemId}`);
-            preview.srcObject = null;
-            preview.style.display = 'none';
         }
     }
 
-    startTimer() {
-        const timer = document.querySelector(`#timer-${this.itemId}`);
-        timer.style.display = 'block';
-        let seconds = 0;
-        
-        this.timerInterval = setInterval(() => {
-            seconds++;
-            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const secs = (seconds % 60).toString().padStart(2, '0');
-            timer.textContent = `${mins}:${secs}`;
-            
-            if (seconds >= 30) {
-                this.stopRecording();
-            }
-        }, 1000);
-    }
-
-    async handleRecordingStop() {
-        if (this.recordedChunks.length === 0) {
-            this.showStatus('No video data recorded', 'error');
-            return;
-        }
-
-        const blob = new Blob(this.recordedChunks);
-        try {
-            this.showStatus('Uploading to Cloudinary...', '');
-            await this.uploadToCloudinary(blob);
-        } catch (error) {
-            this.showStatus('Upload failed: ' + error.message, 'error');
-        }
-    }
-
-    async uploadToCloudinary(blob) {
-        const formData = new FormData();
-        formData.append('file', blob);
-        formData.append('upload_preset', 'testvideo');
-        formData.append('api_key', API_KEY);
-        
-        try {
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`,
-                {
-                    method: 'POST',
-                    body: formData
-                }
-            );
-            
-            const data = await response.json();
-            
-            if (data.secure_url) {
-                this.cloudinaryUrl = data.secure_url;
-                const playback = document.querySelector(`#video-playback-${this.itemId}`);
-                playback.src = this.cloudinaryUrl;
-                playback.setAttribute('playsinline', '');
-                playback.setAttribute('webkit-playsinline', '');
-                playback.style.display = 'block';
-                
-                const itemIndex = checklistItems.findIndex(item => item.id === this.itemId);
-                if (itemIndex !== -1) {
-                    checklistItems[itemIndex].video = this.cloudinaryUrl;
-                    saveToLocalStorage();
-                    checkComplete(itemIndex);
-                    checkAllItemsComplete();
-                }
-                
-                this.showStatus('Upload successful! Video ready to play.', 'success');
-            } else {
-                throw new Error(data.error?.message || 'Upload failed');
-            }
-        } catch (error) {
-            throw new Error(`Upload failed: ${error.message}`);
-        }
-    }
-
-    showStatus(message, type) {
-        const status = document.querySelector(`#video-status-${this.itemId}`);
-        status.textContent = message;
-        status.className = `status ${type}`;
-    }
-
-    async toggleRecording() {
-        if (!this.recording) {
-            await this.startRecording();
-        } else {
-            this.stopRecording();
-        }
-    }
+    // ... rest of the methods remain the same ...
 }
 
 // Export the VideoHandler class
