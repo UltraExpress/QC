@@ -473,9 +473,12 @@ async function loadFromLocalStorage() {
             renderChecklist();
             updateTotalScore();
             
-            // Load images from IndexedDB
+            // Load images and restore videos
             setTimeout(async () => {
                 for (let i = 0; i < checklistItems.length; i++) {
+                    const item = checklistItems[i];
+                    
+                    // Load images
                     try {
                         const imageData = await loadImageFromIndexedDB(i);
                         if (imageData) {
@@ -490,6 +493,20 @@ async function loadFromLocalStorage() {
                         }
                     } catch (error) {
                         console.error('Error loading image:', error);
+                    }
+                    
+                    // Restore video playback if URL exists
+                    if (item.videoUrl) {
+                        const playback = document.querySelector(`#video-playback-${item.id}`);
+                        if (playback) {
+                            playback.src = item.videoUrl;
+                            playback.style.display = 'block';
+                            // Hide the preview element since we're showing the playback
+                            const preview = document.querySelector(`#video-preview-${item.id}`);
+                            if (preview) {
+                                preview.style.display = 'none';
+                            }
+                        }
                     }
                 }
             }, 100);
