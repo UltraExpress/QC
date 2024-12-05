@@ -10,37 +10,22 @@ class VideoHandler {
         this.timerInterval = null;
         this.recording = false;
         this.cloudinaryUrl = '';
-    }
-
-    getSupportedMimeType() {
-        const types = [
-            'video/webm;codecs=vp8,opus',
-            'video/webm',
-            'video/mp4',
-            'video/quicktime',
-            'video/webm;codecs=vp9',
-            'video/webm;codecs=h264',
-            'video/x-matroska;codecs=avc1'
-        ];
-        
-        for (const type of types) {
-            if (MediaRecorder.isTypeSupported(type)) {
-                return type;
-            }
-        }
-        
-        return '';
+        this.stream = null;
     }
 
     async startRecording() {
         try {
-            const stream = await this.getMediaStream();
+            // If we already have a stream, use it
+            if (!this.stream) {
+                this.stream = await this.getMediaStream();
+            }
             
             const preview = document.querySelector(`#video-preview-${this.itemId}`);
-            preview.srcObject = stream;
+            preview.srcObject = this.stream;
             preview.style.display = 'block';
-            preview.setAttribute('playsinline', '');
-            preview.setAttribute('webkit-playsinline', '');
+            preview.setAttribute('playsinline', true);
+            preview.setAttribute('webkit-playsinline', true);
+            preview.muted = true;
             
             try {
                 await preview.play();
@@ -48,27 +33,34 @@ class VideoHandler {
                 console.log('Preview play error:', playError);
             }
 
-            const mimeType = this.getSupportedMimeType();
-            const options = mimeType ? { mimeType } : {};
-            
-            this.mediaRecorder = new MediaRecorder(stream, options);
+            // For iOS, we need to create the MediaRecorder without a mimeType
+            try {
+                this.mediaRecorder = new MediaRecorder(this.stream);
+            } catch (e) {
+                console.error('MediaRecorder error:', e);
+                this.showStatus('Recording not supported on this device', 'error');
+                return;
+            }
+
             this.recordedChunks = [];
             
             this.mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
+                if (event.data && event.data.size > 0) {
                     this.recordedChunks.push(event.data);
                 }
             };
             
             this.mediaRecorder.onstop = () => this.handleRecordingStop();
             
-            this.mediaRecorder.start(1000); // Record in 1-second chunks
+            // Start recording
+            this.mediaRecorder.start();
             this.recording = true;
             this.startTimer();
             
             const recordBtn = document.querySelector(`#record-btn-${this.itemId}`);
             recordBtn.textContent = 'Stop Recording';
             
+            // Auto-stop after 30 seconds
             setTimeout(() => {
                 if (this.recording) {
                     this.stopRecording();
@@ -86,8 +78,8 @@ class VideoHandler {
             audio: true,
             video: {
                 facingMode: { ideal: 'environment' },
-                width: { ideal: 1280 }, // Reduced from 1920 for better compatibility
-                height: { ideal: 720 }  // Reduced from 1080 for better compatibility
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
             }
         };
 
@@ -114,15 +106,17 @@ class VideoHandler {
             const recordBtn = document.querySelector(`#record-btn-${this.itemId}`);
             recordBtn.textContent = 'Start Recording';
             
+            if (this.stream) {
+                this.stream.getTracks().forEach(track => track.stop());
+                this.stream = null;
+            }
+            
             const preview = document.querySelector(`#video-preview-${this.itemId}`);
-            const tracks = preview.srcObject?.getTracks() || [];
-            tracks.forEach(track => track.stop());
             preview.srcObject = null;
             preview.style.display = 'none';
         }
     }
 
-    // ... rest of the code remains the same ...
     startTimer() {
         const timer = document.querySelector(`#timer-${this.itemId}`);
         timer.style.display = 'block';
