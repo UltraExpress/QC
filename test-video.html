@@ -24,7 +24,7 @@
             border-radius: 4px;
             background: #000;
         }
-        .record-btn {
+        .record-btn, .play-btn {
             background: #ff4444;
             color: white;
             border: none;
@@ -35,8 +35,15 @@
             width: 100%;
             margin: 10px 0;
         }
+        .play-btn {
+            background: #44ff44;
+            display: none;
+        }
         .record-btn:hover {
             background: #cc0000;
+        }
+        .play-btn:hover {
+            background: #00cc00;
         }
         .timer {
             font-family: monospace;
@@ -63,6 +70,7 @@
     <div class="container">
         <h1>Cloudinary Video Test</h1>
         <button class="record-btn" onclick="toggleRecording()">Start Recording</button>
+        <button class="play-btn" onclick="playVideo()" style="display: none;">Play Recording</button>
         <div class="timer" style="display: none;">00:00</div>
         <video class="video-preview" style="display: none;" autoplay playsinline muted></video>
         <video class="video-playback" style="display: none;" controls></video>
@@ -77,6 +85,7 @@
         let recordedChunks = [];
         let timerInterval;
         let recording = false;
+        let cloudinaryUrl = '';
         
         async function toggleRecording() {
             if (!recording) {
@@ -101,6 +110,7 @@
                 preview.srcObject = stream;
                 preview.style.display = 'block';
                 document.querySelector('.video-playback').style.display = 'none';
+                document.querySelector('.play-btn').style.display = 'none';
                 
                 mediaRecorder = new MediaRecorder(stream);
                 recordedChunks = [];
@@ -137,6 +147,7 @@
                         preview.srcObject = stream;
                         preview.style.display = 'block';
                         document.querySelector('.video-playback').style.display = 'none';
+                        document.querySelector('.play-btn').style.display = 'none';
                         
                         mediaRecorder = new MediaRecorder(stream);
                         recordedChunks = [];
@@ -208,11 +219,6 @@
 
         async function handleRecordingStop() {
             const blob = new Blob(recordedChunks, { type: 'video/webm' });
-            const videoURL = URL.createObjectURL(blob);
-            const playback = document.querySelector('.video-playback');
-            playback.src = videoURL;
-            playback.style.display = 'block';
-            
             try {
                 showStatus('Uploading to Cloudinary...', '');
                 await uploadToCloudinary(blob);
@@ -239,17 +245,22 @@
                 const data = await response.json();
                 
                 if (data.secure_url) {
-                    showStatus(
-                        `Upload successful! Video URL: ${data.secure_url}`, 
-                        'success'
-                    );
-                    console.log('Full response:', data);
+                    showStatus('Upload successful! Ready to play.', 'success');
+                    cloudinaryUrl = data.secure_url;
+                    document.querySelector('.play-btn').style.display = 'block';
                 } else {
                     throw new Error(data.error?.message || 'Upload failed');
                 }
             } catch (error) {
                 throw new Error(`Upload failed: ${error.message}`);
             }
+        }
+
+        function playVideo() {
+            const playback = document.querySelector('.video-playback');
+            playback.src = cloudinaryUrl;
+            playback.style.display = 'block';
+            playback.play();
         }
 
         function showStatus(message, type) {
