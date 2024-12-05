@@ -980,6 +980,26 @@ async function generatePDF() {
     let yPosition = 20;
     const pageHeight = doc.internal.pageSize.height;
     const marginLeft = 20;
+
+
+
+
+
+       // NEW CODE STARTS HERE
+    // Pull site name from HTML and clean it up
+    const pageTitle = document.querySelector('.header h2').textContent;
+    const siteName = pageTitle.replace('Quality Control Checklist ', '');
+    
+    // Add site name at the top
+    doc.setFontSize(24);
+    doc.setTextColor(0, 0, 0);
+    doc.text(siteName, 105, yPosition, { align: "center" });
+    yPosition += 15;
+    // NEW CODE ENDS HERE
+
+
+
+    
     
     // Add date
     const currentDate = new Date().toLocaleDateString('en-US', { 
