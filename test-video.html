@@ -2,20 +2,27 @@
 <html>
 <head>
     <title>Cloudinary Video Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
         .container {
             max-width: 800px;
             margin: 20px auto;
             padding: 20px;
-            font-family: Arial, sans-serif;
             background: #2a2a2a;
-            color: white;
             border-radius: 8px;
         }
-        .video-preview {
-            max-width: 100%;
+        .video-preview, .video-playback {
+            width: 100%;
             margin: 10px 0;
             border-radius: 4px;
+            background: #000;
         }
         .record-btn {
             background: #ff4444;
@@ -25,6 +32,8 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
+            width: 100%;
+            margin: 10px 0;
         }
         .record-btn:hover {
             background: #cc0000;
@@ -33,18 +42,24 @@
             font-family: monospace;
             font-size: 20px;
             margin: 10px 0;
+            text-align: center;
             color: white;
         }
         .status {
             margin: 10px 0;
             padding: 10px;
             border-radius: 4px;
+            word-break: break-all;
         }
         .success { background: #198754; color: white; }
         .error { background: #dc3545; color: white; }
+        h1 {
+            margin-top: 0;
+            font-size: 24px;
+        }
     </style>
 </head>
-<body style="background: #1a1a1a;">
+<body>
     <div class="container">
         <h1>Cloudinary Video Test</h1>
         <button class="record-btn" onclick="toggleRecording()">Start Recording</button>
@@ -75,7 +90,7 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: {
-                        facingMode: { exact: "environment" }, // Use rear camera
+                        facingMode: { exact: "environment" },
                         width: { ideal: 1920 },
                         height: { ideal: 1080 }
                     }, 
@@ -113,13 +128,11 @@
                 
             } catch (error) {
                 if (error.name === 'OverconstrainedError') {
-                    // If rear camera fails, fall back to any available camera
                     try {
                         const stream = await navigator.mediaDevices.getUserMedia({ 
                             video: true, 
                             audio: true 
                         });
-                        // Rest of the code remains the same
                         const preview = document.querySelector('.video-preview');
                         preview.srcObject = stream;
                         preview.style.display = 'block';
@@ -149,7 +162,7 @@
                             }
                         }, 30000);
                     } catch (fallbackError) {
-                        showStatus('Error starting recording: No camera available', 'error');
+                        showStatus('Error: No camera available', 'error');
                     }
                 } else {
                     showStatus('Error starting recording: ' + error.message, 'error');
@@ -211,7 +224,7 @@
         async function uploadToCloudinary(blob) {
             const formData = new FormData();
             formData.append('file', blob);
-            formData.append('upload_preset', 'textvideo');
+            formData.append('upload_preset', 'testvideo');
             formData.append('api_key', API_KEY);
             
             try {
