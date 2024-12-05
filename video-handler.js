@@ -12,29 +12,46 @@ class VideoHandler {
         this.cloudinaryUrl = '';
     }
 
+    getSupportedMimeType() {
+        const types = [
+            'video/webm;codecs=vp8,opus',
+            'video/webm',
+            'video/mp4',
+            'video/quicktime',
+            'video/webm;codecs=vp9',
+            'video/webm;codecs=h264',
+            'video/x-matroska;codecs=avc1'
+        ];
+        
+        for (const type of types) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                return type;
+            }
+        }
+        
+        return '';
+    }
+
     async startRecording() {
         try {
-            // First try rear camera
             const stream = await this.getMediaStream();
             
             const preview = document.querySelector(`#video-preview-${this.itemId}`);
             preview.srcObject = stream;
             preview.style.display = 'block';
-            
-            // Ensure video plays on iOS
             preview.setAttribute('playsinline', '');
             preview.setAttribute('webkit-playsinline', '');
             
-            // Try to start playing the preview
             try {
                 await preview.play();
             } catch (playError) {
                 console.log('Preview play error:', playError);
             }
+
+            const mimeType = this.getSupportedMimeType();
+            const options = mimeType ? { mimeType } : {};
             
-            this.mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'video/webm;codecs=vp8,opus'
-            });
+            this.mediaRecorder = new MediaRecorder(stream, options);
             this.recordedChunks = [];
             
             this.mediaRecorder.ondataavailable = (event) => {
@@ -45,7 +62,7 @@ class VideoHandler {
             
             this.mediaRecorder.onstop = () => this.handleRecordingStop();
             
-            this.mediaRecorder.start();
+            this.mediaRecorder.start(1000); // Record in 1-second chunks
             this.recording = true;
             this.startTimer();
             
@@ -69,8 +86,8 @@ class VideoHandler {
             audio: true,
             video: {
                 facingMode: { ideal: 'environment' },
-                width: { ideal: 1920 },
-                height: { ideal: 1080 }
+                width: { ideal: 1280 }, // Reduced from 1920 for better compatibility
+                height: { ideal: 720 }  // Reduced from 1080 for better compatibility
             }
         };
 
@@ -78,7 +95,6 @@ class VideoHandler {
             return await navigator.mediaDevices.getUserMedia(constraints);
         } catch (error) {
             console.log('Failed with environment camera, trying basic constraints');
-            // Fallback to basic constraints
             return await navigator.mediaDevices.getUserMedia({
                 audio: true,
                 video: true
@@ -106,6 +122,7 @@ class VideoHandler {
         }
     }
 
+    // ... rest of the code remains the same ...
     startTimer() {
         const timer = document.querySelector(`#timer-${this.itemId}`);
         timer.style.display = 'block';
@@ -129,7 +146,7 @@ class VideoHandler {
             return;
         }
 
-        const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+        const blob = new Blob(this.recordedChunks);
         try {
             this.showStatus('Uploading to Cloudinary...', '');
             await this.uploadToCloudinary(blob);
@@ -163,7 +180,6 @@ class VideoHandler {
                 playback.setAttribute('webkit-playsinline', '');
                 playback.style.display = 'block';
                 
-                // Store the video URL in the checklist items
                 const itemIndex = checklistItems.findIndex(item => item.id === this.itemId);
                 if (itemIndex !== -1) {
                     checklistItems[itemIndex].video = this.cloudinaryUrl;
