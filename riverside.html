@@ -115,19 +115,52 @@ body {
     box-sizing: border-box;
     font-size: 18px;
 }
+/* Find this section in your CSS */
 .image-upload {
     margin: 15px 0;
 }
 .image-upload input[type="file"] {
-    padding: 20px;
-    font-size: 18px;
     width: 100%;
-    box-sizing: border-box;
-    background: #e9ecef;
+    padding: 15px 30px;
+    font-size: 20px;
+    background: #2196F3;
+    color: white;
+    border: none;
     border-radius: 8px;
-    border: 2px solid #ddd;
-    height: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 10px 0;
+    font-weight: bold;
+    height: auto;
 }
+
+.image-upload input[type="file"]::file-selector-button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    background: white;
+    color: #2196F3;
+    font-weight: bold;
+    margin-right: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.image-upload input[type="file"]:hover {
+    background: #1976D2;
+}
+
+.image-upload input[type="file"]:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.image-upload input[type="file"]:disabled::file-selector-button {
+    background: #e0e0e0;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
 .image-preview {
     max-width: 100%;
     margin-top: 15px;
