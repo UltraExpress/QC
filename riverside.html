@@ -627,9 +627,8 @@ function renderChecklist() {
     const hasScore = item.score > 0;
     const hasNotes = item.notes.trim() !== '';
     const hasImage = item.image !== null;
-    // Change this line:
-    const hasVideo = item.video !== undefined;
-    // To:
+   
+ 
     const hasVideo = item.videoUrl !== undefined;
     
     const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
