@@ -618,7 +618,7 @@ function renderChecklist() {
             </div>
             
             <div class="rating-group">
-                <div class="section-label">Quality Rating</div>
+                <div class="section-label">Quality Rating:</div>
                 <div class="rating-options">
                     ${[1,2,3,4,5].map(rating => `
                         <button class="rating-btn" onclick="setRating(${index}, ${rating})" ${!inspectorName ? 'disabled' : ''}>
