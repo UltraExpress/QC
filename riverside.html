@@ -513,7 +513,7 @@ async function loadFromLocalStorage() {
             score: 0,
             notes: "",
             image: null,
-            video: undefined  // Add this line to initialize video property
+            videoUrl: undefined  // Add this line to initialize video property
         }));
         
         // Load saved data after initializing checklist
@@ -749,7 +749,7 @@ async function resetForm() {
             item.score = 0;
             item.notes = '';
             item.image = null;
-            item.video = undefined; 
+            item.videoUrl = undefined; 
         });
         
         // Clear inspector name
