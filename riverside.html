@@ -584,16 +584,41 @@ async function loadFromLocalStorage() {
         if (!response.ok) throw new Error('Failed to load checklist data');
         
         const data = await response.json();
+        const savedData = localStorage.getItem('qcFormData');
+        
+        // Initialize with fresh checklist
         checklistItems = data.items.map(item => ({
             ...item,
             score: 0,
             notes: "",
             image: null,
-            video: undefined  // Add this line to initialize video property
+            video: undefined
         }));
         
-        // Load saved data after initializing checklist
-        loadFromLocalStorage();
+        // If we have saved data, merge it into the fresh checklist
+        if (savedData) {
+            const parsed = JSON.parse(savedData);
+            if (parsed.checklistItems) {
+                checklistItems = checklistItems.map((freshItem, index) => {
+                    const savedItem = parsed.checklistItems[index];
+                    if (savedItem && savedItem.id === freshItem.id) {
+                        return {
+                            ...freshItem,
+                            score: savedItem.score || 0,
+                            notes: savedItem.notes || "",
+                            image: savedItem.image || null,
+                            videoUrl: savedItem.videoUrl,
+                        };
+                    }
+                    return freshItem;
+                });
+            }
+            // Restore inspector name
+            if (parsed.inspectorName) {
+                inspectorName = parsed.inspectorName;
+                document.getElementById('inspector-name').value = inspectorName;
+            }
+        }
         
         renderChecklist();
     } catch (error) {
@@ -605,6 +630,8 @@ async function loadFromLocalStorage() {
         `;
     }
 }
+
+// Remove or comment out the loadFromLocalStorage() call in the original loadChecklist()
 
 
 
