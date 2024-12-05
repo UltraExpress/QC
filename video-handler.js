@@ -230,7 +230,8 @@ class VideoHandler {
                 
                 const itemIndex = checklistItems.findIndex(item => item.id === this.itemId);
                 if (itemIndex !== -1) {
-                    checklistItems[itemIndex].video = this.cloudinaryUrl;
+                   
+                    checklistItems[itemIndex].videoUrl = this.cloudinaryUrl;
                     saveToLocalStorage();
                     checkComplete(itemIndex);
                     checkAllItemsComplete();
