@@ -608,6 +608,12 @@ async function loadFromLocalStorage() {
 
 
 
+
+
+
+        
+
+
 function renderChecklist() {
     const container = document.getElementById('checklist-container');
     container.innerHTML = checklistItems.map((item, index) => `
@@ -621,7 +627,9 @@ function renderChecklist() {
                 <div class="section-label">Quality Rating:</div>
                 <div class="rating-options">
                     ${[1,2,3,4,5].map(rating => `
-                        <button class="rating-btn" onclick="setRating(${index}, ${rating})" ${!inspectorName ? 'disabled' : ''}>
+                        <button class="rating-btn ${item.score === rating ? 'selected' : ''}" 
+                            onclick="setRating(${index}, ${rating})" 
+                            ${!inspectorName ? 'disabled' : ''}>
                             <span class="number">${rating}</span>
                             <span class="description">${getRatingDescription(rating)}</span>
                         </button>
@@ -647,45 +655,71 @@ function renderChecklist() {
                 <div class="image-preview-${index}"></div>
             </div>
              <div class="video-section">
-    <div class="section-label">Record Video:</div>
-    <button id="record-btn-${item.id}" 
-        class="record-btn" 
-        onclick="videoHandlers['${item.id}'].toggleRecording()"
-        ${!inspectorName ? 'disabled' : ''}>
-        Start Recording
-    </button>
-    <div id="timer-${item.id}" class="timer" style="display: none;">00:00</div>
-    <video id="video-preview-${item.id}" 
-        class="video-preview" 
-        style="display: none;" 
-        autoplay 
-        playsinline 
-        webkit-playsinline 
-        muted>
-    </video>
-    <video id="video-playback-${item.id}" 
-        class="video-playback" 
-        style="display: none;" 
-        playsinline
-        webkit-playsinline
-        controls>
-    </video>
-    <div id="video-status-${item.id}" class="status"></div>
-</div>
+                <div class="section-label">Record Video:</div>
+                <button id="record-btn-${item.id}" 
+                    class="record-btn" 
+                    onclick="videoHandlers['${item.id}'].toggleRecording()"
+                    ${!inspectorName ? 'disabled' : ''}>
+                    Start Recording
+                </button>
+                <div id="timer-${item.id}" class="timer" style="display: none;">00:00</div>
+                <video id="video-preview-${item.id}" 
+                    class="video-preview" 
+                    style="display: none;" 
+                    autoplay 
+                    playsinline 
+                    webkit-playsinline 
+                    muted>
+                </video>
+                <video id="video-playback-${item.id}" 
+                    class="video-playback" 
+                    style="display: none;" 
+                    playsinline
+                    webkit-playsinline
+                    controls>
+                </video>
+                <div id="video-status-${item.id}" class="status"></div>
+            </div>
         </div>
     `).join('');
-     // Initialize video handlers for each item
+
+    // Initialize video handlers for each item
     checklistItems.forEach(item => {
         if (!window.videoHandlers) window.videoHandlers = {};
         window.videoHandlers[item.id] = new VideoHandler(item.id);
     });
     
+    // Check completion status and update total score
     checklistItems.forEach((item, index) => {
         checkComplete(index);
     });
+    updateTotalScore();
     checkAllItemsComplete();
+
+    // Restore video playback if URLs exist
+    checklistItems.forEach(item => {
+        if (item.videoUrl) {
+            const playback = document.querySelector(`#video-playback-${item.id}`);
+            if (playback) {
+                playback.src = item.videoUrl;
+                playback.style.display = 'block';
+                const preview = document.querySelector(`#video-preview-${item.id}`);
+                if (preview) {
+                    preview.style.display = 'none';
+                }
+            }
+        }
+    });
 }
 
+
+
+
+
+
+
+
+        
 
         function getRatingDescription(rating) {
             const descriptions = {
