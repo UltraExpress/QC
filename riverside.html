@@ -622,13 +622,16 @@ function renderChecklist() {
             return descriptions[rating];
         }
 
-        function checkComplete(index) {
+    function checkComplete(index) {
     const item = checklistItems[index];
     const hasScore = item.score > 0;
     const hasNotes = item.notes.trim() !== '';
     const hasImage = item.image !== null;
-    const hasVideo = item.video !== undefined;  // Add this line before using it
-            
+    // Change this line:
+    const hasVideo = item.video !== undefined;
+    // To:
+    const hasVideo = item.videoUrl !== undefined;
+    
     const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
     if (hasScore && hasNotes && hasImage && hasVideo) {
         itemElement.classList.add('complete');
