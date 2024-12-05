@@ -640,12 +640,12 @@ function renderChecklist() {
     }
 }
 
-        function checkAllItemsComplete() {
+     function checkAllItemsComplete() {
             const allComplete = checklistItems.every(item => 
                 item.score > 0 && 
                 item.notes.trim() !== '' && 
                 item.image !== null
-                 && item.video !== undefined
+                 && item.videoUrl !== undefined
             );
             
             const pdfButton = document.getElementById('pdfButton');
