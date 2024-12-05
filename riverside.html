@@ -801,7 +801,7 @@ async function generatePDF() {
     const pageHeight = doc.internal.pageSize.height;
     const marginLeft = 20;
     
-    // Add date - increased from 12 to 14
+    // Add date
     const currentDate = new Date().toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long', 
@@ -811,7 +811,7 @@ async function generatePDF() {
     doc.setTextColor(0, 0, 0);
     doc.text(currentDate, 105, yPosition, { align: "center" });
     
-    // Add title - increased from 24 to 28
+    // Add title
     yPosition += 20;
     doc.setFontSize(28);
     doc.text("Quality Control Report", 105, yPosition, { align: "center" });
@@ -821,7 +821,7 @@ async function generatePDF() {
     doc.setFontSize(14);
     doc.text(`Inspector: ${inspectorName || 'Not Specified'}`, 105, yPosition, { align: "center" });
     
-    // Add total score - increased from 16 to 20
+    // Add total score
     yPosition += 20;
     doc.setFontSize(20);
     const totalScoreElement = document.getElementById('total-score');
@@ -831,15 +831,16 @@ async function generatePDF() {
     for (const item of checklistItems) {
         yPosition += 20;
         
-        // Calculate initial space needed
+        // Calculate space needed
         const titleHeight = 15;
         const scoreHeight = 15;
         const notesLines = doc.splitTextToSize(`Notes: ${item.notes}`, 170).length;
         const notesHeight = notesLines * 8;
-        const targetImageHeight = 100;
-        const totalItemHeight = titleHeight + scoreHeight + notesHeight + targetImageHeight + 40;
+        const imageHeight = item.image ? 100 : 0;
+        const videoUrlHeight = item.videoUrl ? 15 : 0;
+        const totalItemHeight = titleHeight + scoreHeight + notesHeight + imageHeight + videoUrlHeight + 40;
         
-        // Check if we need a new page
+        // Check for new page
         if (yPosition + totalItemHeight > pageHeight - 20) {
             doc.addPage();
             yPosition = 20;
@@ -855,13 +856,13 @@ async function generatePDF() {
             doc.setLineWidth(0.5);
         }
         
-        // Item name and weight - increased from 14 to 18
+        // Item name and weight
         doc.setTextColor(item.score < 4 ? 255 : 0, 0, 0);
         doc.setFontSize(18);
         doc.setFont(undefined, 'bold');
         doc.text(`${item.name} (Weight: ${item.weight})`, marginLeft, yPosition);
         
-        // Score - increased from 12 to 16
+        // Score
         yPosition += 15;
         doc.setFontSize(16);
         doc.text(`SCORE: ${item.score}`, marginLeft, yPosition);
@@ -869,7 +870,7 @@ async function generatePDF() {
             doc.text('NEEDS ATTENTION', 70, yPosition);
         }
         
-        // Notes - increased from 12 to 14
+        // Notes
         yPosition += 15;
         doc.setFont(undefined, 'normal');
         doc.setFontSize(14);
@@ -877,76 +878,85 @@ async function generatePDF() {
         doc.text(splitNotes, marginLeft, yPosition);
         yPosition += notesHeight;
         
-        // Handle image - now with IndexedDB support
+        // Handle uploaded images
         if (item.image) {
             try {
                 const imageData = await loadImageFromIndexedDB(checklistItems.indexOf(item));
-                if (!imageData) continue;
-                
-                const img = new Image();
-                img.src = imageData;
-                
-                await new Promise((resolve) => {
-                    img.onload = async () => {
-                        try {
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d', { alpha: false });
-                            
-                            const maxWidth = 150;
-                            const maxHeight = 100;
-                            
-                            let finalWidth = img.width;
-                            let finalHeight = img.height;
-                            
-                            if (finalWidth > maxWidth) {
-                                const ratio = maxWidth / finalWidth;
-                                finalWidth = maxWidth;
-                                finalHeight = Math.floor(finalHeight * ratio);
+                if (imageData) {
+                    const img = new Image();
+                    img.src = imageData;
+                    
+                    await new Promise((resolve) => {
+                        img.onload = async () => {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d', { alpha: false });
+                                
+                                const maxWidth = 150;
+                                const maxHeight = 100;
+                                
+                                let finalWidth = img.width;
+                                let finalHeight = img.height;
+                                
+                                if (finalWidth > maxWidth) {
+                                    const ratio = maxWidth / finalWidth;
+                                    finalWidth = maxWidth;
+                                    finalHeight = Math.floor(finalHeight * ratio);
+                                }
+                                if (finalHeight > maxHeight) {
+                                    const ratio = maxHeight / finalHeight;
+                                    finalHeight = maxHeight;
+                                    finalWidth = Math.floor(finalWidth * ratio);
+                                }
+                                
+                                canvas.width = finalWidth * 4;
+                                canvas.height = finalHeight * 4;
+                                
+                                ctx.imageSmoothingEnabled = true;
+                                ctx.imageSmoothingQuality = 'high';
+                                
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                
+                                const properImage = canvas.toDataURL('image/jpeg', 1.0);
+                                doc.addImage(
+                                    properImage,
+                                    'JPEG',
+                                    marginLeft,
+                                    yPosition,
+                                    finalWidth,
+                                    finalHeight,
+                                    undefined,
+                                    'NONE'
+                                );
+                                
+                                yPosition += finalHeight + 10;
+                            } catch (e) {
+                                console.error('Error processing image:', e);
                             }
-                            if (finalHeight > maxHeight) {
-                                const ratio = maxHeight / finalHeight;
-                                finalHeight = maxHeight;
-                                finalWidth = Math.floor(finalWidth * ratio);
-                            }
-                            
-                            canvas.width = finalWidth * 4;
-                            canvas.height = finalHeight * 4;
-                            
-                            ctx.imageSmoothingEnabled = true;
-                            ctx.imageSmoothingQuality = 'high';
-                            
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            
-                            const properImage = canvas.toDataURL('image/jpeg', 1.0);
-                            doc.addImage(
-                                properImage,
-                                'JPEG',
-                                marginLeft,
-                                yPosition,
-                                finalWidth,
-                                finalHeight,
-                                undefined,
-                                'NONE'
-                            );
-                            
-                            yPosition += finalHeight + 10;
-                            
-                            if (item.score < 4 || item.score >= 4) {
-                                const boxHeight = yPosition - boxStartY;
-                                doc.rect(15, boxStartY, 180, boxHeight, 'S');
-                            }
-                            
                             resolve();
-                        } catch (e) {
-                            console.error('Error processing image:', e);
-                            resolve();
-                        }
-                    };
-                    img.onerror = () => resolve();
-                });
+                        };
+                        img.onerror = () => resolve();
+                    });
+                }
             } catch (e) {
                 console.error('Error adding image:', e);
             }
+        }
+        
+        // Add video URL only (no video frames)
+        if (item.videoUrl) {
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 255); // Blue color for URL
+            doc.setFont(undefined, 'normal');
+            doc.text(`Video URL: ${item.videoUrl}`, marginLeft, yPosition);
+            doc.link(marginLeft, yPosition - 5, 150, 10, { url: item.videoUrl });
+            yPosition += 15;
+        }
+        
+        // Draw box around the item if needed
+        if (item.score < 4 || item.score >= 4) {
+            const boxHeight = yPosition - boxStartY;
+            doc.rect(15, boxStartY, 180, boxHeight, 'S');
         }
         
         yPosition += 20;
