@@ -1056,14 +1056,29 @@ async function generatePDF() {
         }
         
         // Add video URL only (no video frames)
-        if (item.videoUrl) {
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 255); // Blue color for URL
-            doc.setFont(undefined, 'normal');
-            doc.text(`Video URL: ${item.videoUrl}`, marginLeft, yPosition);
-            doc.link(marginLeft, yPosition - 5, 150, 10, { url: item.videoUrl });
-            yPosition += 15;
-        }
+       
+        
+        
+        
+        
+        
+        // Handle video URL with wrapping
+if (item.videoUrl) {
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 255);
+    doc.setFont(undefined, 'normal');
+    
+    const maxWidth = 160;
+    const splitUrl = doc.splitTextToSize(`Video URL: ${item.videoUrl}`, maxWidth);
+    
+    splitUrl.forEach((line, i) => {
+        doc.text(line, marginLeft, yPosition + (i * 15));
+    });
+    
+    doc.link(marginLeft, yPosition - 5, maxWidth, (splitUrl.length * 15), { url: item.videoUrl });
+    
+    yPosition += (splitUrl.length * 15) + 5;
+}
         
         // Draw box around the item if needed
         if (item.score < 4 || item.score >= 4) {
