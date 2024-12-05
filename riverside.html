@@ -2,12 +2,11 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-      
-        
+   
 
-
-
+          <script src="video-handler.js"></script>
+    
+   <style>
 body {
     font-family: Arial, sans-serif;
     max-width: 800px;
@@ -18,37 +17,28 @@ body {
     color: white;
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.reset-btn {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 20px;
+    font-weight: bold;
+}
+.reset-btn:hover {
+    background: #ff5252;
+}
 
-
-        
-        
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .reset-btn {
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .reset-btn:hover {
-            background: #ff5252;
-        }
-        
-        
-        
-        
-        
-        .qc-item {
+.qc-item {
     background: #2a2a2a;
     color: #ffffff;
     border-radius: 8px;
@@ -57,126 +47,115 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: background-color 0.3s;
 }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-      
-        .qc-item.complete {
-            background: #90EE90;
-        }
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .item-title {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .item-weight {
-            background: #e9ecef;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 18px;
-        }
-        .rating-group {
-            margin: 15px 0;
-        }
-        .rating-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-        .rating-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            min-height: 100px;
-        }
-        .rating-btn .number {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .rating-btn .description {
-            font-size: 16px;
-            text-align: center;
-            line-height: 1.4;
-        }
-        .rating-btn.selected {
-            background: #4CAF50;
-            color: white;
-            border-color: #4CAF50;
-        }
-        .notes {
-            width: 100%;
-            margin: 15px 0;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            min-height: 120px;
-            box-sizing: border-box;
-            font-size: 18px;
-        }
-        .image-upload {
-            margin: 15px 0;
-        }
-        .image-upload input[type="file"] {
-            padding: 20px;
-            font-size: 18px;
-            width: 100%;
-            box-sizing: border-box;
-            background: #e9ecef;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-            height: 50px;
-        }
-        .image-preview {
-            max-width: 100%;
-            margin-top: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .section-label {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 20px;
-        }
-        h2 {
-            font-size: 28px;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-size: 20px;
-            color: #666;
-        }
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
 
+.qc-item.complete {
+    background: #90EE90;
+}
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+.item-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+.item-weight {
+    background: #e9ecef;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 18px;
+}
+.rating-group {
+    margin: 15px 0;
+}
+.rating-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+}
+.rating-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-height: 100px;
+}
+.rating-btn .number {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+.rating-btn .description {
+    font-size: 16px;
+    text-align: center;
+    line-height: 1.4;
+}
+.rating-btn.selected {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+.notes {
+    width: 100%;
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-height: 120px;
+    box-sizing: border-box;
+    font-size: 18px;
+}
+.image-upload {
+    margin: 15px 0;
+}
+.image-upload input[type="file"] {
+    padding: 20px;
+    font-size: 18px;
+    width: 100%;
+    box-sizing: border-box;
+    background: #e9ecef;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    height: 50px;
+}
+.image-preview {
+    max-width: 100%;
+    margin-top: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.section-label {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 20px;
+}
+h2 {
+    font-size: 28px;
+}
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 20px;
+    color: #666;
+}
+.error {
+    background: #ffebee;
+    color: #c62828;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
 
 .total-score {
     font-size: 24px;
@@ -188,59 +167,72 @@ body {
     margin-bottom: 20px;
 }
 
+.pdf-button {
+    width: 100%;
+    padding: 20px;
+    font-size: 24px;
+    background: #ccc;
+    color: #666;
+    border: none;
+    border-radius: 8px;
+    margin-top: 30px;
+    cursor: not-allowed;
+    transition: all 0.3s;
+}
+.pdf-button.ready {
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+}
+.pdf-button.ready:hover {
+    background: #0056b3;
+}
+.inspector-section {
+    margin: 1rem 0;
+    padding: 0 1rem;
+}
+.inspector-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: white;
+    background-color: #343a40;
+}
+.inspector-input:focus {
+    outline: none;
+    border-color: #0056b3;
+}
 
+/* Video Styles */
+.video-section {
+    margin: 15px 0;
+}
 
+.video-preview, .video-playback {
+    width: 100%;
+    margin: 10px 0;
+    border-radius: 4px;
+    background: #000;
+}
 
+.timer {
+    font-family: monospace;
+    font-size: 20px;
+    margin: 10px 0;
+    text-align: center;
+    color: white;
+}
 
-
-        
-        .pdf-button {
-            width: 100%;
-            padding: 20px;
-            font-size: 24px;
-            background: #ccc;
-            color: #666;
-            border: none;
-            border-radius: 8px;
-            margin-top: 30px;
-            cursor: not-allowed;
-            transition: all 0.3s;
-        }
-        .pdf-button.ready {
-            background: #007bff;
-            color: white;
-            cursor: pointer;
-        
-        
-        
-        
-        
-        }
-        .pdf-button.ready:hover {
-            background: #0056b3;
-        }
-        .inspector-section {
-            margin: 1rem 0;
-            padding: 0 1rem;
-        }
-        .inspector-input {
-            width: 100%;
-            max-width: 300px;
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-            color: white;
-            background-color: #343a40;
-        }
-        .inspector-input:focus {
-            outline: none;
-            border-color: #0056b3;
-
-
-
-        
-    </style>
+.status {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 4px;
+    word-break: break-all;
+}
+</style>
 </head>
 <body>
     <div class="header">
@@ -520,7 +512,8 @@ async function loadFromLocalStorage() {
             ...item,
             score: 0,
             notes: "",
-            image: null
+            image: null,
+            video: undefined  // Add this line to initialize video property
         }));
         
         // Load saved data after initializing checklist
@@ -536,7 +529,6 @@ async function loadFromLocalStorage() {
         `;
     }
 }
-
 
 
 
@@ -578,8 +570,36 @@ function renderChecklist() {
                     ${!inspectorName ? 'disabled' : ''}>
                 <div class="image-preview-${index}"></div>
             </div>
+                 <div class="video-section">
+                <div class="section-label">Record Video</div>
+                <button id="record-btn-${item.id}" 
+                    class="record-btn" 
+                    onclick="videoHandlers['${item.id}'].toggleRecording()"
+                    ${!inspectorName ? 'disabled' : ''}>
+                    Start Recording
+                </button>
+                <div id="timer-${item.id}" class="timer" style="display: none;">00:00</div>
+                <video id="video-preview-${item.id}" 
+                    class="video-preview" 
+                    style="display: none;" 
+                    autoplay 
+                    playsinline 
+                    muted>
+                </video>
+                <video id="video-playback-${item.id}" 
+                    class="video-playback" 
+                    style="display: none;" 
+                    controls>
+                </video>
+                <div id="video-status-${item.id}" class="status"></div>
+            </div>
         </div>
     `).join('');
+     // Initialize video handlers for each item
+    checklistItems.forEach(item => {
+        if (!window.videoHandlers) window.videoHandlers = {};
+        window.videoHandlers[item.id] = new VideoHandler(item.id);
+    });
     
     checklistItems.forEach((item, index) => {
         checkComplete(index);
@@ -600,24 +620,26 @@ function renderChecklist() {
         }
 
         function checkComplete(index) {
-            const item = checklistItems[index];
-            const hasScore = item.score > 0;
-            const hasNotes = item.notes.trim() !== '';
-            const hasImage = item.image !== null;
+    const item = checklistItems[index];
+    const hasScore = item.score > 0;
+    const hasNotes = item.notes.trim() !== '';
+    const hasImage = item.image !== null;
+    const hasVideo = item.video !== undefined;  // Add this line before using it
             
-            const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
-            if (hasScore && hasNotes && hasImage) {
-                itemElement.classList.add('complete');
-            } else {
-                itemElement.classList.remove('complete');
-            }
-        }
+    const itemElement = document.querySelector(`.qc-item[data-id="${item.id}"]`);
+    if (hasScore && hasNotes && hasImage && hasVideo) {
+        itemElement.classList.add('complete');
+    } else {
+        itemElement.classList.remove('complete');
+    }
+}
 
         function checkAllItemsComplete() {
             const allComplete = checklistItems.every(item => 
                 item.score > 0 && 
                 item.notes.trim() !== '' && 
                 item.image !== null
+                 && item.video !== undefined
             );
             
             const pdfButton = document.getElementById('pdfButton');
@@ -721,6 +743,7 @@ async function resetForm() {
             item.score = 0;
             item.notes = '';
             item.image = null;
+            item.video = undefined; 
         });
         
         // Clear inspector name
