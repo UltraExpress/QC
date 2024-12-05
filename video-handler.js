@@ -14,20 +14,27 @@ class VideoHandler {
 
     async startRecording() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: {
-                    facingMode: { exact: "environment" },
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
-                }, 
-                audio: true 
-            });
+            // First try rear camera
+            const stream = await this.getMediaStream();
             
             const preview = document.querySelector(`#video-preview-${this.itemId}`);
             preview.srcObject = stream;
             preview.style.display = 'block';
             
-            this.mediaRecorder = new MediaRecorder(stream);
+            // Ensure video plays on iOS
+            preview.setAttribute('playsinline', '');
+            preview.setAttribute('webkit-playsinline', '');
+            
+            // Try to start playing the preview
+            try {
+                await preview.play();
+            } catch (playError) {
+                console.log('Preview play error:', playError);
+            }
+            
+            this.mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm;codecs=vp8,opus'
+            });
             this.recordedChunks = [];
             
             this.mediaRecorder.ondataavailable = (event) => {
@@ -45,7 +52,6 @@ class VideoHandler {
             const recordBtn = document.querySelector(`#record-btn-${this.itemId}`);
             recordBtn.textContent = 'Stop Recording';
             
-            // Auto-stop after 30 seconds
             setTimeout(() => {
                 if (this.recording) {
                     this.stopRecording();
@@ -53,46 +59,30 @@ class VideoHandler {
             }, 30000);
             
         } catch (error) {
-            if (error.name === 'OverconstrainedError') {
-                // Fallback to any available camera
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: true, 
-                        audio: true 
-                    });
-                    const preview = document.querySelector(`#video-preview-${this.itemId}`);
-                    preview.srcObject = stream;
-                    preview.style.display = 'block';
-                    
-                    this.mediaRecorder = new MediaRecorder(stream);
-                    this.recordedChunks = [];
-                    
-                    this.mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) {
-                            this.recordedChunks.push(event.data);
-                        }
-                    };
-                    
-                    this.mediaRecorder.onstop = () => this.handleRecordingStop();
-                    
-                    this.mediaRecorder.start();
-                    this.recording = true;
-                    this.startTimer();
-                    
-                    const recordBtn = document.querySelector(`#record-btn-${this.itemId}`);
-                    recordBtn.textContent = 'Stop Recording';
-                    
-                    setTimeout(() => {
-                        if (this.recording) {
-                            this.stopRecording();
-                        }
-                    }, 30000);
-                } catch (fallbackError) {
-                    this.showStatus('Error: No camera available', 'error');
-                }
-            } else {
-                this.showStatus('Error starting recording: ' + error.message, 'error');
+            console.error('Recording error:', error);
+            this.showStatus('Error: ' + (error.message || 'Failed to start recording'), 'error');
+        }
+    }
+
+    async getMediaStream() {
+        const constraints = {
+            audio: true,
+            video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
             }
+        };
+
+        try {
+            return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (error) {
+            console.log('Failed with environment camera, trying basic constraints');
+            // Fallback to basic constraints
+            return await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: true
+            });
         }
     }
 
@@ -108,10 +98,11 @@ class VideoHandler {
             const recordBtn = document.querySelector(`#record-btn-${this.itemId}`);
             recordBtn.textContent = 'Start Recording';
             
-            const tracks = document.querySelector(`#video-preview-${this.itemId}`).srcObject.getTracks();
+            const preview = document.querySelector(`#video-preview-${this.itemId}`);
+            const tracks = preview.srcObject?.getTracks() || [];
             tracks.forEach(track => track.stop());
-            
-            document.querySelector(`#video-preview-${this.itemId}`).style.display = 'none';
+            preview.srcObject = null;
+            preview.style.display = 'none';
         }
     }
 
@@ -133,6 +124,11 @@ class VideoHandler {
     }
 
     async handleRecordingStop() {
+        if (this.recordedChunks.length === 0) {
+            this.showStatus('No video data recorded', 'error');
+            return;
+        }
+
         const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
         try {
             this.showStatus('Uploading to Cloudinary...', '');
@@ -163,9 +159,11 @@ class VideoHandler {
                 this.cloudinaryUrl = data.secure_url;
                 const playback = document.querySelector(`#video-playback-${this.itemId}`);
                 playback.src = this.cloudinaryUrl;
+                playback.setAttribute('playsinline', '');
+                playback.setAttribute('webkit-playsinline', '');
                 playback.style.display = 'block';
                 
-                // Store the video URL in the checklistItems
+                // Store the video URL in the checklist items
                 const itemIndex = checklistItems.findIndex(item => item.id === this.itemId);
                 if (itemIndex !== -1) {
                     checklistItems[itemIndex].video = this.cloudinaryUrl;
