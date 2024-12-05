@@ -667,6 +667,7 @@ function renderChecklist() {
             <div>
                 <div class="section-label">Notes:</div>
                 <textarea class="notes" 
+                    oninput="updateNotes(${index}, this.value)"
                     onchange="updateNotes(${index}, this.value)" 
                     placeholder="Enter detailed observations here..."
                     ${!inspectorName ? 'disabled' : ''}>${item.notes}</textarea>
