@@ -570,29 +570,32 @@ function renderChecklist() {
                     ${!inspectorName ? 'disabled' : ''}>
                 <div class="image-preview-${index}"></div>
             </div>
-                 <div class="video-section">
-                <div class="section-label">Record Video</div>
-                <button id="record-btn-${item.id}" 
-                    class="record-btn" 
-                    onclick="videoHandlers['${item.id}'].toggleRecording()"
-                    ${!inspectorName ? 'disabled' : ''}>
-                    Start Recording
-                </button>
-                <div id="timer-${item.id}" class="timer" style="display: none;">00:00</div>
-                <video id="video-preview-${item.id}" 
-                    class="video-preview" 
-                    style="display: none;" 
-                    autoplay 
-                    playsinline 
-                    muted>
-                </video>
-                <video id="video-playback-${item.id}" 
-                    class="video-playback" 
-                    style="display: none;" 
-                    controls>
-                </video>
-                <div id="video-status-${item.id}" class="status"></div>
-            </div>
+             <div class="video-section">
+    <div class="section-label">Record Video</div>
+    <button id="record-btn-${item.id}" 
+        class="record-btn" 
+        onclick="videoHandlers['${item.id}'].toggleRecording()"
+        ${!inspectorName ? 'disabled' : ''}>
+        Start Recording
+    </button>
+    <div id="timer-${item.id}" class="timer" style="display: none;">00:00</div>
+    <video id="video-preview-${item.id}" 
+        class="video-preview" 
+        style="display: none;" 
+        autoplay 
+        playsinline 
+        webkit-playsinline 
+        muted>
+    </video>
+    <video id="video-playback-${item.id}" 
+        class="video-playback" 
+        style="display: none;" 
+        playsinline
+        webkit-playsinline
+        controls>
+    </video>
+    <div id="video-status-${item.id}" class="status"></div>
+</div>
         </div>
     `).join('');
      // Initialize video handlers for each item
