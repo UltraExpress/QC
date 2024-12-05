@@ -46,10 +46,11 @@
 </head>
 <body style="background: #1a1a1a;">
     <div class="container">
-        <h1>Cloudinary Video </h1>
+        <h1>Cloudinary Video Test</h1>
         <button class="record-btn" onclick="toggleRecording()">Start Recording</button>
         <div class="timer" style="display: none;">00:00</div>
-        <video class="video-preview" style="display: none;" controls></video>
+        <video class="video-preview" style="display: none;" autoplay playsinline muted></video>
+        <video class="video-playback" style="display: none;" controls></video>
         <div id="status"></div>
     </div>
 
@@ -74,9 +75,9 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: {
-                        aspectRatio: 9/16,
-                        width: { ideal: 576 },
-                        height: { ideal: 1024 }
+                        facingMode: { exact: "environment" }, // Use rear camera
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
                     }, 
                     audio: true 
                 });
@@ -84,6 +85,7 @@
                 const preview = document.querySelector('.video-preview');
                 preview.srcObject = stream;
                 preview.style.display = 'block';
+                document.querySelector('.video-playback').style.display = 'none';
                 
                 mediaRecorder = new MediaRecorder(stream);
                 recordedChunks = [];
@@ -110,7 +112,48 @@
                 }, 30000);
                 
             } catch (error) {
-                showStatus('Error starting recording: ' + error.message, 'error');
+                if (error.name === 'OverconstrainedError') {
+                    // If rear camera fails, fall back to any available camera
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ 
+                            video: true, 
+                            audio: true 
+                        });
+                        // Rest of the code remains the same
+                        const preview = document.querySelector('.video-preview');
+                        preview.srcObject = stream;
+                        preview.style.display = 'block';
+                        document.querySelector('.video-playback').style.display = 'none';
+                        
+                        mediaRecorder = new MediaRecorder(stream);
+                        recordedChunks = [];
+                        
+                        mediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                recordedChunks.push(event.data);
+                            }
+                        };
+                        
+                        mediaRecorder.onstop = handleRecordingStop;
+                        
+                        mediaRecorder.start();
+                        recording = true;
+                        startTimer();
+                        
+                        const recordBtn = document.querySelector('.record-btn');
+                        recordBtn.textContent = 'Stop Recording';
+                        
+                        setTimeout(() => {
+                            if (recording) {
+                                stopRecording();
+                            }
+                        }, 30000);
+                    } catch (fallbackError) {
+                        showStatus('Error starting recording: No camera available', 'error');
+                    }
+                } else {
+                    showStatus('Error starting recording: ' + error.message, 'error');
+                }
             }
         }
 
@@ -128,6 +171,8 @@
                 
                 const tracks = document.querySelector('.video-preview').srcObject.getTracks();
                 tracks.forEach(track => track.stop());
+                
+                document.querySelector('.video-preview').style.display = 'none';
             }
         }
 
@@ -151,9 +196,9 @@
         async function handleRecordingStop() {
             const blob = new Blob(recordedChunks, { type: 'video/webm' });
             const videoURL = URL.createObjectURL(blob);
-            const preview = document.querySelector('.video-preview');
-            preview.srcObject = null;
-            preview.src = videoURL;
+            const playback = document.querySelector('.video-playback');
+            playback.src = videoURL;
+            playback.style.display = 'block';
             
             try {
                 showStatus('Uploading to Cloudinary...', '');
@@ -166,7 +211,7 @@
         async function uploadToCloudinary(blob) {
             const formData = new FormData();
             formData.append('file', blob);
-            formData.append('upload_preset', 'testvideo');  // Updated to use your preset
+            formData.append('upload_preset', 'textvideo');
             formData.append('api_key', API_KEY);
             
             try {
@@ -185,7 +230,7 @@
                         `Upload successful! Video URL: ${data.secure_url}`, 
                         'success'
                     );
-                    console.log('Full response:', data);  // For debugging
+                    console.log('Full response:', data);
                 } else {
                     throw new Error(data.error?.message || 'Upload failed');
                 }
