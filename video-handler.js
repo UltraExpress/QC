@@ -7,6 +7,11 @@ class VideoHandler {
         this.recording = false;
         this.cloudinaryUrl = '';
         this.stream = null;
+        // Hardcode the config since it's constant
+        this.cloudinaryConfig = {
+            cloudName: 'drnkghxvx',
+            uploadPreset: 'testvideo'
+        };
     }
 
     async startRecording() {
@@ -189,6 +194,7 @@ class VideoHandler {
             this.showStatus('Uploading to Cloudinary...', '');
             await this.uploadToCloudinary(blob);
         } catch (error) {
+            console.error('Upload error:', error);
             this.showStatus('Upload failed: ' + error.message, 'error');
         }
     }
@@ -196,18 +202,22 @@ class VideoHandler {
     async uploadToCloudinary(blob) {
         const formData = new FormData();
         formData.append('file', blob);
-        formData.append('upload_preset', 'testvideo');
-        formData.append('api_key', API_KEY);
+        formData.append('upload_preset', this.cloudinaryConfig.uploadPreset);
         
         try {
             const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`,
+                `https://api.cloudinary.com/v1_1/${this.cloudinaryConfig.cloudName}/video/upload`,
                 {
                     method: 'POST',
                     body: formData
                 }
             );
             
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || `Upload failed with status: ${response.status}`);
+            }
+
             const data = await response.json();
             
             if (data.secure_url) {
