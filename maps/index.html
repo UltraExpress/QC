@@ -104,12 +104,20 @@
         let lastSaveTimeout;
 
         // GitHub configuration
-        const githubConfig = {
-            owner: 'ultraexpress',
-            repo: 'QC',
-            path: 'map-data.json',
-            branch: 'main'
-        };
+    
+
+
+
+const githubConfig = {
+    owner: 'ultraexpress',
+    repo: 'QC',
+    path: 'maps/map-data.json',
+    branch: 'main'
+};
+
+
+
+        
 
         async function initializeGitHub() {
             const token = document.getElementById('github-token').value.trim();
