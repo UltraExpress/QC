@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Work Location Tracker</title>
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+        .controls {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <input type="text" id="location-name" placeholder="Location Name">
+        <input type="text" id="location-address" placeholder="Address">
+        <button onclick="addLocation()">Add Location</button>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        // Store locations in localStorage
+        let locations = JSON.parse(localStorage.getItem('workLocations')) || [];
+        let map;
+        let markers = [];
+        let geocoder;
+
+        function initMap() {
+            // Initialize the map centered on a default location
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: { lat: 40.7128, lng: -74.0060 } // Default to NYC
+            });
+
+            geocoder = new google.maps.Geocoder();
+
+            // Load existing locations
+            locations.forEach(location => {
+                addMarker(location);
+            });
+        }
+
+        function addLocation() {
+            const name = document.getElementById('location-name').value;
+            const address = document.getElementById('location-address').value;
+
+            if (!name || !address) {
+                alert('Please enter both name and address');
+                return;
+            }
+
+            // Geocode the address
+            geocoder.geocode({ address: address }, (results, status) => {
+                if (status === 'OK') {
+                    const location = {
+                        name: name,
+                        address: address,
+                        lat: results[0].geometry.location.lat(),
+                        lng: results[0].geometry.location.lng()
+                    };
+
+                    // Save to localStorage
+                    locations.push(location);
+                    localStorage.setItem('workLocations', JSON.stringify(locations));
+
+                    // Add marker to map
+                    addMarker(location);
+
+                    // Clear input fields
+                    document.getElementById('location-name').value = '';
+                    document.getElementById('location-address').value = '';
+                } else {
+                    alert('Geocoding failed: ' + status);
+                }
+            });
+        }
+
+        function addMarker(location) {
+            const marker = new google.maps.Marker({
+                position: { lat: location.lat, lng: location.lng },
+                map: map,
+                title: location.name
+            });
+
+            // Add info window
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <h3>${location.name}</h3>
+                    <p>${location.address}</p>
+                    <button onclick="deleteMarker('${location.name}')">Delete</button>
+                `
+            });
+
+            marker.addListener('click', () => {
+                infoWindow.open(map, marker);
+            });
+
+            markers.push({ marker, location });
+        }
+
+        function deleteMarker(name) {
+            // Remove from locations array
+            locations = locations.filter(loc => loc.name !== name);
+            localStorage.setItem('workLocations', JSON.stringify(locations));
+
+            // Remove marker from map
+            const markerIndex = markers.findIndex(m => m.location.name === name);
+            if (markerIndex > -1) {
+                markers[markerIndex].marker.setMap(null);
+                markers.splice(markerIndex, 1);
+            }
+        }
+    </script>
+
+    <!-- Replace YOUR_API_KEY with your actual Google Maps API key -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+    </script>
+</body>
+</html>
