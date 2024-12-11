@@ -127,10 +127,10 @@ const githubConfig = {
         async function loadFromGitHub() {
             try {
                 const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
+                   headers: {
+    'Authorization': `Bearer ${githubToken}`,
+    'Accept': 'application/vnd.github.v3+json'
+}
                 });
 
                 if (!response.ok) {
@@ -148,63 +148,63 @@ const githubConfig = {
             }
         }
 
-        async function saveToGitHub() {
-            if (!githubToken) {
-                console.warn('GitHub token not set. Skipping save.');
-                return;
+async function saveToGitHub() {
+    if (!githubToken) {
+        console.warn('GitHub token not set. Skipping save.');
+        return;
+    }
+
+    try {
+        // Get the current file (if it exists) to get the SHA
+        let sha = '';
+        try {
+            const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
+                headers: {
+                    'Authorization': `Bearer ${githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                sha = data.sha;
             }
-
-            try {
-                // Get the current file (if it exists) to get the SHA
-                let sha = '';
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
-                        headers: {
-                            'Authorization': `token ${githubToken}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        sha = data.sha;
-                    }
-                } catch (error) {
-                    // File might not exist yet, continue without SHA
-                }
-
-                // Prepare the update
-                const content = JSON.stringify(projects, null, 2);
-                const body = {
-                    message: 'Update map data',
-                    content: btoa(content),
-                    branch: githubConfig.branch
-                };
-
-                if (sha) {
-                    body.sha = sha;
-                }
-
-                // Update or create the file
-                const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify(body)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.statusText}`);
-                }
-
-                console.log('Successfully saved to GitHub');
-            } catch (error) {
-                console.error('Error saving to GitHub:', error);
-                alert('Failed to save to GitHub. Check console for details.');
-            }
+        } catch (error) {
+            // File might not exist yet, continue without SHA
         }
+
+        // Prepare the update
+        const content = JSON.stringify(projects, null, 2);
+        const body = {
+            message: 'Update map data',
+            content: btoa(content),
+            branch: githubConfig.branch
+        };
+
+        if (sha) {
+            body.sha = sha;
+        }
+
+        // Update or create the file
+        const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${githubToken}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            throw new Error(`GitHub API error: ${response.statusText}`);
+        }
+
+        console.log('Successfully saved to GitHub');
+    } catch (error) {
+        console.error('Error saving to GitHub:', error);
+        alert('Failed to save to GitHub. Check console for details.');
+    }
+}
 
         function debouncedsaveToGitHub() {
             clearTimeout(lastSaveTimeout);
