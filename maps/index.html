@@ -16,21 +16,7 @@
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-4">
-        <!-- GitHub Authentication -->
-        <div class="bg-white p-4 rounded shadow mb-4">
-            <h2 class="text-xl mb-2">GitHub Connection</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="github-token" placeholder="GitHub Personal Access Token" 
-                       class="p-2 border rounded">
-                <button onclick="initializeGitHub()" 
-                        class="bg-purple-500 text-white p-2 rounded hover:bg-purple-600">
-                    Connect to GitHub
-                </button>
-            </div>
-            <p class="text-sm text-gray-600 mt-2">
-                Status: <span id="github-status">Not connected</span>
-            </p>
-        </div>
+      
 
         <!-- Project Management -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -245,13 +231,15 @@ const githubConfig = {
         }
 
         // Initialize by trying to load saved token
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedToken = localStorage.getItem('githubToken');
-            if (savedToken) {
-                document.getElementById('github-token').value = savedToken;
-                initializeGitHub();
-            }
-        });
+
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    githubToken = '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';  // Your token here
+    initializeGitHub();
+});
+
+        
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
