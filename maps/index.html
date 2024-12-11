@@ -105,32 +105,20 @@ const githubConfig = {
 
         
 
-        async function initializeGitHub() {
-            const token = document.getElementById('github-token').value.trim();
-            if (!token) {
-                alert('Please enter a GitHub token');
-                return;
-            }
-
-            githubToken = token;
-            document.getElementById('github-status').textContent = 'Connecting...';
-
-            try {
-                // Try to load existing data from GitHub
-                const data = await loadFromGitHub();
-                if (data) {
-                    projects = JSON.parse(data);
-                    refreshProjectList();
-                    document.getElementById('github-status').textContent = 'Connected';
-                    localStorage.setItem('githubToken', token);
-                }
-            } catch (error) {
-                console.error('GitHub initialization error:', error);
-                document.getElementById('github-status').textContent = 'Connection failed';
-                alert('Failed to connect to GitHub. Please check your token and try again.');
-            }
+   async function initializeGitHub() {
+    try {
+        // Try to load existing data from GitHub
+        const data = await loadFromGitHub();
+        if (data) {
+            projects = JSON.parse(data);
+            refreshProjectList();
         }
-
+    } catch (error) {
+        console.error('GitHub initialization error:', error);
+        // Create empty projects object if none exists
+        projects = {};
+    }
+}
         async function loadFromGitHub() {
             try {
                 const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
