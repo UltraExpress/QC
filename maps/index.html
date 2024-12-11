@@ -89,10 +89,6 @@
         let githubToken = '';
         let lastSaveTimeout;
 
-        // GitHub configuration
-    
-
-
 
 const githubConfig = {
     owner: 'ultraexpress',
@@ -105,11 +101,6 @@ const githubConfig = {
     githubToken = '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';
     initializeGitHub();
 });
-
-
-
-        
-
    async function initializeGitHub() {
     try {
         // Try to load existing data from GitHub
@@ -127,10 +118,10 @@ const githubConfig = {
         async function loadFromGitHub() {
             try {
                 const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
-                   headers: {
-    'Authorization': `Bearer ${githubToken}`,
-    'Accept': 'application/vnd.github.v3+json'
-}
+headers: {
+                    'Authorization': `token ${githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
                 });
 
                 if (!response.ok) {
@@ -160,7 +151,7 @@ async function saveToGitHub() {
         try {
             const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
                 headers: {
-                    'Authorization': `Bearer ${githubToken}`,
+                    'Authorization': `token ${githubToken}`,
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
@@ -188,7 +179,7 @@ async function saveToGitHub() {
         const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${githubConfig.path}`, {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${githubToken}`,
+                'Authorization': `token ${githubToken}`,
                 'Content-Type': 'application/json',
                 'Accept': 'application/vnd.github.v3+json'
             },
@@ -222,14 +213,6 @@ async function saveToGitHub() {
             clearTimeout(lastSaveTimeout);
             saveToGitHub();
         }
-
-        // Initialize by trying to load saved token
-
-
-
-
-
-        
 
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
@@ -419,13 +402,6 @@ async function saveToGitHub() {
                 } catch (error) {
                     alert('Error importing data. Please check the file format.');
                 }
-
-
-
-
-
-
-
             };
             reader.readAsText(file);
         }
