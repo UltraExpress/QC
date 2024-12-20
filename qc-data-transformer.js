@@ -15,18 +15,25 @@ class QCDataTransformer {
         return 'Medium';
     }
 
-    formatTimestamp() {
-        const now = new Date();
-        return now.toLocaleString('en-US', {
-            year: 'numeric',
-            month: '1-digit',
-            day: '1-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '1-digit',
-            hour12: false
-        });
-    }
+formatTimestamp() {
+    const now = new Date();
+    const month = now.getMonth() + 1;    // getMonth() returns 0-11
+    const day = now.getDate();
+    const year = now.getFullYear();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    // Format as MM/D/YYYY HH:MM:S (no leading zeros except for hours)
+    return `${month}/${day}/${year} ${hours.toString().padStart(2, '0')}:${minutes}:${seconds}`;
+}
+
+
+
+
+
+
+    
 
     // Transform QC data to sheet format
     transformForSheet(qcData) {
