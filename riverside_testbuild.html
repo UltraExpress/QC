@@ -5,6 +5,10 @@
    
 
           <script src="video-handler.js"></script>
+
+
+    <script src="video-handler.js"></script>
+<script src="qc-data-transformer.js"></script>
     
    <style>
 body {
@@ -222,6 +226,17 @@ h2 {
 .pdf-button.ready:hover {
     background: #0056b3;
 }
+
+
+
+.button-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+
+       
 .inspector-section {
     margin: 1rem 0;
     padding: 0 1rem;
@@ -329,9 +344,14 @@ h2 {
         <div class="loading">Loading checklist items...</div>
     </div>
 
+   <div class="button-container">
     <button id="pdfButton" class="pdf-button" onclick="generatePDF()" disabled>
         Make a PDF Report
     </button>
+    <button id="exportButton" class="pdf-button" onclick="exportToSheet()" disabled>
+        Export to Maintenance Sheet
+    </button>
+</div>
 
 
 
@@ -348,6 +368,7 @@ h2 {
         let inspectorName = '';
 
 
+let dataTransformer = new QCDataTransformer();
 
 
 // Add this new IndexedDB initialization code
@@ -458,6 +479,12 @@ async function loadImageFromIndexedDB(index) {
 }
         
 
+
+
+
+
+
+
 document.getElementById('inspector-name').addEventListener('input', function(e) {
     inspectorName = e.target.value.trim();
     
@@ -466,6 +493,13 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
     const noteInputs = document.querySelectorAll('.notes');
     const fileInputs = document.querySelectorAll('input[type="file"]');
     const pdfButton = document.getElementById('pdfButton');
+    const exportButton = document.getElementById('exportButton');  // Add this line
+
+
+
+
+
+    
     
     // Enable/disable based on inspector name
     if (inspectorName) {
@@ -485,6 +519,8 @@ document.getElementById('inspector-name').addEventListener('input', function(e) 
             if (checkAllItemsComplete()) {
             pdfButton.disabled = false;
             pdfButton.classList.add('ready');
+            exportButton.disabled = false;        
+            exportButton.classList.add('ready');
         }
     } else {
         ratingButtons.forEach(btn => {
@@ -817,23 +853,39 @@ function renderChecklist() {
     }
 }
 
-     function checkAllItemsComplete() {
-            const allComplete = checklistItems.every(item => 
-                item.score > 0 && 
-                item.notes.trim() !== '' && 
-                item.image !== null
-                 && item.videoUrl !== undefined
-            );
-            
-            const pdfButton = document.getElementById('pdfButton');
-            if (allComplete) {
-                pdfButton.classList.add('ready');
-                pdfButton.disabled = false;
-            } else {
-                pdfButton.classList.remove('ready');
-                pdfButton.disabled = true;
-            }
-        }
+function checkAllItemsComplete() {
+    const allComplete = checklistItems.every(item => 
+        item.score > 0 && 
+        item.notes.trim() !== '' && 
+        item.image !== null
+         && item.videoUrl !== undefined
+    );
+    
+    const pdfButton = document.getElementById('pdfButton');
+    const exportButton = document.getElementById('exportButton');
+    
+    if (allComplete) {
+        pdfButton.classList.add('ready');
+        pdfButton.disabled = false;
+        exportButton.classList.add('ready');
+        exportButton.disabled = false;
+    } else {
+        pdfButton.classList.remove('ready');
+        pdfButton.disabled = true;
+        exportButton.classList.remove('ready');
+        exportButton.disabled = true;
+    }
+}
+
+
+
+
+
+
+
+
+
+        
 
         function setRating(index, rating) {
     const itemElement = document.querySelector(`.qc-item[data-id="${checklistItems[index].id}"]`);
@@ -936,6 +988,10 @@ async function resetForm() {
         // Clear localStorage
         localStorage.removeItem('qcFormData');
         
+        // Reset buttons (add this line)
+        document.getElementById('exportButton').disabled = true;
+        document.getElementById('exportButton').classList.remove('ready');
+        
         // Clear IndexedDB
         try {
             const transaction = db.transaction([storeName], 'readwrite');
@@ -961,8 +1017,31 @@ async function resetForm() {
         
         
         
+async function exportToSheet() {
+    if (!checkAllItemsComplete()) return;
+    
+    try {
+        // Test transforming single item first
+        console.log("Sample transformation of first item:");
+        const sampleTransform = dataTransformer.transformForSheet([checklistItems[0]]);
+        console.log(sampleTransform);
+
+        // Then test full data transformation
+        console.log("Full data transformation:");
+        const transformedData = dataTransformer.transformForSheet(checklistItems);
+        console.log(transformedData);
+
+        // Show what we're sending for verification
+        console.log("Inspector Name:", inspectorName);
+        console.log("Total Items:", transformedData.length);
         
+        alert('Data transformation test complete - check console log');
         
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('Error during test: ' + error.message);
+    }
+}
         
         
         
