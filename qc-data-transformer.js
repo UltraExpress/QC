@@ -17,15 +17,14 @@ class QCDataTransformer {
 
 formatTimestamp() {
     const now = new Date();
-    const month = now.getMonth() + 1;    // getMonth() returns 0-11
+    const month = now.getMonth() + 1;
     const day = now.getDate();
     const year = now.getFullYear();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes());
+    const seconds = String(now.getSeconds());
 
-    // Format as MM/D/YYYY HH:MM:S (no leading zeros except for hours)
-    return `${month}/${day}/${year} ${hours.toString().padStart(2, '0')}:${minutes}:${seconds}`;
+    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 
