@@ -853,6 +853,18 @@ function renderChecklist() {
     }
 }
 
+
+
+
+
+
+
+
+
+
+        
+/*
+  // REAL  VERSION - only checks ALL ITEMS, turn this back on after testing wisth the below one
 function checkAllItemsComplete() {
     const allComplete = checklistItems.every(item => 
         item.score > 0 && 
@@ -876,9 +888,42 @@ function checkAllItemsComplete() {
         exportButton.disabled = true;
     }
 }
+*/
 
 
 
+
+
+function checkAllItemsComplete() {
+    // TEMPORARY TEST VERSION - only checks first item
+    const firstItem = checklistItems[0];
+    const allComplete = firstItem &&
+        firstItem.score > 0 && 
+        firstItem.notes.trim() !== '' && 
+        firstItem.image !== null && 
+        firstItem.videoUrl !== undefined;
+    
+    const pdfButton = document.getElementById('pdfButton');
+    const exportButton = document.getElementById('exportButton');
+    
+    if (allComplete) {
+        pdfButton.classList.add('ready');
+        pdfButton.disabled = false;
+        exportButton.classList.add('ready');
+        exportButton.disabled = false;
+    } else {
+        pdfButton.classList.remove('ready');
+        pdfButton.disabled = true;
+        exportButton.classList.remove('ready');
+        exportButton.disabled = true;
+    }
+    
+    return allComplete;
+}
+
+
+
+        
 
 
 
